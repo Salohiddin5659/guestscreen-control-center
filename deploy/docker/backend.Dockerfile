@@ -1,0 +1,38 @@
+FROM python:3.12-slim AS builder
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    libpq-dev \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY src/backend/requirements.txt .
+RUN pip install --no-cache-dir --user -r requirements.txt
+
+FROM python:3.12-slim AS runner
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpq5 \
+    curl \
+    openssh-client \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy installed python packages from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
+ENV PYTHONPATH=/app:/app/src/backend:/app/src
+ENV PYTHONUNBUFFERED=1
+
+# Copy application source tree
+COPY src/ /app/src/
+COPY deploy/scripts/ /app/scripts/
+
+RUN chmod +x /app/scripts/*.sh 2>/dev/null || true
+
+EXPOSE 8000
+
+CMD ["uvicorn", "src.backend.app.main:app", "--host", "0.0.0.0", "--port", "8000"]

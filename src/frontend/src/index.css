@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  background-color: #171821;
+  color: #FFFFFF;
+  overflow-x: hidden;
+}
+
+/* Custom sleek dark scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #171821;
+}
+::-webkit-scrollbar-thumb {
+  background: #2C2D3A;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #3E4154;
+}

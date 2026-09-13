@@ -1,0 +1,141 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: gs_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gs_control_center}
+      POSTGRES_USER: ${POSTGRES_USER:-gs_admin}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gs_admin} -d ${POSTGRES_DB:-gs_control_center}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - gs_network
+
+  redis_queue:
+    image: redis:7-alpine
+    container_name: gs_redis_queue
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - gs_network
+
+  minio_s3:
+    image: minio/minio:latest
+    container_name: gs_minio_s3
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minio_admin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://127.0.0.1:9000/minio/health/live || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      gs_network:
+        aliases:
+          - minio
+          - minio-s3
+
+  backend_api:
+    build:
+      context: ..
+      dockerfile: deploy/docker/backend.Dockerfile
+    container_name: gs_backend_api
+    restart: unless-stopped
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers 2
+    env_file:
+      - .env
+    depends_on:
+      postgres_db:
+        condition: service_healthy
+      redis_queue:
+        condition: service_healthy
+      minio_s3:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c 'import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/healthz\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - gs_network
+
+  worker_pool:
+    build:
+      context: ..
+      dockerfile: deploy/docker/backend.Dockerfile
+    container_name: gs_worker_pool
+    restart: unless-stopped
+    command: arq workers.main.WorkerSettings
+    env_file:
+      - .env
+    depends_on:
+      backend_api:
+        condition: service_healthy
+      redis_queue:
+        condition: service_healthy
+    networks:
+      - gs_network
+
+  frontend_ui:
+    build:
+      context: ..
+      dockerfile: deploy/docker/frontend.Dockerfile
+    container_name: gs_frontend_ui
+    restart: unless-stopped
+    networks:
+      - gs_network
+
+  reverse_proxy:
+    image: nginx:alpine
+    container_name: gs_reverse_proxy
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT:-8088}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend_ui
+      - backend_api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://127.0.0.1:80/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - gs_network
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:
+
+networks:
+  gs_network:
+    driver: bridge

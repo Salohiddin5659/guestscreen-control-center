@@ -1,0 +1,172 @@
+<USER_REQUEST>
+КРИТИЧЕСКИЙ BUGFIX: Advertising Templates CRUD + полноценные SSH Credentials для Cashbox.
+
+Работать в существующей архитектуре.
+
+НЕ переписывать систему с нуля.
+НЕ менять GuestScreen deployment architecture.
+НЕ менять DeploymentOrchestrator без необходимости.
+НЕ менять доказанный механизм SQLite / Hot Reload / Rollback.
+
+==================================================
+PART A — ADVERTISING TEMPLATE CRUD
+==================================================
+
+Текущая проблема:
+
+Рекламные шаблоны можно:
+
+- создать;
+- применить;
+
+но существующие шаблоны нельзя нормально:
+
+- редактировать;
+- переименовывать;
+- удалять.
+
+Необходимо реализовать полноценный CRUD.
+
+Поддержать:
+
+CREATE
+READ
+UPDATE
+RENAME
+DELETE
+DUPLICATE
+
+Редактирование существующего шаблона должно происходить через тот же конфигуратор, что используется для создания.
+
+Поддержать изменение:
+
+- name;
+- description;
+- FULL_SCREEN / MODE32_PROMO;
+- STATIC / SLIDESHOW;
+- media;
+- order;
+- duration;
+- interval;
+- active state.
+
+==================================================
+PART B — DRAFT / PUBLISHED / CURRENT / DESIRED
+==================================================
+
+Критически разделить:
+
+Template
+Draft Configuration
+Published Configuration
+Desired State
+Current State
+
+Редактирование шаблона само по себе НЕ должно менять кассы.
+
+Только:
+
+"Опубликовать"
+
+создаёт PublicationBatch.
+
+Пример:
+
+Current = v5
+Draft = v6
+Desired = v5
+
+после Publish:
+
+Current = v5
+Desired = v6
+
+после успешного deployment:
+
+Curren
+<truncated 8521 bytes>
+t entries
+
+==================================================
+PART R — LIVE TEST
+==================================================
+
+Live target:
+
+10.0.0.241
+
+SSH username:
+использовать значение, введённое пользователем в форме.
+
+НЕ hardcode username.
+
+Проверить:
+
+Add Cashbox
+→ Save
+→ Test Connection
+→ Edit
+→ Test Connection again.
+
+После этого:
+
+Create/Edit/Delete advertising template.
+
+Не делать mass production deployment.
+
+==================================================
+PART S — ACCEPTANCE
+==================================================
+
+Система считается исправленной, если:
+
+CASHBOX:
+
+✅ можно добавить login;
+✅ можно добавить password;
+✅ можно проверить SSH;
+✅ credentials сохраняются encrypted;
+✅ credentials не возвращаются API;
+✅ можно изменить username;
+✅ можно изменить password;
+✅ connection test использует введённый username.
+
+TEMPLATE:
+
+✅ create;
+✅ edit;
+✅ rename;
+✅ duplicate;
+✅ delete;
+✅ safe dependency handling;
+✅ draft ≠ current;
+✅ publish explicitly;
+✅ audit.
+
+==================================================
+FINAL REPORT
+==================================================
+
+Перед завершением предоставить:
+
+1. Root cause template CRUD bug.
+2. Root cause missing SSH username.
+3. Backend files changed.
+4. Frontend files changed.
+5. DB migration changes.
+6. API contract changes.
+7. Security changes.
+8. Tests.
+9. npm build.
+10. Live connection test to 10.0.0.241.
+11. Template CRUD verification.
+
+Не отмечать задачи completed без реального теста.
+
+Не менять GuestScreen/gs.db deployment mechanism.
+
+Не запускать массовый production deployment.
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-12T19:09:48+05:00.
+</ADDITIONAL_METADATA>

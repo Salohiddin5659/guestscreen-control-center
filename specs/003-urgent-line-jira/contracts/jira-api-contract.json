@@ -1,0 +1,92 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UrgentLineJiraApiContract",
+  "description": "Jira REST API v2 contract for creating and managing Urgent Line incidents in project URG",
+  "endpoints": {
+    "create_incident": {
+      "method": "POST",
+      "path": "/rest/api/2/issue",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request_body": {
+        "fields": {
+          "project": {
+            "key": "URG"
+          },
+          "issuetype": {
+            "name": "Ургентный инцидент"
+          },
+          "summary": "Подозрение на отравление: филиал Чиланзар-1",
+          "priority": {
+            "name": "P1 — Критический"
+          },
+          "description": "Поступила жалоба от клиента на острое недомогание после посещения заведения 08.09.2026...",
+          "customfield_incident_type": {
+            "value": "Отравление / подозрение на отравление"
+          },
+          "customfield_incident_datetime": "2026-09-08T18:30:00.000+0500",
+          "customfield_branch": {
+            "value": "Чиланзар-1"
+          },
+          "customfield_city": {
+            "value": "Ташкент"
+          },
+          "customfield_client_contact": "+998 90 123-45-67 (Азиз Рахимов)",
+          "customfield_threat_gov": {
+            "value": "Да"
+          },
+          "customfield_threat_media": {
+            "value": "Нет"
+          },
+          "customfield_media_url": null,
+          "customfield_affected_count": 2
+        }
+      },
+      "response_201": {
+        "id": "10542",
+        "key": "URG-101",
+        "self": "https://jsm.oqtl.uz/rest/api/2/issue/10542"
+      }
+    },
+    "transition_escalate_p1": {
+      "method": "POST",
+      "path": "/rest/api/2/issue/{issueKey}/transitions",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request_body": {
+        "transition": {
+          "id": "31"
+        },
+        "fields": {},
+        "update": {
+          "comment": [
+            {
+              "add": {
+                "body": "[EMERGENCY ESCALATION] Непосредственная эскалация критического инцидента P1 дежурной группе и руководству."
+              }
+            }
+          ]
+        }
+      },
+      "response_204": {}
+    },
+    "transition_resolve": {
+      "method": "POST",
+      "path": "/rest/api/2/issue/{issueKey}/transitions",
+      "headers": {
+        "Content-Type": "application/json"
+      },
+      "request_body": {
+        "transition": {
+          "id": "61"
+        },
+        "fields": {
+          "customfield_resolution_summary": "Проведена проверка партии сырья в филиале Чиланзар-1. Образцы направлены в СЭС. С клиентом проведена беседа, оплачены расходы на лечение, конфликт урегулирован досудебно."
+        }
+      },
+      "response_204": {}
+    }
+  }
+}

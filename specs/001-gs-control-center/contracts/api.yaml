@@ -1,0 +1,761 @@
+openapi: 3.1.0
+info:
+  title: GS Control Center API
+  description: Centralized Advertising Block Management System for UCS Guest Screen
+  version: 1.0.0
+servers:
+  - url: /api/v1
+    description: Central Server API (Host 10.0.0.111)
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username: { type: string }
+                password: { type: string }
+      responses:
+        '200':
+          description: Authenticated session token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token: { type: string }
+                  token_type: { type: string, example: bearer }
+                  user:
+                    type: object
+                    properties:
+                      id: { type: string, format: uuid }
+                      username: { type: string }
+                      role: { type: string, enum: [ADMINISTRATOR, OPERATOR, AUDITOR] }
+
+  /dashboard/overview:
+    get:
+      summary: Get fleet and content overview metrics
+      responses:
+        '200':
+          description: Overview metrics
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_cashiers: { type: integer }
+                  online_cashiers: { type: integer }
+                  offline_cashiers: { type: integer }
+                  awaiting_restart: { type: integer }
+                  active_advertising_blocks: { type: integer }
+                  recent_batches:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PublicationBatchSummary'
+
+  /regions:
+    get:
+      summary: List all regions
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Region'
+    post:
+      summary: Create new region
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, code]
+              properties:
+                name: { type: string }
+                code: { type: string }
+                default_full_screen_block_id: { type: string, format: uuid, nullable: true }
+                default_mode32_block_id: { type: string, format: uuid, nullable: true }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Region'
+
+  /branches:
+    get:
+      summary: List branches (filterable by region)
+      parameters:
+        - name: region_id
+          in: query
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Branch'
+    post:
+      summary: Create new branch
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [region_id, name, code]
+              properties:
+                region_id: { type: string, format: uuid }
+                name: { type: string }
+                code: { type: string }
+                override_full_screen_block_id: { type: string, format: uuid, nullable: true }
+                override_mode32_block_id: { type: string, format: uuid, nullable: true }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+
+  /cashiers:
+    get:
+      summary: List cashiers
+      parameters:
+        - name: branch_id
+          in: query
+          schema: { type: string, format: uuid }
+        - name: status
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cashier'
+    post:
+      summary: Register new cashier
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [branch_id, name, ip_address]
+              properties:
+                branch_id: { type: string, format: uuid }
+                name: { type: string }
+                ip_address: { type: string, format: ipv4 }
+                ssh_port: { type: integer, default: 22 }
+                override_full_screen_block_id: { type: string, format: uuid, nullable: true }
+                override_mode32_block_id: { type: string, format: uuid, nullable: true }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cashier'
+
+  /cashiers/{id}/test-connection:
+    post:
+      summary: Test SSH connectivity to cashier
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reachable: { type: boolean }
+                  response_time_ms: { type: integer }
+                  gs_installed: { type: boolean }
+                  free_space_mb: { type: integer }
+                  error_message: { type: string, nullable: true }
+
+  /media:
+    get:
+      summary: List media assets
+      parameters:
+        - name: media_type
+          in: query
+          schema: { type: string, enum: [IMAGE, VIDEO] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/MediaAsset'
+
+  /media/upload:
+    post:
+      summary: Upload image or video asset to MinIO
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaAsset'
+
+  /media/{id}:
+    patch:
+      summary: Rename media asset display name (OCC protected)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [original_name, version]
+              properties:
+                original_name: { type: string, maxLength: 255 }
+                version: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaAsset'
+        '409':
+          description: Optimistic lock conflict (media was modified by another operator)
+    delete:
+      summary: Delete media asset (safe deletion with dependency protection & S3 refcount)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Media asset deleted
+        '409':
+          description: Media asset is in use by advertising blocks (deletion rejected)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail: { type: string }
+                  dependent_templates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        area: { type: string }
+
+  /media/{id}/replace:
+    post:
+      summary: In-place media binary replacement (recomputes SHA-256, preserves template references)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file, version]
+              properties:
+                file:
+                  type: string
+                  format: binary
+                version:
+                  type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MediaAsset'
+        '409':
+          description: Optimistic lock conflict (version mismatch)
+
+  /media/{id}/usage:
+    get:
+      summary: Inspect templates referencing this media asset
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  media_id: { type: string, format: uuid }
+                  usage_count: { type: integer }
+                  templates:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id: { type: string, format: uuid }
+                        name: { type: string }
+                        area: { type: string }
+                        display_mode: { type: string }
+
+  /advertising-blocks:
+    get:
+      summary: List advertising blocks (filterable by area and display mode)
+      parameters:
+        - name: area
+          in: query
+          schema: { type: string, enum: [FULL_SCREEN, MODE32_PROMO] }
+        - name: display_mode
+          in: query
+          schema: { type: string, enum: [STATIC, SLIDESHOW, VIDEO] }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AdvertisingBlock'
+    post:
+      summary: Create new advertising block with playlist items
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, area, display_mode, playlist]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                area: { type: string, enum: [FULL_SCREEN, MODE32_PROMO] }
+                display_mode: { type: string, enum: [STATIC, SLIDESHOW, VIDEO] }
+                playlist:
+                  type: array
+                  items:
+                    type: object
+                    required: [media_asset_id, order_index]
+                    properties:
+                      media_asset_id: { type: string, format: uuid }
+                      order_index: { type: integer }
+                      duration_seconds: { type: integer, default: 7 }
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvertisingBlock'
+
+  /advertising-blocks/{id}:
+    get:
+      summary: Get advertising block details and playlist
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvertisingBlock'
+    put:
+      summary: Update advertising block, reorder playlist, or modify durations (OCC protected)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [version]
+              properties:
+                name: { type: string }
+                description: { type: string }
+                is_active: { type: boolean }
+                version: { type: integer, description: Monotonically increasing OCC version counter }
+                playlist:
+                  type: array
+                  items:
+                    type: object
+                    required: [media_asset_id, order_index]
+                    properties:
+                      media_asset_id: { type: string, format: uuid }
+                      order_index: { type: integer }
+                      duration_seconds: { type: integer }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvertisingBlock'
+        '409':
+          description: Optimistic lock conflict (template modified by another operator)
+    delete:
+      summary: Delete advertising block (cascades to playlist_items; does NOT delete media; zero cashier tasks)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204':
+          description: Advertising block deleted
+
+  /advertising-blocks/{id}/duplicate:
+    post:
+      summary: Duplicate advertising template in 1 click (clones playlist, sets name to '<Name> — копия')
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '201':
+          description: Duplicated advertising template created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdvertisingBlock'
+
+  /advertising-blocks/{id}/preview:
+    get:
+      summary: Get resolved preview payload for Web UI player (renders static or slideshow preview)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id: { type: string, format: uuid }
+                  area: { type: string }
+                  display_mode: { type: string }
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        url: { type: string }
+                        duration_seconds: { type: integer }
+                        order_index: { type: integer }
+
+  /publications:
+    post:
+      summary: Initiate or schedule a publication batch for an advertising block
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [advertising_block_id, scope_type, scope_target_ids]
+              properties:
+                advertising_block_id: { type: string, format: uuid }
+                scope_type: { type: string, enum: [REGION, BRANCH, CUSTOM_CASHIERS] }
+                scope_target_ids:
+                  type: array
+                  items: { type: string, format: uuid }
+                scheduled_at: { type: string, format: date-time, nullable: true }
+      responses:
+        '202':
+          description: Publication batch accepted and enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationBatch'
+
+  /publications/{id}:
+    get:
+      summary: Get publication batch progress and per-cashier status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PublicationBatchDetail'
+
+  /publications/{id}/retry:
+    post:
+      summary: Retry failed or offline cashiers within a batch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202':
+          description: Retry jobs queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  retried_count: { type: integer }
+
+  /publications/{id}/retry-failed:
+    post:
+      summary: Retry strictly failed or offline cashiers within a batch using original immutable snapshot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '202':
+          description: Retry jobs dispatched strictly for failed/offline nodes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  retried_count: { type: integer }
+                  batch_id: { type: string, format: uuid }
+
+  /audit-logs:
+    get:
+      summary: Query immutable audit logs
+      parameters:
+        - name: limit
+          in: query
+          schema: { type: integer, default: 50 }
+        - name: entity_type
+          in: query
+          schema: { type: string }
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AuditLog'
+
+  /events/publications/{batch_id}:
+    get:
+      summary: Real-time SSE stream of publication progress events
+      parameters:
+        - name: batch_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: Event stream (Server-Sent Events)
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                description: JSON events formatted as data:<payload>\n\n
+
+  /settings:
+    get:
+      summary: Get system configuration and concurrency settings
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+    put:
+      summary: Update system settings (Administrator only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SystemSettings'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SystemSettings'
+
+components:
+  schemas:
+    Region:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        default_full_screen_block_id: { type: string, format: uuid, nullable: true }
+        default_mode32_block_id: { type: string, format: uuid, nullable: true }
+        created_at: { type: string, format: date-time }
+
+    Branch:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        region_id: { type: string, format: uuid }
+        name: { type: string }
+        code: { type: string }
+        override_full_screen_block_id: { type: string, format: uuid, nullable: true }
+        override_mode32_block_id: { type: string, format: uuid, nullable: true }
+
+    Cashier:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        branch_id: { type: string, format: uuid }
+        name: { type: string }
+        ip_address: { type: string }
+        ssh_port: { type: integer }
+        enabled: { type: boolean }
+        has_ssh_password: { type: boolean, description: Indicates whether an encrypted SSH password is configured }
+        last_sync_status: { type: string }
+        last_seen_at: { type: string, format: date-time, nullable: true }
+
+    MediaAsset:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        original_name: { type: string }
+        stored_name: { type: string }
+        sha256: { type: string }
+        mime_type: { type: string }
+        media_type: { type: string, enum: [IMAGE, VIDEO] }
+        file_size_bytes: { type: integer }
+        width: { type: integer, nullable: true }
+        height: { type: integer, nullable: true }
+        version: { type: integer, description: OCC version counter }
+        preview_url: { type: string }
+
+    PlaylistItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        media_asset_id: { type: string, format: uuid }
+        order_index: { type: integer }
+        duration_seconds: { type: integer }
+        media_asset: { $ref: '#/components/schemas/MediaAsset' }
+
+    AdvertisingBlock:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        area: { type: string, enum: [FULL_SCREEN, MODE32_PROMO] }
+        display_mode: { type: string, enum: [STATIC, SLIDESHOW, VIDEO] }
+        is_active: { type: boolean }
+        version: { type: integer, description: OCC version counter }
+        playlist:
+          type: array
+          items: { $ref: '#/components/schemas/PlaylistItem' }
+
+    PublicationBatchSummary:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        advertising_block_name: { type: string }
+        area: { type: string, enum: [FULL_SCREEN, MODE32_PROMO] }
+        status: { type: string, enum: [PENDING, RUNNING, SUCCESS, PARTIAL, FAILED, CANCELLED] }
+        total_cashiers: { type: integer }
+        success_count: { type: integer }
+        awaiting_restart_count: { type: integer }
+        failed_count: { type: integer }
+        offline_count: { type: integer }
+        started_at: { type: string, format: date-time }
+
+    PublicationBatch:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        advertising_block_id: { type: string, format: uuid }
+        content_snapshot_json: { type: object, description: Immutable batch snapshot }
+        status: { type: string, enum: [PENDING, RUNNING, SUCCESS, PARTIAL, FAILED, CANCELLED] }
+        total_cashiers: { type: integer }
+
+    PublicationBatchDetail:
+      type: object
+      properties:
+        batch: { $ref: '#/components/schemas/PublicationBatchSummary' }
+        jobs:
+          type: array
+          items:
+            type: object
+            properties:
+              cashier_id: { type: string, format: uuid }
+              cashier_name: { type: string }
+              cashier_ip: { type: string }
+              status: { type: string, enum: [PENDING, RUNNING, SUCCESS, PUBLISHED_AWAITING_RESTART, FAILED, OFFLINE] }
+              attempt_count: { type: integer }
+              error_message: { type: string, nullable: true }
+
+    AuditLog:
+      type: object
+      properties:
+        id: { type: integer }
+        timestamp: { type: string, format: date-time }
+        user_id: { type: string, format: uuid, nullable: true }
+        action: { type: string }
+        entity_type: { type: string }
+        entity_id: { type: string, nullable: true }
+        ip_address: { type: string, nullable: true }
+
+    SystemSettings:
+      type: object
+      properties:
+        worker_concurrency: { type: integer, minimum: 5, maximum: 30, default: 15 }
+        max_concurrent_per_branch: { type: integer, minimum: 1, maximum: 4, default: 2 }
+        ssh_connect_timeout_seconds: { type: integer, default: 10 }
+        ssh_command_timeout_seconds: { type: integer, default: 45 }
+        sftp_timeout_seconds: { type: integer, default: 60 }
+        minio_media_retention_days: { type: integer, default: 30 }
+        cashier_backup_retention_days: { type: integer, default: 7 }

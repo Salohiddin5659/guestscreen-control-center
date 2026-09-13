@@ -1,0 +1,339 @@
+openapi: 3.1.0
+info:
+  title: GS Control Center - Media File Server Synchronization API
+  version: 2.1.0
+  description: REST API contracts for Bidirectional File Server <-> Central Control Media Synchronization.
+
+paths:
+  /api/v1/file-server/config:
+    get:
+      summary: Get File Server configuration
+      description: Returns configuration for corporate File Server connection with masked credentials.
+      tags: [File Server]
+      responses:
+        "200":
+          description: Configuration retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileServerConfigResponse"
+    put:
+      summary: Update File Server configuration
+      description: Updates connection settings, credentials, polling interval, and deletion policies.
+      tags: [File Server]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileServerConfigUpdate"
+      responses:
+        "200":
+          description: Configuration updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileServerConfigResponse"
+        "400":
+          description: Invalid parameters (e.g. interval outside 10..3600 range)
+
+  /api/v1/file-server/test-connection:
+    post:
+      summary: Test connection to File Server
+      description: Probes SMB/LocalMount share with configured or supplied credentials and returns latency.
+      tags: [File Server]
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FileServerTestRequest"
+      responses:
+        "200":
+          description: Connection probe result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FileServerTestResponse"
+
+  /api/v1/media-sync/reconcile:
+    post:
+      summary: Trigger manual on-demand synchronization
+      description: Enqueues a full reconciliation background job (File Server <-> Central Control).
+      tags: [Media Sync]
+      responses:
+        "202":
+          description: Sync task enqueued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  task_id:
+                    type: string
+                    format: uuid
+                  status:
+                    type: string
+                    example: "QUEUED"
+                  message:
+                    type: string
+                    example: "Full reconciliation task enqueued."
+        "409":
+          description: Sync task already running
+
+  /api/v1/media-sync/status:
+    get:
+      summary: Get synchronization engine health and statistics
+      description: Returns last sync time, status, files indexed, pending transfers, and active conflicts.
+      tags: [Media Sync]
+      responses:
+        "200":
+          description: Sync status metrics
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaSyncStatusResponse"
+
+  /api/v1/media-sync/conflicts:
+    get:
+      summary: List synchronization conflicts
+      description: Returns all unresolved (OPEN) concurrent edit conflicts between Central Control and File Server.
+      tags: [Media Sync]
+      responses:
+        "200":
+          description: Conflict list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MediaConflictResponse"
+
+  /api/v1/media-sync/conflicts/{id}/resolve:
+    post:
+      summary: Resolve synchronization conflict
+      description: Resolves a conflict by either pushing Central Control version or accepting File Server version.
+      tags: [Media Sync]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MediaConflictResolveRequest"
+      responses:
+        "200":
+          description: Conflict resolved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MediaConflictResponse"
+        "404":
+          description: Conflict record not found
+        "400":
+          description: Conflict already resolved
+
+components:
+  schemas:
+    FileServerConfigResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        protocol:
+          type: string
+          enum: [SMB, LOCAL_MOUNT]
+        host:
+          type: string
+        port:
+          type: integer
+        share_name:
+          type: string
+          nullable: true
+        base_path:
+          type: string
+        username:
+          type: string
+          nullable: true
+        has_password:
+          type: boolean
+        domain:
+          type: string
+          nullable: true
+        sync_interval_seconds:
+          type: integer
+        deletion_policy:
+          type: string
+          enum: [ARCHIVE, HARD_DELETE]
+        archive_subfolder:
+          type: string
+        enabled:
+          type: boolean
+        last_sync_at:
+          type: string
+          format: date-time
+          nullable: true
+        last_sync_status:
+          type: string
+          enum: [IDLE, RUNNING, OK, ERROR]
+        last_error_message:
+          type: string
+          nullable: true
+
+    FileServerConfigUpdate:
+      type: object
+      required: [protocol, host]
+      properties:
+        protocol:
+          type: string
+          enum: [SMB, LOCAL_MOUNT]
+        host:
+          type: string
+        port:
+          type: integer
+          default: 445
+        share_name:
+          type: string
+          nullable: true
+        base_path:
+          type: string
+          default: ""
+        username:
+          type: string
+          nullable: true
+        password:
+          type: string
+          nullable: true
+        domain:
+          type: string
+          nullable: true
+        sync_interval_seconds:
+          type: integer
+          minimum: 10
+          maximum: 3600
+          default: 60
+        deletion_policy:
+          type: string
+          enum: [ARCHIVE, HARD_DELETE]
+          default: ARCHIVE
+        archive_subfolder:
+          type: string
+          default: ".archive"
+        enabled:
+          type: boolean
+          default: true
+
+    FileServerTestRequest:
+      type: object
+      properties:
+        protocol:
+          type: string
+          enum: [SMB, LOCAL_MOUNT]
+        host:
+          type: string
+        port:
+          type: integer
+        share_name:
+          type: string
+        username:
+          type: string
+        password:
+          type: string
+        domain:
+          type: string
+
+    FileServerTestResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        latency_ms:
+          type: integer
+        can_read:
+          type: boolean
+        can_write:
+          type: boolean
+        error_message:
+          type: string
+          nullable: true
+
+    MediaSyncStatusResponse:
+      type: object
+      properties:
+        engine_status:
+          type: string
+          enum: [IDLE, RUNNING, ERROR, PAUSED]
+        last_sync_at:
+          type: string
+          format: date-time
+          nullable: true
+        total_files_on_server:
+          type: integer
+        total_media_assets:
+          type: integer
+        synced_count:
+          type: integer
+        pending_upload_count:
+          type: integer
+        pending_download_count:
+          type: integer
+        missing_on_source_count:
+          type: integer
+        conflict_count:
+          type: integer
+        error_count:
+          type: integer
+        last_duration_seconds:
+          type: number
+
+    MediaConflictResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        media_asset_id:
+          type: string
+          format: uuid
+        asset_name:
+          type: string
+        remote_path:
+          type: string
+        local_sha256:
+          type: string
+        remote_sha256:
+          type: string
+        local_mtime:
+          type: string
+          format: date-time
+        remote_mtime:
+          type: string
+          format: date-time
+        status:
+          type: string
+          enum: [OPEN, RESOLVED_LOCAL, RESOLVED_REMOTE]
+        detected_at:
+          type: string
+          format: date-time
+        resolved_at:
+          type: string
+          format: date-time
+          nullable: true
+
+    MediaConflictResolveRequest:
+      type: object
+      required: [action]
+      properties:
+        action:
+          type: string
+          enum: [KEEP_CENTRAL_CONTROL, ACCEPT_FILE_SERVER]
+        resolution_notes:
+          type: string
+          nullable: true

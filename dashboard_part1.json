@@ -1,0 +1,6694 @@
+﻿{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "9BUl9dP4k"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "A dashboard to visualize the metrics from HTTP endpoints in Uptime Kuma",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 18278,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "title": "R-Keeper Metrics (Part 1)",
+  "uid": "rk-metrics-p1-v2",
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Golden Life"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Golden Life"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "Golden Life"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 0
+      },
+      "id": 845,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"Golden Life\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Golden Life",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "TTZ"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "TTZ"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "TTZ"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 0
+      },
+      "id": 851,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"TTZ\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TTZ",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "DRUZHBA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "DRUZHBA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "DRUZHBA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 0
+      },
+      "id": 860,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"DRUZHBA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "DRUZHBA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "SERGELI YARMARKA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "SERGELI YARMARKA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "SERGELI YARMARKA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 0
+      },
+      "id": 849,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"SERGELI YARMARKA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SERGELI YARMARKA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "FARHOD"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "FARHOD"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "FARHOD"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 0
+      },
+      "id": 854,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"FARHOD\"}\r\n",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "FARHOD",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "SERGELI-5BEKAT"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "SERGELI-5BEKAT"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "SERGELI-5BEKAT"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 0
+      },
+      "id": 847,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"SERGELI-5BEKAT\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SERGELI-5BEKAT",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "VODNIK"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "VODNIK"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "VODNIK"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 0
+      },
+      "id": 846,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"VODNIK\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "VODNIK",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QO'YLIQ"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QO'YLIQ"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QO'YLIQ"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 0
+      },
+      "id": 858,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QO'YLIQ\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QO'YLIQ",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "RISOVIY"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "RISOVIY"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "RISOVIY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 6
+      },
+      "id": 852,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"RISOVIY\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RISOVIY",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHO’PON-OTA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHO’PON-OTA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHO’PON-OTA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 1.9998
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 6
+      },
+      "id": 853,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHO’PON-OTA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHO’PON-OTA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "YUNUSOBOD-5"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "YUNUSOBOD-5"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "YUNUSOBOD-5"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 6
+      },
+      "id": 868,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"YUNUSOBOD-5\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "YUNUSOBOD-5",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "GULZOR"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "GULZOR"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "GULZOR"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 6
+      },
+      "id": 859,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"GULZOR\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "GULZOR",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "WESTMINSTER"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "WESTMINSTER"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "WESTMINSTER"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 6
+      },
+      "id": 862,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"WESTMINSTER\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "WESTMINSTER",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QATORTOL"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QATORTOL"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QATORTOL"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 6
+      },
+      "id": 855,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QATORTOL\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QATORTOL",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QUTBINISO"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QUTBINISO"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QUTBINISO"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 6
+      },
+      "id": 856,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QUTBINISO\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QUTBINISO",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHILONZOR Metro"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHILONZOR Metro"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHILONZOR Metro"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 6
+      },
+      "id": 857,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHILONZOR Metro\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHILONZOR Metro",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "VATAN"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "VATAN"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "VATAN"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 12
+      },
+      "id": 861,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"VATAN\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "VATAN",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHILONZOR-19"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHILONZOR-19"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHILONZOR-19"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 12
+      },
+      "id": 865,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHILONZOR-19\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHILONZOR-19",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "RAKAT"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "RAKAT"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "RAKAT"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 12
+      },
+      "id": 871,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"RAKAT\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RAKAT",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "MAJNUNTOL"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "MAJNUNTOL"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "MAJNUNTOL"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 12
+      },
+      "id": 867,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"MAJNUNTOL\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "MAJNUNTOL",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "BERUNIY"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "BERUNIY"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "BERUNIY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 12
+      },
+      "id": 873,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"BERUNIY\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "BERUNIY",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "RIVIERA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "RIVIERA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "RIVIERA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 12
+      },
+      "id": 869,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"RIVIERA\", monitor_url=\"https://192.168.139.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "RIVIERA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "LABZAK"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "LABZAK"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "LABZAK"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 12
+      },
+      "id": 864,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"LABZAK\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "LABZAK",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "XADRA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "XADRA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "XADRA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 12
+      },
+      "id": 863,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"XADRA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "XADRA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "MAGIC CITY"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "MAGIC CITY"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "MAGIC CITY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 18
+      },
+      "id": 866,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"MAGIC CITY\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "MAGIC CITY",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHORSUV"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHORSUV"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHORSUV"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 18
+      },
+      "id": 870,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHORSUV\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHORSUV",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "OXUNBOBOEV"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "OXUNBOBOEV"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "OXUNBOBOEV"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 18
+      },
+      "id": 880,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"OXUNBOBOEV\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "OXUNBOBOEV",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "BODOMZOR"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "BODOMZOR"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "BODOMZOR"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 18
+      },
+      "id": 872,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"BODOMZOR\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "BODOMZOR",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QORASUV-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QORASUV-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QORASUV-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 18
+      },
+      "id": 882,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QORASUV-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QORASUV-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "LUNACHARSKIY"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "LUNACHARSKIY"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "LUNACHARSKIY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 18
+      },
+      "id": 874,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"LUNACHARSKIY\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "LUNACHARSKIY",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "OQTEPA MAYDONI"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "OQTEPA MAYDONI"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "OQTEPA MAYDONI"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 18
+      },
+      "id": 875,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "text": {},
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"OQTEPA MAYDONI\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "OQTEPA MAYDONI",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "LISUNOVA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "LISUNOVA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "LISUNOVA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 18
+      },
+      "id": 876,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"LISUNOVA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "LISUNOVA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "TOSHMI"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "TOSHMI"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "TOSHMI"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 24
+      },
+      "id": 878,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"TASHMI\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "TOSHMI",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QORASUV-6"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QORASUV-6"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QORASUV-6"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 24
+      },
+      "id": 879,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QORASUV-6\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QORASUV-6",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "LISUNOVA-D"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "LISUNOVA-D"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "LISUNOVA-D"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 24
+      },
+      "id": 895,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"LISUNOVA-D\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "LISUNOVA-D",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "KO'KSAROY"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "KO'KSAROY"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "KO'KSAROY"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 24
+      },
+      "id": 881,
+      "maxDataPoints": 296,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"KO'KSAROY\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "KO'KSAROY",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QO'QON-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QO'QON-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QO'QON-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 24
+      },
+      "id": 889,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QO'QON-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QO'QON-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QO'QON-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QO'QON-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QO'QON-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 24
+      },
+      "id": 890,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QO'QON-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QO'QON-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHINOZ"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHINOZ"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHINOZ"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 24
+      },
+      "id": 884,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHINOZ\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHINOZ",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "YANGIYO'L-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "YANGIYO'L-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "YANGIYO'L-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 24
+      },
+      "id": 877,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"YANGIYO'L-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "YANGIYO'L-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "YANGIYO'L-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "YANGIYO'L-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "YANGIYO'L-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 30
+      },
+      "id": 885,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"YANGIYO'L-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "YANGIYO'L-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "OLMALIQ-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "OLMALIQ-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "OLMALIQ-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 30
+      },
+      "id": 886,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"OLMALIQ-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "OLMALIQ-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "UNIVERSAM"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "UNIVERSAM"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "UNIVERSAM"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 30
+      },
+      "id": 904,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"UNIVERSAM\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "UNIVERSAM",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "NUKUS-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "NUKUS-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "NUKUS-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 30
+      },
+      "id": 888,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"NUKUS-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "NUKUS-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "NURAFSHON"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "NURAFSHON"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "NURAFSHON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 30
+      },
+      "id": 897,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"NURAFSHON\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "NURAFSHON",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "NUKUS-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "NUKUS-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "NUKUS-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 30
+      },
+      "id": 898,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"NUKUS-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "NUKUS-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "FARG'ONA-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "FARG'ONA-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "FARG'ONA-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 30
+      },
+      "id": 891,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"FARG'ONA-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "FARG'ONA-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "FARG'ONA-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "FARG'ONA-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "FARG'ONA-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 30
+      },
+      "id": 892,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"FARG'ONA-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "FARG'ONA-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "COMPASS"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "COMPASS"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "COMPASS"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 36
+      },
+      "id": 901,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"COMPASS\", monitor_url=\"https://192.168.145.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "COMPASS",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "NAMANGAN-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "NAMANGAN-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "NAMANGAN-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 36
+      },
+      "id": 894,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"NAMANGAN-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "NAMANGAN-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "ALGORITM"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "ALGORITM"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "ALGORITM"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 36
+      },
+      "id": 903,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"ALGORITM\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ALGORITM",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "CHIRCHIQ"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "CHIRCHIQ"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "CHIRCHIQ"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 36
+      },
+      "id": 905,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"CHIRCHIQ\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "CHIRCHIQ",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "YANGIBOZOR"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "YANGIBOZOR"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "YANGIBOZOR"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 36
+      },
+      "id": 906,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"YANGIBOZOR\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "YANGIBOZOR",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Chig'atoy"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Chig'atoy"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "Chig'atoy"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 36
+      },
+      "id": 907,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"Chig'atoy\", monitor_url=\"https://192.168.184.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Chig'atoy",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "IPODROM"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "IPODROM"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "IPODROM"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 36
+      },
+      "id": 899,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"IPODROM\", monitor_url=\"https://192.168.126.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "IPODROM",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "SAMARQAND-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "SAMARQAND-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "SAMARQAND-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 36
+      },
+      "id": 909,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"SAMARQAND-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SAMARQAND-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QORAQAMISH"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QORAQAMISH"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QORAQAMISH"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 42
+      },
+      "id": 911,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QORAQAMISH\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QORAQAMISH",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "ANDIJON-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "ANDIJON-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "ANDIJON-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 42
+      },
+      "id": 902,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"ANDIJON-1\", monitor_url=\"https://192.168.175.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ANDIJON-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "NAMANGAN-3"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "NAMANGAN-3"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "NAMANGAN-3"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 42
+      },
+      "id": 913,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"NAMANGAN-3\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "NAMANGAN-3",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "G'AZALKENT"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "G'AZALKENT"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "G'AZALKENT"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 42
+      },
+      "id": 914,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"G'AZALKENT\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "G'AZALKENT",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "Olim-Polvon"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "Olim-Polvon"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "Olim-Polvon"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 42
+      },
+      "id": 915,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"Olim-Polvon\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Olim-Polvon",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "AVIASOZLAR BOZORI"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "AVIASOZLAR BOZORI"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "AVIASOZLAR BOZORI"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 42
+      },
+      "id": 910,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"AVIASOZLAR BOZORI\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "AVIASOZLAR BOZORI",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "SAMARQAND-1"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "SAMARQAND-1"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "SAMARQAND-1"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 42
+      },
+      "id": 908,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"SAMARQAND-1\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SAMARQAND-1",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "MINOR"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "MINOR"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "MINOR"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 42
+      },
+      "id": 918,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"MINOR\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "MINOR",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "PISKENT"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "PISKENT"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "PISKENT"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 0,
+        "y": 48
+      },
+      "id": 919,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"PISKENT\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "PISKENT",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "ANDIJON-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "ANDIJON-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "ANDIJON-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 3,
+        "y": 48
+      },
+      "id": 912,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"ANDIJON-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "ANDIJON-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "DOMBIROBOD"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "DOMBIROBOD"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "DOMBIROBOD"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 6,
+        "y": 48
+      },
+      "id": 924,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"DOMBIROBOD\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "DOMBIROBOD",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "SAMARQAND-3"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "SAMARQAND-3"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "SAMARQAND-3"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 9,
+        "y": 48
+      },
+      "id": 925,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"SAMARQAND-3\", monitor_url=\"https://192.168.197.201:8085\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "SAMARQAND-3",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QOYLIQ-2"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QOYLIQ-2"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QOYLIQ-2"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 12,
+        "y": 48
+      },
+      "id": 926,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QOYLIQ-2\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QOYLIQ-2",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": " BO'KA"
+                },
+                "1": {
+                  "index": 0,
+                  "text": " BO'KA"
+                },
+                "2": {
+                  "index": 2,
+                  "text": " BO'KA"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 15,
+        "y": 48
+      },
+      "id": 916,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"BO'KA\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": " BO'KA",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "MARG'ILON"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "MARG'ILON"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "MARG'ILON"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 18,
+        "y": 48
+      },
+      "id": 917,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"MARG'ILON\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "MARG'ILON",
+      "transformations": [],
+      "type": "stat"
+    },
+{
+      "datasource": {
+        "type": "prometheus",
+        "uid": "9BUl9dP4k"
+      },
+      "description": "",
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [
+            {
+              "options": {
+                "0": {
+                  "index": 1,
+                  "text": "QUSHBEGI"
+                },
+                "1": {
+                  "index": 0,
+                  "text": "QUSHBEGI"
+                },
+                "2": {
+                  "index": 2,
+                  "text": "QUSHBEGI"
+                }
+              },
+              "type": "value"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "#EAB839",
+                "value": 2
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 6,
+        "w": 3,
+        "x": 21,
+        "y": 48
+      },
+      "id": 928,
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "9BUl9dP4k"
+          },
+          "editorMode": "code",
+          "expr": "monitor_status{monitor_name=~\"QUSHBEGI\"}",
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "QUSHBEGI",
+      "transformations": [],
+      "type": "stat"
+    }
+  ]
+}

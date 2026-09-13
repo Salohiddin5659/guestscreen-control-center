@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мониторинг касс: FiscalService</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --green: #10b981;
+            --red: #ef4444;
+            --yellow: #f59e0b;
+            --blue: #3b82f6;
+            --purple: #8b5cf6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 24px;
+            line-height: 1.5;
+        }
+        .container { max-width: 1300px; margin: 0 auto; }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        h1 { font-size: 24px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+        .pulse-dot {
+            width: 12px; height: 12px; border-radius: 50%; background: var(--green);
+            box-shadow: 0 0 10px var(--green);
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+        .stat-val { font-size: 28px; font-weight: 800; margin-top: 4px; }
+        .stat-label { font-size: 13px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .controls {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 14px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 8px 14px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .btn-filter {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+        .btn-filter.active, .btn-filter:hover {
+            background: var(--blue);
+            border-color: var(--blue);
+            color: #fff;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        th, td { padding: 12px 16px; text-align: left; font-size: 14px; border-bottom: 1px solid var(--border-color); }
+        th { background: #162032; font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; }
+        tr:hover { background: rgba(255, 255, 255, 0.03); }
+        
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-running { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+        .badge-stopped { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .badge-online  { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+        .badge-offline { background: rgba(148, 163, 184, 0.1); color: #64748b; }
+        .badge-none    { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; }
+        .small-path    { font-family: monospace; font-size: 12px; color: var(--text-muted); max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><span class="pulse-dot"></span> Мониторинг фискальных служб касс (FiscalService)</h1>
+            <div style="font-size: 13px; color: var(--text-muted);">Обновлено: <strong>2026-08-20 14:28:46</strong></div>
+        </header>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Всего касс</div>
+                <div class="stat-val">30</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">В сети (Online)</div>
+                <div class="stat-val" style="color: var(--blue);">10</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">FiscalService RUNNING</div>
+                <div class="stat-val" style="color: var(--green);">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">FiscalService STOPPED</div>
+                <div class="stat-val" style="color: var(--red);">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">FiscalDriveAPI RUNNING</div>
+                <div class="stat-val" style="color: var(--purple);">10</div>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="searchInput" class="search-box" placeholder="🔍 Поиск по IP (например 192.168.142...)..." onkeyup="filterTable()">
+            <button class="btn-filter active" onclick="setFilter('all', this)">Все (30)</button>
+            <button class="btn-filter" onclick="setFilter('fs-running', this)">🟢 FiscalService Работает (0)</button>
+            <button class="btn-filter" onclick="setFilter('fs-stopped', this)">🔴 FiscalService Остановлена (5)</button>
+            <button class="btn-filter" onclick="setFilter('fs-none', this)">⚪ Без FiscalService (5)</button>
+            <button class="btn-filter" onclick="setFilter('offline', this)">⚫ Офлайн (20)</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>IP адрес</th>
+                    <th>Сеть</th>
+                    <th>FiscalService</th>
+                    <th>PID</th>
+                    <th>Автозапуск</th>
+                    <th>FiscalDriveAPI</th>
+                    <th>Путь к файлу</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                
+        <tr data-status="fs-none" data-ip="192.168.140.201">
+            <td><strong><code>192.168.140.201</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-none">NOT_INSTALLED</span></td>
+            <td><code>-</code></td>
+            <td>UNKNOWN</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3368)</td>
+            <td class="small-path" title=""></td>
+        </tr>
+        
+        <tr data-status="fs-stopped" data-ip="192.168.140.202">
+            <td><strong><code>192.168.140.202</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-stopped">STOPPED</span></td>
+            <td><code>-</code></td>
+            <td>DISABLED</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 4568)</td>
+            <td class="small-path" title="C:\UCS\FiscalService\nssm.exe">C:\UCS\FiscalService\nssm.exe</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.140.203">
+            <td><strong><code>192.168.140.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.140.204">
+            <td><strong><code>192.168.140.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.140.205">
+            <td><strong><code>192.168.140.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="fs-none" data-ip="192.168.141.201">
+            <td><strong><code>192.168.141.201</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-none">NOT_INSTALLED</span></td>
+            <td><code>-</code></td>
+            <td>UNKNOWN</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3508)</td>
+            <td class="small-path" title=""></td>
+        </tr>
+        
+        <tr data-status="fs-stopped" data-ip="192.168.141.202">
+            <td><strong><code>192.168.141.202</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-stopped">STOPPED</span></td>
+            <td><code>-</code></td>
+            <td>DISABLED</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 4412)</td>
+            <td class="small-path" title="C:\UCS\FiscalService\nssm.exe">C:\UCS\FiscalService\nssm.exe</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.141.203">
+            <td><strong><code>192.168.141.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.141.204">
+            <td><strong><code>192.168.141.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.141.205">
+            <td><strong><code>192.168.141.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="fs-none" data-ip="192.168.142.201">
+            <td><strong><code>192.168.142.201</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-none">NOT_INSTALLED</span></td>
+            <td><code>-</code></td>
+            <td>UNKNOWN</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3932)</td>
+            <td class="small-path" title=""></td>
+        </tr>
+        
+        <tr data-status="fs-stopped" data-ip="192.168.142.202">
+            <td><strong><code>192.168.142.202</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-stopped">STOPPED</span></td>
+            <td><code>-</code></td>
+            <td>DISABLED</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3512)</td>
+            <td class="small-path" title="C:\UCS\FiscalService\nssm.exe">C:\UCS\FiscalService\nssm.exe</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.142.203">
+            <td><strong><code>192.168.142.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.142.204">
+            <td><strong><code>192.168.142.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.142.205">
+            <td><strong><code>192.168.142.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="fs-none" data-ip="192.168.143.201">
+            <td><strong><code>192.168.143.201</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-none">NOT_INSTALLED</span></td>
+            <td><code>-</code></td>
+            <td>UNKNOWN</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3628)</td>
+            <td class="small-path" title=""></td>
+        </tr>
+        
+        <tr data-status="fs-stopped" data-ip="192.168.143.202">
+            <td><strong><code>192.168.143.202</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-stopped">STOPPED</span></td>
+            <td><code>-</code></td>
+            <td>DISABLED</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3628)</td>
+            <td class="small-path" title="C:\UCS\FiscalService\nssm.exe">C:\UCS\FiscalService\nssm.exe</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.143.203">
+            <td><strong><code>192.168.143.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.143.204">
+            <td><strong><code>192.168.143.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.143.205">
+            <td><strong><code>192.168.143.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="fs-none" data-ip="192.168.144.201">
+            <td><strong><code>192.168.144.201</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-none">NOT_INSTALLED</span></td>
+            <td><code>-</code></td>
+            <td>UNKNOWN</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3716)</td>
+            <td class="small-path" title=""></td>
+        </tr>
+        
+        <tr data-status="fs-stopped" data-ip="192.168.144.202">
+            <td><strong><code>192.168.144.202</code></strong></td>
+            <td><span class="badge badge-online">ONLINE</span></td>
+            <td><span class="badge badge-stopped">STOPPED</span></td>
+            <td><code>-</code></td>
+            <td>DISABLED</td>
+            <td><span class="badge badge-running">RUNNING</span> (PID: 3484)</td>
+            <td class="small-path" title="C:\UCS\FiscalService\nssm.exe">C:\UCS\FiscalService\nssm.exe</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.144.203">
+            <td><strong><code>192.168.144.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.144.204">
+            <td><strong><code>192.168.144.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.144.205">
+            <td><strong><code>192.168.144.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.145.201">
+            <td><strong><code>192.168.145.201</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.145.202">
+            <td><strong><code>192.168.145.202</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.145.203">
+            <td><strong><code>192.168.145.203</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.145.204">
+            <td><strong><code>192.168.145.204</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+        <tr data-status="offline" data-ip="192.168.145.205">
+            <td><strong><code>192.168.145.205</code></strong></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><span class="badge badge-offline">OFFLINE</span></td>
+            <td><code>-</code></td>
+            <td>-</td>
+            <td><span class="badge badge-none">OFFLINE</span> (PID: -)</td>
+            <td class="small-path" title="-">-</td>
+        </tr>
+        
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let currentFilter = 'all';
+        function setFilter(filter, btn) {
+            currentFilter = filter;
+            document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterTable();
+        }
+        function filterTable() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const rows = document.querySelectorAll('#tableBody tr');
+            rows.forEach(row => {
+                const ip = row.getAttribute('data-ip').toLowerCase();
+                const st = row.getAttribute('data-status');
+                const matchesSearch = ip.includes(search);
+                const matchesFilter = (currentFilter === 'all') || (st === currentFilter);
+                row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>

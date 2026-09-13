@@ -1,0 +1,3590 @@
+﻿{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "prometheus",
+          "uid": "9BUl9dP4k"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "A dashboard to visualize the metrics from HTTP endpoints in Uptime Kuma",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "gnetId": 18278,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "PARKENT"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "PARKENT"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "PARKENT"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  0,
+                    "y":  0
+                },
+    "id":  929,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"PARKENT\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "PARKENT",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "FERUZA"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "FERUZA"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "FERUZA"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  3,
+                    "y":  0
+                },
+    "id":  923,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"FERUZA\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "FERUZA",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MARKAZ-5"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MARKAZ-5"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MARKAZ-5"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  6,
+                    "y":  0
+                },
+    "id":  932,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MARKAZ-5\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MARKAZ-5",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "YANGIYO\u0027L-3"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "YANGIYO\u0027L-3"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "YANGIYO\u0027L-3"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  9,
+                    "y":  0
+                },
+    "id":  933,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"YANGIYO\u0027L-3\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "YANGIYO\u0027L-3",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "Urganch"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "Urganch"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "Urganch"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  12,
+                    "y":  0
+                },
+    "id":  934,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"Urganch\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "Urganch",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "BODOMZOR-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "BODOMZOR-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "BODOMZOR-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  15,
+                    "y":  0
+                },
+    "id":  922,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"BODOMZOR-2\", monitor_url=\"https://192.168.195.201:8085/\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "BODOMZOR-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "CHORBOG"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "CHORBOG"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "CHORBOG"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  18,
+                    "y":  0
+                },
+    "id":  927,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"CHORBOG\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "CHORBOG",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "BUYUK IPAK"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "BUYUK IPAK"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "BUYUK IPAK"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  21,
+                    "y":  0
+                },
+    "id":  937,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"BUYUK IPAK\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "BUYUK IPAK",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "BELTEPA"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "BELTEPA"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "BELTEPA"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  0,
+                    "y":  6
+                },
+    "id":  938,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"BELTEPA\", monitor_url=\"https://192.168.208.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "BELTEPA",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "SHIFOKORLAR"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "SHIFOKORLAR"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "SHIFOKORLAR"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  3,
+                    "y":  6
+                },
+    "id":  930,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"SHIFOKORLAR\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "SHIFOKORLAR",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "ANDALUS"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "ANDALUS"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "ANDALUS"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  6,
+                    "y":  6
+                },
+    "id":  940,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"ANDALUS\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "ANDALUS",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "ROHAT"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "ROHAT"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "ROHAT"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  9,
+                    "y":  6
+                },
+    "id":  944,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"ROHAT\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "ROHAT",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "SHUHRAT"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "SHUHRAT"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "SHUHRAT"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  12,
+                    "y":  6
+                },
+    "id":  942,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"SHUHRAT\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "SHUHRAT",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "CHILONZOR SAVDO"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "CHILONZOR SAVDO"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "CHILONZOR SAVDO"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  15,
+                    "y":  6
+                },
+    "id":  935,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "text":  {
+                                 "valueSize":  30
+                             },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"CHILONZOR SAVDO\", monitor_url=\"https://192.168.204.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "CHILONZOR SAVDO",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "ZANGIOTA"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "ZANGIOTA"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "ZANGIOTA"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  18,
+                    "y":  6
+                },
+    "id":  936,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"ZANGIOTA\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "ZANGIOTA",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "CHORSU-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "CHORSU-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "CHORSU-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  21,
+                    "y":  6
+                },
+    "id":  945,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"CHORSU-2\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "CHORSU-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "HIGH TOWN"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "HIGH TOWN"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "HIGH TOWN"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  0,
+                    "y":  12
+                },
+    "id":  946,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"HIGH TOWN\", monitor_url=\"https://192.168.212.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "HIGH TOWN",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "BERUNIY-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "BERUNIY-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "BERUNIY-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  3,
+                    "y":  12
+                },
+    "id":  939,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"BERUNIY-2\", monitor_url=\"https://192.168.209.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "BERUNIY-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "BAHODIR"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "BAHODIR"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "BAHODIR"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  6,
+                    "y":  12
+                },
+    "id":  941,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"BAHODIR\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "BAHODIR",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "NAMANGAN-4"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "NAMANGAN-4"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "NAMANGAN-4"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  9,
+                    "y":  12
+                },
+    "id":  954,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"NAMANGAN-4\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "NAMANGAN-4",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "KO\u0027KTERAK"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "KO\u0027KTERAK"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "KO\u0027KTERAK"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  12,
+                    "y":  12
+                },
+    "id":  947,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"KO\u0027KTERAK\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "KO\u0027KTERAK",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY BUYUK"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY BUYUK"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY BUYUK"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  15,
+                    "y":  12
+                },
+    "id":  943,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY BUYUK\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY BUYUK",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY QORASUV-1"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY QORASUV-1"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY QORASUV-1"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  18,
+                    "y":  12
+                },
+    "id":  949,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY QORASUV-1\", monitor_url=\"https://192.168.130.204:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY QORASUV-1",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY TOSHMI"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY TOSHMI"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY TOSHMI"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  21,
+                    "y":  12
+                },
+    "id":  948,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY TOSHMI\", monitor_url=\"https://192.168.117.205:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY TOSHMI",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY OLMALIQ-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY OLMALIQ-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY OLMALIQ-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  0,
+                    "y":  18
+                },
+    "id":  958,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY OLMALIQ-2\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY OLMALIQ-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "SCOPUS MALL"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "SCOPUS MALL"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "SCOPUS MALL"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  3,
+                    "y":  18
+                },
+    "id":  951,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"SCOPUS MALL\", monitor_url=\"https://192.168.221.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "SCOPUS MALL",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "NAMANGAN-1"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "NAMANGAN-1"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "NAMANGAN-1"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  6,
+                    "y":  18
+                },
+    "id":  952,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"NAMANGAN-1\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "NAMANGAN-1",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "URGUT"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "URGUT"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "URGUT"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  9,
+                    "y":  18
+                },
+    "id":  953,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"URGUT\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "URGUT",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "CHIRCHIQ-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "CHIRCHIQ-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "CHIRCHIQ-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  12,
+                    "y":  18
+                },
+    "id":  955,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"CHIRCHIQ-2\", monitor_url=\"https://192.168.215.201:8085\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "CHIRCHIQ-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "SEOUL MUN"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "SEOUL MUN"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "SEOUL MUN"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  15,
+                    "y":  18
+                },
+    "id":  956,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"SEOUL MUN\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "SEOUL MUN",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "OLMALIQ-2"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "OLMALIQ-2"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "OLMALIQ-2"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  18,
+                    "y":  18
+                },
+    "id":  957,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"OLMALIQ-2\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "OLMALIQ-2",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "SERGELI-8"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "SERGELI-8"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "SERGELI-8"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  21,
+                    "y":  18
+                },
+    "id":  959,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"SERGELI-8\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "SERGELI-8",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY SERGELI-8"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY SERGELI-8"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY SERGELI-8"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  0,
+                    "y":  24
+                },
+    "id":  960,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY SERGELI-8\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY SERGELI-8",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY AFRUZ"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY AFRUZ"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY AFRUZ"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  3,
+                    "y":  24
+                },
+    "id":  961,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY AFRUZ\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY AFRUZ",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "MILLY NOVZA"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "MILLY NOVZA"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "MILLY NOVZA"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  6,
+                    "y":  24
+                },
+    "id":  963,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"MILLY NOVZA\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "MILLY NOVZA",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+},
+{
+    "datasource":  {
+                       "type":  "prometheus",
+                       "uid":  "9BUl9dP4k"
+                   },
+    "description":  "",
+    "fieldConfig":  {
+                        "defaults":  {
+                                         "color":  {
+                                                       "mode":  "thresholds"
+                                                   },
+                                         "mappings":  [
+                                                          {
+                                                              "options":  {
+                                                                              "0":  {
+                                                                                        "index":  1,
+                                                                                        "text":  "ANGREN"
+                                                                                    },
+                                                                              "1":  {
+                                                                                        "index":  0,
+                                                                                        "text":  "ANGREN"
+                                                                                    },
+                                                                              "2":  {
+                                                                                        "index":  2,
+                                                                                        "text":  "ANGREN"
+                                                                                    }
+                                                                          },
+                                                              "type":  "value"
+                                                          }
+                                                      ],
+                                         "thresholds":  {
+                                                            "mode":  "absolute",
+                                                            "steps":  [
+                                                                          {
+                                                                              "color":  "green"
+                                                                          },
+                                                                          {
+                                                                              "color":  "red",
+                                                                              "value":  0
+                                                                          },
+                                                                          {
+                                                                              "color":  "green",
+                                                                              "value":  1
+                                                                          },
+                                                                          {
+                                                                              "color":  "#EAB839",
+                                                                              "value":  2
+                                                                          }
+                                                                      ]
+                                                        }
+                                     },
+                        "overrides":  [
+
+                                      ]
+                    },
+    "gridPos":  {
+                    "h":  6,
+                    "w":  3,
+                    "x":  9,
+                    "y":  24
+                },
+    "id":  962,
+    "options":  {
+                    "colorMode":  "background",
+                    "graphMode":  "area",
+                    "justifyMode":  "auto",
+                    "orientation":  "auto",
+                    "reduceOptions":  {
+                                          "calcs":  [
+                                                        "lastNotNull"
+                                                    ],
+                                          "fields":  "",
+                                          "values":  false
+                                      },
+                    "textMode":  "value"
+                },
+    "pluginVersion":  "9.4.7",
+    "targets":  [
+                    {
+                        "datasource":  {
+                                           "type":  "prometheus",
+                                           "uid":  "9BUl9dP4k"
+                                       },
+                        "editorMode":  "code",
+                        "expr":  "monitor_status{monitor_name=~\"ANGREN\"}",
+                        "legendFormat":  "__auto",
+                        "range":  true,
+                        "refId":  "A"
+                    }
+                ],
+    "title":  "ANGREN",
+    "transformations":  [
+
+                        ],
+    "type":  "stat"
+}
+  ],
+  "refresh": "5s",
+  "revision": 1,
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "9BUl9dP4k"
+        },
+        "definition": "label_values(monitor_response_time, monitor_type)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "type",
+        "options": [],
+        "query": {
+          "query": "label_values(monitor_response_time, monitor_type)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 2,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "All",
+          "value": "$__all"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "9BUl9dP4k"
+        },
+        "definition": "label_values(monitor_response_time{monitor_type=~\"$type\"}, monitor_name)",
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "name": "monitor",
+        "options": [],
+        "query": {
+          "query": "label_values(monitor_response_time{monitor_type=~\"$type\"}, monitor_name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "ALGORITM",
+          "value": "ALGORITM"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "9BUl9dP4k"
+        },
+        "definition": "label_values(monitor_name)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "tochka",
+        "options": [],
+        "query": {
+          "query": "label_values(monitor_name)",
+          "refId": "StandardVariableQuery"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "R-Keeper_Metrics-Part-2-V2",
+  "uid": "rk-part-2-v2-unique",
+  "version": 249,
+  "weekStart": ""
+}

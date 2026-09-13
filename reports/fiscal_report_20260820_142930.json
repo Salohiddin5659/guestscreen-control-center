@@ -1,0 +1,494 @@
+[
+  {
+    "ip": "192.168.185.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3428,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.185.202",
+    "online": true,
+    "auth_ok": false,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "ACCESS_DENIED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": "Access Denied"
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "ACCESS_DENIED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalDriveAPI",
+      "error": "Access Denied"
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.185.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.185.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.185.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.186.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3868,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.186.202",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "STOPPED",
+      "pid": 0,
+      "start_type": "DISABLED",
+      "bin_path": "C:\\UCS\\FiscalService\\nssm.exe",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3752,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.186.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.186.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.186.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.187.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3284,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.187.202",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "RUNNING",
+      "pid": 3660,
+      "start_type": "AUTO",
+      "bin_path": "C:\\UCS\\FiscalService\\nssm.exe",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3652,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.187.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.187.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.187.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.188.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3676,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.188.202",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "STOPPED",
+      "pid": 0,
+      "start_type": "DISABLED",
+      "bin_path": "C:\\UCS\\FiscalService\\nssm.exe",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3628,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.188.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.188.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.188.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.189.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3196,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.189.202",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "STOPPED",
+      "pid": 0,
+      "start_type": "DISABLED",
+      "bin_path": "C:\\UCS\\FiscalService\\nssm.exe",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3620,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.189.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.189.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.189.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.190.201",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "NOT_INSTALLED",
+      "pid": 0,
+      "start_type": "UNKNOWN",
+      "bin_path": "",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3392,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.190.202",
+    "online": true,
+    "auth_ok": true,
+    "fiscal_service": {
+      "name": "FiscalService",
+      "status": "STOPPED",
+      "pid": 0,
+      "start_type": "DISABLED",
+      "bin_path": "C:\\UCS\\FiscalService\\nssm.exe",
+      "display_name": "FiscalService",
+      "error": null
+    },
+    "fiscal_drive_api": {
+      "name": "FiscalDriveAPI",
+      "status": "RUNNING",
+      "pid": 3768,
+      "start_type": "AUTO",
+      "bin_path": "C:\\Program Files\\FiscalDriveAPI\\nssm.exe",
+      "display_name": "FiscalDriveAPI",
+      "error": null
+    },
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": null
+  },
+  {
+    "ip": "192.168.190.203",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.190.204",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  },
+  {
+    "ip": "192.168.190.205",
+    "online": false,
+    "auth_ok": false,
+    "fiscal_service": null,
+    "fiscal_drive_api": null,
+    "all_services": [],
+    "scan_time": "2026-08-20 14:29:21",
+    "error": "Host unreachable"
+  }
+]

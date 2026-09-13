@@ -1,0 +1,218 @@
+﻿openapi: 3.1.0
+info:
+  title: UCS GuestScreen Central Ad Content Management API
+  version: 1.0.0
+  description: Central management REST API for orchestrating advertising banners and playlists across POS monoblocks.
+paths:
+  /api/v1/media:
+    get:
+      summary: List uploaded media assets
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, ARCHIVED]
+      responses:
+        '200':
+          description: List of media metadata
+    post:
+      summary: Upload new media asset
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Media asset metadata created
+        '400':
+          description: Invalid file dimensions, format or name
+
+  /api/v1/media/{media_id}:
+    delete:
+      summary: Safe deletion of media asset
+      parameters:
+        - name: media_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Successfully deleted
+        '409':
+          description: Media is in use by active playlists or configurations
+
+  /api/v1/playlists:
+    get:
+      summary: List dynamic playlists
+      responses:
+        '200':
+          description: List of playlists
+    post:
+      summary: Create reusable playlist
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, display_type, items]
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                display_type:
+                  type: string
+                  enum: [FULL_SCREEN, SPLIT_50_50]
+                default_interval_sec:
+                  type: integer
+                  default: 5
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: [media_asset_id, sort_order]
+                    properties:
+                      media_asset_id:
+                        type: string
+                        format: uuid
+                      sort_order:
+                        type: integer
+                      duration_sec:
+                        type: integer
+      responses:
+        '201':
+          description: Playlist created
+
+  /api/v1/configurations:
+    get:
+      summary: List advertising configurations
+      responses:
+        '200':
+          description: List of ad configurations
+    post:
+      summary: Create or publish ad configuration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, mode, content_type]
+              properties:
+                name:
+                  type: string
+                mode:
+                  type: string
+                  enum: [FULL_SCREEN, SPLIT_50_50]
+                content_type:
+                  type: string
+                  enum: [STATIC, DYNAMIC]
+                media_asset_id:
+                  type: string
+                  format: uuid
+                playlist_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Configuration created with incremented version
+
+  /api/v1/cashboxes:
+    get:
+      summary: List registered cashbox monoblocks with sync status
+      responses:
+        '200':
+          description: Cashbox fleet overview
+    post:
+      summary: Register new cashbox monoblock
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, group_id, ip_address, ssh_credential_id]
+              properties:
+                name:
+                  type: string
+                group_id:
+                  type: string
+                  format: uuid
+                ip_address:
+                  type: string
+                hostname:
+                  type: string
+                ssh_port:
+                  type: integer
+                  default: 22
+                ssh_credential_id:
+                  type: string
+                  format: uuid
+      responses:
+        '201':
+          description: Cashbox registered
+
+  /api/v1/cashboxes/{cashbox_id}/inventory:
+    post:
+      summary: Trigger live SSH inventory collection from cashbox
+      parameters:
+        - name: cashbox_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Actual state collected and persisted
+
+  /api/v1/deployments:
+    get:
+      summary: List deployment operations
+      responses:
+        '200':
+          description: Deployment history
+    post:
+      summary: Enqueue deployment to cashbox or group
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                cashbox_id:
+                  type: string
+                  format: uuid
+                group_id:
+                  type: string
+                  format: uuid
+                full_configuration_id:
+                  type: string
+                  format: uuid
+                split_configuration_id:
+                  type: string
+                  format: uuid
+      responses:
+        '202':
+          description: Deployment accepted and enqueued in PostgreSQL
+
+  /api/v1/deployments/{deployment_id}/rollback:
+    post:
+      summary: Trigger emergency rollback of deployment
+      parameters:
+        - name: deployment_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '202':
+          description: Rollback accepted and dispatched
