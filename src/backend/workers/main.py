@@ -222,47 +222,45 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 raise RuntimeError(f"Media transfer failed: {upload_res.error_message}")
 
             # 5. Build Scene & Capture Prior State
+            target_mode = "mode1" if block.area == "FULL_SCREEN" else "mode32"
+            active_guid = await adapter.get_active_scene_guid_for_mode(target_mode)
+            effective_guid = active_guid or ("2509359c-2d71-4344-9be4-7d90dd453083" if block.area == "FULL_SCREEN" else "68906ed2-49a3-4dc3-bb8a-6fa7943f39c3")
+            execution_log.append(f"Resolved active target scene GUID: {effective_guid} (mode: {target_mode})")
+
             execution_log.append("Capturing prior scenes.Raw into memory...")
-            built_scene_pre = build_guest_screen_scene(block, items, media_map)
+            built_scene_pre = build_guest_screen_scene(block, items, media_map, target_guid=effective_guid)
             prior_raw = await adapter.get_current_scene_raw(built_scene_pre.scene_guid)
             attempt.previous_scene_raw = prior_raw
-            built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw)
+            built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw, target_guid=effective_guid)
 
-            # 6. Check Idempotency
-            if is_content_identical(cashier.current_content_version, job.idempotency_key):
-                execution_log.append("Content is identical to active cashier version. Skipping redundant SQL write.")
-                execution_log.append("Signaling front reload via sync_version.txt...")
-                await adapter.refresh()
-                final_status = "SUCCESS"
+            # 6. Surgical SQL Scene Update
+            execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
+            upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
+            if not upd_res.success:
+                # Tier 1 Surgical Rollback
+                execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
+                if prior_raw:
+                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+                raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
+
+            # 7. Verification Query
+            execution_log.append("Verifying written scene in gs.db...")
+            ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
+            if not ver_res.matches:
+                execution_log.append(f"Verification mismatch! Triggering Tier 1 Rollback...")
+                if prior_raw:
+                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+                raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
+
+            # 8. Refresh Front
+            execution_log.append("Signaling front reload via sync_version.txt...")
+            ref_res = await adapter.refresh()
+            if ref_res.awaiting_restart:
+                final_status = "PUBLISHED_AWAITING_RESTART"
+                execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
             else:
-                # 7. Surgical SQL Scene Update
-                execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
-                upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
-                if not upd_res.success:
-                    # Tier 1 Surgical Rollback
-                    execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
-                    if prior_raw:
-                        await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                    raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
-
-                # 8. Verification Query
-                execution_log.append("Verifying written scene in gs.db...")
-                ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
-                if not ver_res.matches:
-                    execution_log.append(f"Verification mismatch! Triggering Tier 1 Rollback...")
-                    if prior_raw:
-                        await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                    raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
-
-                # 9. Refresh Front
-                execution_log.append("Signaling front reload via sync_version.txt...")
-                ref_res = await adapter.refresh()
-                if ref_res.awaiting_restart:
-                    final_status = "PUBLISHED_AWAITING_RESTART"
-                    execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
-                else:
-                    final_status = "SUCCESS"
-                    execution_log.append("Front reloaded seamlessly.")
+                final_status = "SUCCESS"
+                execution_log.append("Front reloaded seamlessly.")
 
             # Record Success
             duration_ms = int((time.perf_counter() - start_time) * 1000)

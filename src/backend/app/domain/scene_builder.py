@@ -33,13 +33,14 @@ def build_guest_screen_scene(
     block: AdvertisingBlock,
     items: List[PlaylistItem],
     media_map: Dict[str, MediaAsset],
-    existing_scene_raw: str = None
+    existing_scene_raw: str = None,
+    target_guid: str = None
 ) -> BuiltScene:
     """
     Constructs the exact JSON string to be stored in SQLite scenes.Raw
     for a given AdvertisingBlock and its ordered PlaylistItems.
     If existing_scene_raw is provided (as a JSON string), it preserves original extra fields.
-    Scene GUID is resolved strictly by Area:
+    Scene GUID is resolved by explicit target_guid or strictly by Area:
       - FULL_SCREEN -> GUID_FULLSCREEN_SCENE (2509359c-2d71-4344-9be4-7d90dd453083)
       - MODE32_PROMO -> GUID_MODE32_PROMO_SCENE (68906ed2-49a3-4dc3-bb8a-6fa7943f39c3)
     Display mode (STATIC / SLIDESHOW / VIDEO) determines only the JSON scene type and parameters.
@@ -47,8 +48,10 @@ def build_guest_screen_scene(
     area = block.area
     mode = block.display_mode
 
-    # Resolve scene GUID strictly by Area
-    if area == "FULL_SCREEN":
+    # Resolve scene GUID: prioritize explicit target_guid if provided
+    if target_guid:
+        scene_guid = target_guid
+    elif area == "FULL_SCREEN":
         scene_guid = GUID_FULLSCREEN_SCENE
     elif area == "MODE32_PROMO":
         scene_guid = GUID_MODE32_PROMO_SCENE

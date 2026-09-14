@@ -325,6 +325,44 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
             logger.error(f"Error reading scene {scene_guid} on {self.host}: {e}")
             return None
 
+    async def get_active_scene_guid_for_mode(self, mode: str = "mode1") -> Optional[str]:
+        """
+        Queries scenarios table on the cashier to find the active sceneGuid bound to the given mode.
+        """
+        ps_script = f"""
+        $db = 'C:\\UCS\\GuestScreen\\gs.db'
+        $sqlExe = 'C:\\UCS\\GuestScreen\\sqlite3.exe'
+        if (!(Test-Path $sqlExe)) {{ $sqlExe = 'sqlite3' }}
+        $tmp = [System.IO.Path]::GetTempFileName()
+        [System.IO.File]::WriteAllText($tmp, "SELECT Raw FROM scenarios WHERE lower(Mode) = '{mode.lower()}';", [System.Text.Encoding]::UTF8)
+        $forwardTmp = $tmp.Replace('\\', '/')
+        $res = & $sqlExe $db ".read `"$forwardTmp`""
+        Remove-Item -Path $tmp -Force
+        Write-Output $res
+        """
+        try:
+            code, stdout, stderr = await self._run_powershell(ps_script, timeout=settings.SSH_COMMAND_TIMEOUT_SECONDS)
+            if code == 0 and stdout:
+                import json
+                for line in reversed(stdout.splitlines()):
+                    line = line.strip()
+                    if line.startswith("{") and line.endswith("}"):
+                        data = json.loads(line)
+                        conds = data.get("conditionSets", [])
+                        if conds:
+                            scenes = conds[0].get("scenes", [])
+                            if mode.lower() == "mode1" and scenes:
+                                return scenes[0].get("sceneGuid")
+                            elif mode.lower() == "mode32" and scenes:
+                                for s in scenes:
+                                    if s.get("blockGuid", "").lower() == "4ff51193-d30b-4f05-bc6f-143addcdb38b":
+                                        return s.get("sceneGuid")
+                                return "68906ed2-49a3-4dc3-bb8a-6fa7943f39c3"
+            return None
+        except Exception as e:
+            logger.error(f"Error reading active scenario GUID for {mode} on {self.host}: {e}")
+            return None
+
     async def update_scene(self, scene_guid: str, scene_raw_json: str) -> UpdateResult:
         # Strict Constitution Guard: orphan scene must NEVER be modified
         FORBIDDEN_SCENE_GUIDS = {"fad6349b-3aaa-43e2-82c7-ba12abfc1463"}
@@ -343,7 +381,22 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
         $rawBytes = [System.Convert]::FromBase64String('{b64_json}')
         $rawText = [System.Text.Encoding]::UTF8.GetString($rawBytes)
         $escaped = $rawText.Replace("'", "''")
-        $sql = "PRAGMA busy_timeout = 10000; PRAGMA journal_mode = WAL; UPDATE scenes SET Raw = '$escaped' WHERE lower(Guid) = '{scene_guid.lower()}';"
+        $targetGuid = '{scene_guid.lower()}'
+        
+        $sql = "PRAGMA busy_timeout = 10000; PRAGMA journal_mode = WAL; "
+        $sql += "UPDATE scenes SET Raw = '$escaped' WHERE lower(Guid) = '$targetGuid'; "
+        
+        # Dual-sync: If target is full-screen, also update the counterpart standard GUID so both match!
+        if ($targetGuid -eq 'ecc5d909-3f0a-4e7f-8da0-f876bcdda46c') {{
+            $cpText = $rawText.Replace('ecc5d909-3f0a-4e7f-8da0-f876bcdda46c', '2509359c-2d71-4344-9be4-7d90dd453083')
+            $cpEsc = $cpText.Replace("'", "''")
+            $sql += "UPDATE scenes SET Raw = '$cpEsc' WHERE lower(Guid) = '2509359c-2d71-4344-9be4-7d90dd453083'; "
+        }} elseif ($targetGuid -eq '2509359c-2d71-4344-9be4-7d90dd453083') {{
+            $cpText = $rawText.Replace('2509359c-2d71-4344-9be4-7d90dd453083', 'ecc5d909-3f0a-4e7f-8da0-f876bcdda46c')
+            $cpEsc = $cpText.Replace("'", "''")
+            $sql += "UPDATE scenes SET Raw = '$cpEsc' WHERE lower(Guid) = 'ecc5d909-3f0a-4e7f-8da0-f876bcdda46c'; "
+        }}
+        
         $tmp = [System.IO.Path]::GetTempFileName()
         [System.IO.File]::WriteAllText($tmp, $sql, [System.Text.Encoding]::UTF8)
         $sqlExe = 'C:\\UCS\\GuestScreen\\sqlite3.exe'

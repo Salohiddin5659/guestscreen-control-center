@@ -1,7 +1,9 @@
 import asyncio
 import json
 import logging
+import os
 import time
+from typing import Optional
 from datetime import datetime, timezone
 from uuid import UUID
 from arq.connections import create_pool
@@ -32,7 +34,7 @@ async def execute_cashier_job(ctx, job_id_str: str):
     Strictly zero agent on client monoblock.
     """
     job_id = UUID(job_id_str)
-    redis: Redis = ctx["redis"]
+    redis: Optional[Redis] = ctx.get("redis") if ctx else None
 
     async with async_session_factory() as session:
         job = await session.get(PublicationJob, job_id)
@@ -128,21 +130,34 @@ async def execute_cashier_job(ctx, job_id_str: str):
                     logger.warning(f"Failed to decrypt password for cashier {cashier.name}: {e}")
 
         # Concurrency Limiter
-        limiter = DistributedBranchLimiter(
-            redis=redis,
-            global_max=settings.WORKER_CONCURRENCY,
-            per_branch_max=settings.MAX_CONCURRENT_PER_BRANCH
-        )
-        branch_id_str = str(branch.id) if branch else "default"
-        acquired = await limiter.acquire(branch_id_str, timeout_seconds=45)
-        if not acquired:
-            logger.warning(f"Could not acquire rate limiter slot for branch {branch_id_str} in time.")
+        limiter = None
+        acquired = False
+        if redis:
+            limiter = DistributedBranchLimiter(
+                redis=redis,
+                global_max=settings.WORKER_CONCURRENCY,
+                per_branch_max=settings.MAX_CONCURRENT_PER_BRANCH
+            )
+            branch_id_str = str(branch.id) if branch else "default"
+            acquired = await limiter.acquire(branch_id_str, timeout_seconds=45)
+            if not acquired:
+                logger.warning(f"Could not acquire rate limiter slot for branch {branch_id_str} in time.")
+
+        # Resolve SSH credentials dynamically from central DB
+        ssh_user = None
+        if cashier.ssh_credential_id:
+            cred = await session.get(SSHCredential, cashier.ssh_credential_id)
+            if cred and cred.username and cred.username.strip():
+                ssh_user = cred.username.strip()
+
+        if not ssh_user:
+            raise ValueError(f"SSH username is missing for cashier {cashier.name} ({cashier.ip_address})")
 
         adapter = CashRegisterAdapterFactory.get_adapter(
             cashier_id=cashier.id,
             host=cashier.ip_address,
+            username=ssh_user,
             port=cashier.ssh_port,
-            username="Administrator",
             password=password
         )
 
@@ -171,13 +186,35 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 raise RuntimeError(f"Local backup failed: {bak.error_message}")
             attempt.remote_backup_path = bak.backup_path
 
-            # 4. Fetch Media from MinIO & Upload to Cashier
-            execution_log.append("Downloading media from MinIO & transferring over SFTP...")
+            # 4. Fetch Media from Storage & Upload to Cashier
+            execution_log.append("Downloading media from storage & transferring over SFTP...")
             media_tuples = []
             for item in items:
                 asset = media_map.get(str(item.media_asset_id))
                 if asset:
-                    file_bytes = await storage_service.download_file_bytes(asset.s3_key)
+                    file_bytes = None
+                    try:
+                        file_bytes = await storage_service.download_file_bytes(asset.s3_key)
+                    except Exception as e:
+                        logger.warning(f"StorageService download failed for {asset.s3_key}: {e}")
+
+                    if not file_bytes:
+                        candidate_paths = [
+                            f"/app/data/storage/{asset.s3_key}",
+                            f"/app/data/storage/media/{asset.s3_key}",
+                            f"/app/data/media/{asset.original_name}",
+                            f"/app/data/media/{asset.stored_name}",
+                            f"/app/data/{asset.s3_key}",
+                        ]
+                        for cp in candidate_paths:
+                            if os.path.exists(cp):
+                                with open(cp, "rb") as f:
+                                    file_bytes = f.read()
+                                break
+
+                    if not file_bytes:
+                        raise FileNotFoundError(f"Media file '{asset.original_name}' ({asset.s3_key}) not found in S3 or local storage")
+
                     media_tuples.append((asset.stored_name, file_bytes))
 
             upload_res = await adapter.upload_media(media_tuples)
@@ -185,45 +222,45 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 raise RuntimeError(f"Media transfer failed: {upload_res.error_message}")
 
             # 5. Build Scene & Capture Prior State
+            target_mode = "mode1" if block.area == "FULL_SCREEN" else "mode32"
+            active_guid = await adapter.get_active_scene_guid_for_mode(target_mode)
+            effective_guid = active_guid or ("2509359c-2d71-4344-9be4-7d90dd453083" if block.area == "FULL_SCREEN" else "68906ed2-49a3-4dc3-bb8a-6fa7943f39c3")
+            execution_log.append(f"Resolved active target scene GUID: {effective_guid} (mode: {target_mode})")
+
             execution_log.append("Capturing prior scenes.Raw into memory...")
-            built_scene_pre = build_guest_screen_scene(block, items, media_map)
+            built_scene_pre = build_guest_screen_scene(block, items, media_map, target_guid=effective_guid)
             prior_raw = await adapter.get_current_scene_raw(built_scene_pre.scene_guid)
             attempt.previous_scene_raw = prior_raw
-            built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw)
+            built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw, target_guid=effective_guid)
 
-            # 6. Check Idempotency
-            if is_content_identical(cashier.current_content_version, job.idempotency_key):
-                execution_log.append("Content is identical to active cashier version. Skipping redundant SQL write.")
-                final_status = "SUCCESS"
+            # 6. Surgical SQL Scene Update
+            execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
+            upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
+            if not upd_res.success:
+                # Tier 1 Surgical Rollback
+                execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
+                if prior_raw:
+                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+                raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
+
+            # 7. Verification Query
+            execution_log.append("Verifying written scene in gs.db...")
+            ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
+            if not ver_res.matches:
+                execution_log.append(f"Verification mismatch! Triggering Tier 1 Rollback...")
+                if prior_raw:
+                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+                raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
+
+            # 8. Refresh Front
+            execution_log.append("Signaling front reload via sync_version.txt...")
+            ref_res = await adapter.refresh()
+            if ref_res.awaiting_restart:
+                final_status = "PUBLISHED_AWAITING_RESTART"
+                execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
             else:
-                # 7. Surgical SQL Scene Update
-                execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
-                upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
-                if not upd_res.success:
-                    # Tier 1 Surgical Rollback
-                    execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
-                    if prior_raw:
-                        await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                    raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
-
-                # 8. Verification Query
-                execution_log.append("Verifying written scene in gs.db...")
-                ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
-                if not ver_res.matches:
-                    execution_log.append(f"Verification mismatch! Triggering Tier 1 Rollback...")
-                    if prior_raw:
-                        await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                    raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
-
-                # 9. Refresh Front
-                execution_log.append("Signaling front reload via sync_version.txt...")
-                ref_res = await adapter.refresh()
-                if ref_res.awaiting_restart:
-                    final_status = "PUBLISHED_AWAITING_RESTART"
-                    execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
-                else:
-                    final_status = "SUCCESS"
-                    execution_log.append("Front reloaded seamlessly.")
+                final_status = "SUCCESS"
+                execution_log.append("Front reloaded seamlessly.")
 
             # Record Success
             duration_ms = int((time.perf_counter() - start_time) * 1000)
@@ -263,12 +300,18 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 # Schedule retry with jittered delay
                 delay = calculate_exponential_backoff_with_jitter(job.current_attempt)
                 logger.info(f"Scheduling retry for job {job.id} in {delay:.2f}s...")
-                arq_pool = await create_pool(redis_settings)
-                await arq_pool.enqueue_job("execute_cashier_job", str(job.id), _defer_by=int(delay))
+                try:
+                    arq_pool = await create_pool(redis_settings)
+                    await arq_pool.enqueue_job("execute_cashier_job", str(job.id), _defer_by=int(delay))
+                except Exception:
+                    asyncio.get_event_loop().call_later(
+                        delay,
+                        lambda: asyncio.create_task(execute_cashier_job({"redis": None}, str(job.id)))
+                    )
 
         finally:
             await adapter.close()
-            if acquired:
+            if acquired and limiter:
                 await limiter.release(branch_id_str)
 
             # Update batch counters
@@ -295,7 +338,7 @@ async def execute_cashier_job(ctx, job_id_str: str):
             await session.commit()
 
             # Publish SSE event to Redis
-            if batch:
+            if batch and redis:
                 event_payload = {
                     "event": "job_update",
                     "batch_id": str(batch.id),

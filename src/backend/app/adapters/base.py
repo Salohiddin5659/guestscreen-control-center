@@ -99,6 +99,10 @@ class CashRegisterAdapter(ABC):
         """Reads current Raw JSON string of scene into memory."""
         pass
 
+    async def get_active_scene_guid_for_mode(self, mode: str = "mode1") -> Optional[str]:
+        """Optionally resolves dynamic sceneGuid from scenarios table on cashier."""
+        return None
+
     @abstractmethod
     async def update_scene(self, scene_guid: str, scene_raw_json: str) -> UpdateResult:
         """Updates only the scenes table for the specified Guid."""
