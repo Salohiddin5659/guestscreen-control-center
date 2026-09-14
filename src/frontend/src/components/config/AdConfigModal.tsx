@@ -84,44 +84,83 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [deployError, setDeployError] = useState<string | null>(null);
 
-  // Initialize from initialBlock if editing
+  // Current active template (if editing existing or selected from list)
+  const [currentBlock, setCurrentBlock] = useState<AdvertisingBlockDetail | null>(initialBlock || null);
+
+  // Available blocks from API
+  const { data: availableBlocks = [] } = useQuery({
+    queryKey: ['advertising-blocks'],
+    queryFn: () => advertisingApi.list(),
+  });
+
+  // Populate form from a block detail
+  const loadBlockData = (block: AdvertisingBlockDetail) => {
+    setCurrentBlock(block);
+    setTemplateName(block.name);
+    setArea(block.area);
+    setDisplayMode(block.display_mode);
+    if (block.items && block.items.length > 0) {
+      setPlaylistItems(
+        block.items.map((it) => ({
+          asset: {
+            id: it.media?.id || it.media_asset_id,
+            original_name: it.media?.original_name || '',
+            stored_name: it.media?.stored_name || '',
+            media_type: (it.media?.media_type || 'IMAGE') as any,
+            mime_type: 'image/jpeg',
+            size_bytes: 0,
+            sha256: '',
+            width: 1920,
+            height: 1080,
+            version: 1,
+            is_deleted: false,
+            created_at: '',
+            updated_at: '',
+          } as MediaAsset,
+          duration: it.duration_seconds || 7,
+        }))
+      );
+      const firstAssetId = block.items[0].media?.id || block.items[0].media_asset_id;
+      if (firstAssetId) {
+        setSelectedSingleAssetId(firstAssetId);
+      }
+    } else {
+      setPlaylistItems([]);
+      setSelectedSingleAssetId('');
+    }
+  };
+
+  // Initialize from initialBlock if passed
   useEffect(() => {
     if (initialBlock) {
-      setTemplateName(initialBlock.name);
-      setArea(initialBlock.area);
-      setDisplayMode(initialBlock.display_mode);
-      if (initialBlock.items && initialBlock.items.length > 0) {
-        setPlaylistItems(
-          initialBlock.items.map((it) => ({
-            asset: {
-              id: it.media?.id || it.media_asset_id,
-              original_name: it.media?.original_name || '',
-              stored_name: it.media?.stored_name || '',
-              media_type: (it.media?.media_type || 'IMAGE') as any,
-              mime_type: 'image/jpeg',
-              size_bytes: 0,
-              sha256: '',
-              width: 1920,
-              height: 1080,
-              version: 1,
-              is_deleted: false,
-              created_at: '',
-              updated_at: '',
-            } as MediaAsset,
-            duration: it.duration_seconds || 7,
-          }))
-        );
-        const firstAssetId = initialBlock.items[0].media?.id || initialBlock.items[0].media_asset_id;
-        if (firstAssetId) {
-          setSelectedSingleAssetId(firstAssetId);
-        }
-      }
+      loadBlockData(initialBlock);
+    } else {
+      setCurrentBlock(null);
     }
   }, [initialBlock]);
 
+  // Handle choosing another template from dropdown
+  const handleSelectExistingTemplate = async (blockId: string) => {
+    if (!blockId) {
+      setCurrentBlock(null);
+      setTemplateName('Промо-кампания ' + new Date().toLocaleDateString('ru-RU'));
+      setArea('FULL_SCREEN');
+      setDisplayMode('STATIC');
+      setPlaylistItems([]);
+      setSelectedSingleAssetId('');
+      return;
+    }
+    try {
+      const fullDetail = await advertisingApi.get(blockId);
+      loadBlockData(fullDetail);
+    } catch (err: any) {
+      setDeployError('Ошибка загрузки шаблона: ' + err.message);
+    }
+  };
+
   // Handle Save Template without dispatch
   const handleSaveTemplate = async () => {
-    if (!initialBlock) return;
+    if (!currentBlock) return;
     try {
       setIsSaving(true);
       setDeployError(null);
@@ -147,7 +186,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
         }));
       }
 
-      await advertisingApi.update(initialBlock.id, {
+      await advertisingApi.update(currentBlock.id, {
         name: templateName.trim() || 'Рекламный блок',
         area,
         display_mode: displayMode,
@@ -155,7 +194,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
       });
 
       queryClient.invalidateQueries({ queryKey: ['advertising-blocks'] });
-      queryClient.invalidateQueries({ queryKey: ['advertising-block', initialBlock.id] });
+      queryClient.invalidateQueries({ queryKey: ['advertising-block', currentBlock.id] });
       onClose();
     } catch (err: any) {
       setDeployError(err.message || 'Ошибка сохранения шаблона');
@@ -281,14 +320,14 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
 
       // 2. Create or Update Advertising Block via real FastAPI
       let blockId: string;
-      if (initialBlock) {
-        await advertisingApi.update(initialBlock.id, {
+      if (currentBlock) {
+        await advertisingApi.update(currentBlock.id, {
           name: templateName.trim() || 'Рекламный блок',
           area,
           display_mode: displayMode,
           items: itemsPayload,
         });
-        blockId = initialBlock.id;
+        blockId = currentBlock.id;
       } else {
         const blockRes = await advertisingApi.create({
           name: templateName.trim() || 'Рекламный блок',
@@ -343,17 +382,52 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
             </div>
             <div>
               <h2 className="text-base font-bold text-white">
-                {initialBlock ? 'Редактирование рекламного блока' : 'Конфигуратор рекламы и деплой'}
+                {currentBlock ? `Шаблон: ${currentBlock.name}` : 'Конфигуратор рекламы и деплой'}
               </h2>
               <p className="text-xs text-slate-400">
-                Шаг {step} из 2: {step === 1 ? 'Настройка формата и выбор слайдов' : 'Выбор целевых касс и подтверждение'}
+                Шаг {step} из 2: {step === 1 ? 'Настройка формата и выбор слайдов' : 'Выбор целевых касс и запуск'}
               </p>
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-dark-800">
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center space-x-3">
+            {/* Step Navigation Tabs */}
+            <div className="flex bg-dark-900 border border-dark-750 rounded-xl p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                  step === 1 ? 'bg-accent-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                1. Шаблон и слайды
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (displayMode === 'STATIC' && !selectedSingleAssetId) {
+                    setDeployError('Выберите изображение для баннера');
+                    return;
+                  }
+                  if (displayMode === 'SLIDESHOW' && playlistItems.length === 0) {
+                    setDeployError('Добавьте хотя бы один слайд в плейлист');
+                    return;
+                  }
+                  setDeployError(null);
+                  setStep(2);
+                }}
+                className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
+                  step === 2 ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                2. Развернуть на кассы ({targetCount})
+              </button>
+            </div>
+
+            <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-dark-800">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Error Notification */}
@@ -373,6 +447,41 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
           {step === 1 ? (
             /* STEP 1: Format & Content */
             <div className="space-y-6">
+
+              {/* Existing Template Picker / Switcher */}
+              <div className="p-3.5 bg-dark-900/90 border border-dark-750 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div className="flex items-center space-x-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center flex-shrink-0">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-white font-semibold block text-xs">
+                      {currentBlock ? `Выбран шаблон: "${currentBlock.name}"` : 'Новый шаблон (не сохранен)'}
+                    </span>
+                    <span className="text-slate-400 text-[11px]">
+                      {currentBlock
+                        ? `ID: ${currentBlock.id.slice(0, 8)}... • Формат: ${currentBlock.area === 'FULL_SCREEN' ? 'Full Screen (4:3)' : '50/50 Promo'} • Слайдов: ${currentBlock.items?.length || 0}`
+                        : 'Вы можете выбрать один из сохраненных шаблонов или настроить новый с нуля'}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <label className="text-slate-400 text-xs whitespace-nowrap">Шаблон:</label>
+                  <select
+                    value={currentBlock?.id || ''}
+                    onChange={(e) => handleSelectExistingTemplate(e.target.value)}
+                    className="bg-dark-800 border border-dark-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accent-500 max-w-[280px]"
+                  >
+                    <option value="">+ Создать новый шаблон с нуля</option>
+                    {availableBlocks.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.name} ({b.area === 'FULL_SCREEN' ? 'Full Screen' : '50/50'})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
               
               {/* Name & Area Selection */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -826,7 +935,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
           <div className="flex items-center space-x-2">
             {step === 1 ? (
               <>
-                {initialBlock && (
+                {currentBlock && (
                   <button
                     type="button"
                     onClick={handleSaveTemplate}
@@ -834,7 +943,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 disabled:opacity-50 flex items-center space-x-1.5 shadow-lg shadow-blue-600/25"
                   >
                     {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-                    <span>{isSaving ? 'Сохранение...' : 'Сохранить изменения'}</span>
+                    <span>{isSaving ? 'Сохранение...' : 'Сохранить шаблон'}</span>
                   </button>
                 )}
                 <button

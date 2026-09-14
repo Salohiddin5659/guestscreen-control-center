@@ -267,7 +267,7 @@ export const PlaylistsView: React.FC = () => {
 
                     <button
                       onClick={() => {
-                        setEditingBlock(null);
+                        setEditingBlock(blockDetail || null);
                         setAdConfigOpen(true);
                       }}
                       className="px-4 py-2 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-sm flex items-center space-x-1.5"
