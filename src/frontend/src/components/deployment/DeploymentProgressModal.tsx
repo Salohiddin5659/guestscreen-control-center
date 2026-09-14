@@ -99,47 +99,48 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
   const percent = Math.min(100, Math.round(((success + awaiting) / total) * 100));
   const isFinished = batch?.status === 'COMPLETED' || batch?.status === 'FAILED' || batch?.status === 'PARTIALLY_FAILED' || (inProgress === 0 && !isLoading);
 
-  const getJobStatusBadge = (status: string) => {
-    switch (status) {
+  const getJobStatusBadge = (job: PublicationJob) => {
+    switch (job.status) {
       case 'SUCCESS':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 inline-flex">
-            <Check className="w-3 h-3 text-emerald-400" />
-            УСПЕШНО
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 inline-flex">
+            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            Успешно
           </span>
         );
       case 'RUNNING':
-        return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-accent-500/15 text-accent-400 border border-accent-500/30 flex items-center gap-1.5 inline-flex">
-            <Loader2 className="w-3 h-3 text-accent-400 animate-spin" />
-            В ПРОЦЕССЕ
-          </span>
-        );
       case 'PENDING':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 flex items-center gap-1.5 inline-flex">
-            <Clock className="w-3 h-3 text-indigo-400" />
-            В ОЧЕРЕДИ
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-accent-500/15 text-accent-400 border border-accent-500/30 flex items-center gap-1.5 inline-flex">
+            <Loader2 className="w-3.5 h-3.5 text-accent-400 animate-spin" />
+            Выполняется
           </span>
         );
       case 'OFFLINE':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5 inline-flex">
-            <WifiOff className="w-3 h-3 text-slate-500" />
-            ОФФЛАЙН
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5 inline-flex">
+            <WifiOff className="w-3.5 h-3.5 text-slate-500" />
+            Оффлайн
           </span>
         );
       case 'FAILED':
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 inline-flex">
-            <AlertTriangle className="w-3 h-3 text-rose-400" />
-            ОШИБКА
-          </span>
+          <div className="flex flex-col items-end">
+            <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 inline-flex">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+              Ошибка
+            </span>
+            {job.error_message && (
+              <span className="text-rose-400/80 text-[10px] mt-0.5 max-w-[220px] truncate" title={job.error_message}>
+                {job.error_message}
+              </span>
+            )}
+          </div>
         );
       default:
         return (
-          <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-dark-750 text-slate-300">
-            {status}
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-dark-750 text-slate-300">
+            {job.status}
           </span>
         );
     }
@@ -164,16 +165,17 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
               )}
             </div>
             <div>
-              <div className="flex items-center space-x-2">
-                <h2 className="text-base font-bold text-white">
-                  {isFinished ? 'Публикация завершена' : 'Выполняется доставка рекламы на кассы...'}
-                </h2>
-                <span className="font-mono text-xs text-slate-400">
-                  #{batchId.substring(0, 8)}
-                </span>
-              </div>
+              <h2 className="text-base font-bold text-white">
+                {isFinished 
+                  ? (failed > 0 ? 'Завершено с ошибками' : 'Успешно') 
+                  : 'Выполняется'}
+              </h2>
               <p className="text-xs text-slate-400">
-                Трансляция событий в реальном времени (SSE) • Область: {batch?.scope_type || 'КАССЫ'}
+                {isFinished
+                  ? (failed > 0 
+                      ? `Обновлено: ${success} из ${total} касс` 
+                      : 'Рекламный шаблон успешно применен на всех кассах')
+                  : 'Применение рекламы на кассы...'}
               </p>
             </div>
           </div>
@@ -187,7 +189,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         <div className="p-6 border-b border-dark-750 bg-dark-900/40 space-y-4">
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-semibold">
-              <span className="text-slate-300">Общий прогресс развертывания</span>
+              <span className="text-slate-300">Общий прогресс</span>
               <span className="text-white font-mono">{percent}%</span>
             </div>
             <div className="w-full h-2.5 bg-dark-800 rounded-full overflow-hidden flex">
@@ -213,7 +215,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
           {/* Counts row */}
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
             <div className="bg-dark-850 border border-dark-750 p-2.5 rounded-xl">
-              <span className="text-slate-400 block text-[10px]">Касс в пакете</span>
+              <span className="text-slate-400 block text-[10px]">Всего касс</span>
               <span className="font-mono font-bold text-white text-sm">{total}</span>
             </div>
             <div className="bg-dark-850 border border-emerald-500/20 p-2.5 rounded-xl">
@@ -221,7 +223,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
               <span className="font-mono font-bold text-emerald-400 text-sm">{success}</span>
             </div>
             <div className="bg-dark-850 border border-rose-500/20 p-2.5 rounded-xl">
-              <span className="text-rose-400 block text-[10px]">Сбоев</span>
+              <span className="text-rose-400 block text-[10px]">Ошибок</span>
               <span className="font-mono font-bold text-rose-400 text-sm">{failed}</span>
             </div>
             <div className="bg-dark-850 border border-slate-700 p-2.5 rounded-xl">
@@ -234,7 +236,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         {/* Cashier Jobs Table */}
         <div className="p-6 overflow-y-auto flex-1 text-xs">
           <div className="flex items-center justify-between mb-3">
-            <h4 className="font-bold text-white">Статус по кассам</h4>
+            <h4 className="font-bold text-white">Кассы</h4>
             {failed > 0 && isFinished && (
               <button
                 onClick={() => {
@@ -254,38 +256,22 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-dark-900 border-b border-dark-750 text-slate-400 font-semibold text-[11px]">
-                  <th className="py-2.5 px-3">Касса</th>
-                  <th className="py-2.5 px-3">IP адрес</th>
-                  <th className="py-2.5 px-3">Попытка</th>
-                  <th className="py-2.5 px-3">Статус</th>
-                  <th className="py-2.5 px-3 text-right">Результат</th>
+                  <th className="py-2.5 px-4">Касса</th>
+                  <th className="py-2.5 px-4">IP адрес</th>
+                  <th className="py-2.5 px-4 text-right">Статус</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-dark-750/60 bg-dark-850/50">
                 {jobs.map((job) => (
                   <tr key={job.id} className="hover:bg-dark-800/40 transition-colors">
-                    <td className="py-2.5 px-3 font-bold text-white">
+                    <td className="py-3 px-4 font-bold text-white">
                       {job.cashier_name}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-slate-300">
+                    <td className="py-3 px-4 font-mono text-slate-300">
                       {job.cashier_ip}
                     </td>
-                    <td className="py-2.5 px-3 font-mono text-slate-400">
-                      #{job.attempt_count}
-                    </td>
-                    <td className="py-2.5 px-3">
-                      {getJobStatusBadge(job.status)}
-                    </td>
-                    <td className="py-2.5 px-3 text-right">
-                      {job.error_message ? (
-                        <span className="text-rose-400 font-mono text-[10px] truncate max-w-[200px] block" title={job.error_message}>
-                          {job.error_message}
-                        </span>
-                      ) : job.status === 'SUCCESS' ? (
-                        <span className="text-emerald-400 font-mono text-[11px]">Сцена применена</span>
-                      ) : (
-                        <span className="text-slate-500 font-mono text-[11px]">Обработка...</span>
-                      )}
+                    <td className="py-3 px-4 text-right">
+                      {getJobStatusBadge(job)}
                     </td>
                   </tr>
                 ))}
@@ -296,8 +282,10 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
 
         {/* Footer */}
         <div className="p-4 border-t border-dark-750 bg-dark-900/40 flex items-center justify-between text-xs">
-          <span className="text-slate-500 font-mono">
-            Статус пакета: {batch?.status || 'RUNNING'}
+          <span className="text-slate-400">
+            Статус: <strong className={isFinished ? (failed > 0 ? 'text-amber-400' : 'text-emerald-400') : 'text-accent-400'}>
+              {isFinished ? (failed > 0 ? 'Завершено с ошибками' : 'Успешно') : 'Выполняется'}
+            </strong>
           </span>
           <button
             onClick={onClose}
