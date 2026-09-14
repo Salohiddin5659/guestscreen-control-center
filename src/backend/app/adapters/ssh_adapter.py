@@ -127,6 +127,52 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
         encoded_cmd = f"powershell -NoProfile -OutputFormat Text -ExecutionPolicy Bypass -EncodedCommand {encoded}"
         return await self._run_command(encoded_cmd, timeout=timeout)
 
+    async def provision_sqlite(self) -> bool:
+        """Auto-provisions sqlite3.exe to the cashier via SFTP if missing."""
+        candidates = [
+            "/app/data/sqlite3.exe",
+            "/opt/guestscreen-server/data/sqlite3.exe",
+            "/opt/guestscreen-server/public/downloads/sqlite3.exe",
+            os.path.join(os.getcwd(), "data", "sqlite3.exe")
+        ]
+        source_path = None
+        for p in candidates:
+            if os.path.exists(p):
+                source_path = p
+                break
+
+        if not source_path:
+            logger.error(f"Cannot provision sqlite3.exe to {self.host}: binary not found on server")
+            return False
+
+        try:
+            logger.info(f"Auto-provisioning sqlite3.exe to {self.host} from {source_path}...")
+            with open(source_path, "rb") as f:
+                content = f.read()
+
+            if self._conn:
+                try:
+                    async with self._conn.start_sftp_client() as sftp:
+                        async with sftp.open("C:/UCS/GuestScreen/sqlite3.exe", "wb") as remote_file:
+                            await remote_file.write(content)
+                    logger.info(f"Successfully uploaded sqlite3.exe to {self.host}")
+                    return True
+                except Exception as sftp_err:
+                    logger.warning(f"SFTP sqlite upload failed ({sftp_err}), trying PowerShell fallback...")
+                    import base64
+                    b64 = base64.b64encode(content).decode("ascii")
+                    ps = (
+                        f"$bytes = [Convert]::FromBase64String('{b64}'); "
+                        f"[System.IO.File]::WriteAllBytes('C:/UCS/GuestScreen/sqlite3.exe', $bytes); "
+                        f"Write-Output 'OK'"
+                    )
+                    code, out, _ = await self._run_powershell(ps, timeout=60)
+                    return code == 0 and "OK" in out
+        except Exception as e:
+            logger.error(f"Error provisioning sqlite3.exe to {self.host}: {e}")
+            return False
+        return False
+
     async def inspect(self) -> TerminalInspectionResult:
         ps_cmd = (
             "$drive = Get-PSDrive C; "
@@ -158,13 +204,18 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
             sqlite_exists = data.get("SqliteExeExists", False)
             gs_ver = data.get("GuestScreenVersion") or None
 
-            # Check fatal conditions
+            # Check fatal conditions & auto-provision if missing
             if not gs_exists:
                 return TerminalInspectionResult(success=False, error_message="База данных gs.db не найдена по пути C:\\UCS\\GuestScreen\\gs.db")
             if not media_exists:
-                return TerminalInspectionResult(success=False, error_message="Директория Front\\media\\uploads не найдена")
+                await self._run_powershell("New-Item -ItemType Directory -Path 'C:/UCS/GuestScreen/Front/media/uploads' -Force | Out-Null")
+                media_exists = True
             if not sqlite_exists:
-                return TerminalInspectionResult(success=False, error_message="Утилита sqlite3.exe отсутствует на кассе")
+                provisioned = await self.provision_sqlite()
+                if provisioned:
+                    sqlite_exists = True
+                else:
+                    return TerminalInspectionResult(success=False, error_message="Утилита sqlite3.exe отсутствует на кассе и не найдена на сервере для автоустановки")
             if free_mb < 100:
                 return TerminalInspectionResult(success=False, free_space_mb=free_mb, error_message=f"Недостаточно свободного места на диске: {free_mb} MB (требуется >= 100 MB)")
 
