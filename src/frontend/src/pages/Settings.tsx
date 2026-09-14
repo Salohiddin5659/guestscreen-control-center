@@ -1,14 +1,26 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Save, CheckCircle2, Server, Cpu, HardDrive, Sliders } from 'lucide-react';
-import { settingsApi } from '../api/client';
+import { settingsApi, getCurrentUserFromStorage } from '../api/client';
 
 export const SettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const currentUser = getCurrentUserFromStorage();
+  const roleUpper = (currentUser?.role || '').toUpperCase();
+  const isPrivileged = roleUpper === 'ADMINISTRATOR' || roleUpper === 'ADMIN' || roleUpper === 'SUPERVISOR';
+
+  useEffect(() => {
+    if (!isPrivileged) {
+      navigate('/devices', { replace: true });
+    }
+  }, [isPrivileged, navigate]);
 
   const { data: settings } = useQuery({
     queryKey: ['system-settings'],
     queryFn: () => settingsApi.get(),
+    enabled: isPrivileged,
   });
 
   const [workerConcurrency, setWorkerConcurrency] = useState(15);
@@ -56,6 +68,10 @@ export const SettingsPage: React.FC = () => {
       cashier_backup_retention_days: backupRetention,
     });
   };
+
+  if (!isPrivileged) {
+    return null;
+  }
 
   return (
     <div className="max-w-4xl space-y-6 text-xs">

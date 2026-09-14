@@ -41,7 +41,7 @@ class UserResponse(BaseModel):
 @router.get("", response_model=List[UserResponse])
 async def list_users(
     session: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user)
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     query = select(User).order_by(User.created_at.asc())
     users = (await session.exec(query)).all()
@@ -62,7 +62,7 @@ async def list_users(
 async def create_user(
     req: UserCreate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     # Check if username exists
     existing = (await session.exec(select(User).where(User.username == req.username))).first()
@@ -70,7 +70,7 @@ async def create_user(
         raise HTTPException(status_code=400, detail=f"Пользователь с именем '{req.username}' уже существует")
 
     normalized_role = req.role.upper()
-    if normalized_role not in {"ADMINISTRATOR", "OPERATOR", "AUDITOR"}:
+    if normalized_role not in {"ADMINISTRATOR", "SUPERVISOR", "OPERATOR", "AUDITOR", "USER"}:
         normalized_role = "OPERATOR"
 
     user = User(
@@ -105,7 +105,7 @@ async def update_user(
     user_id: UUID,
     req: UserUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     user = await session.get(User, user_id)
     if not user:
@@ -127,7 +127,7 @@ async def update_user(
 
     if req.role is not None:
         normalized_role = req.role.upper()
-        if normalized_role in {"ADMINISTRATOR", "OPERATOR", "AUDITOR"}:
+        if normalized_role in {"ADMINISTRATOR", "SUPERVISOR", "OPERATOR", "AUDITOR", "USER"}:
             user.role = normalized_role
 
     if req.is_active is not None:
@@ -156,7 +156,7 @@ async def update_user(
 async def delete_user(
     user_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     if user_id == current_user.id:
         raise HTTPException(status_code=400, detail="Невозможно удалить текущего пользователя")

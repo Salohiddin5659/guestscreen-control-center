@@ -52,8 +52,12 @@ async def get_current_user(
 
 
 def require_roles(*allowed_roles: str):
+    allowed_set = {r.strip().upper() for r in allowed_roles}
+    if "ADMINISTRATOR" in allowed_set:
+        allowed_set.add("ADMIN")
     def role_checker(user: User = Depends(get_current_user)) -> User:
-        if user.role not in allowed_roles:
+        user_role = (user.role or "").strip().upper()
+        if user_role not in allowed_set:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Недостаточно прав для выполнения данной операции",

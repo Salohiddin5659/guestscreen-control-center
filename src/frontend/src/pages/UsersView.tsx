@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Users, 
@@ -15,11 +15,21 @@ import {
   Clock,
   ShieldCheck
 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { usersApi, UserAccount, getCurrentUserFromStorage } from '../api/client';
 
 export const UsersView: React.FC = () => {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const currentUser = getCurrentUserFromStorage();
+  const roleUpper = (currentUser?.role || '').toUpperCase();
+  const isPrivileged = roleUpper === 'ADMINISTRATOR' || roleUpper === 'ADMIN' || roleUpper === 'SUPERVISOR';
+
+  useEffect(() => {
+    if (!isPrivileged) {
+      navigate('/devices', { replace: true });
+    }
+  }, [isPrivileged, navigate]);
 
   const [addUserOpen, setAddUserOpen] = useState(false);
   const [editUser, setEditUser] = useState<UserAccount | null>(null);
@@ -28,7 +38,7 @@ export const UsersView: React.FC = () => {
   const [newUsername, setNewUsername] = useState('');
   const [newFullName, setNewFullName] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  const [newRole, setNewRole] = useState<'ADMINISTRATOR' | 'OPERATOR' | 'AUDITOR'>('OPERATOR');
+  const [newRole, setNewRole] = useState<'ADMINISTRATOR' | 'OPERATOR' | 'AUDITOR' | 'SUPERVISOR'>('OPERATOR');
   const [formError, setFormError] = useState<string | null>(null);
 
   // Edit User Form state
@@ -41,6 +51,7 @@ export const UsersView: React.FC = () => {
   const { data: users = [], isLoading, refetch } = useQuery({
     queryKey: ['users'],
     queryFn: () => usersApi.list(),
+    enabled: isPrivileged,
   });
 
   // Create User Mutation
@@ -94,6 +105,12 @@ export const UsersView: React.FC = () => {
         return (
           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#FFB648]/15 text-[#FFB648] border border-[#FFB648]/30">
             Администратор
+          </span>
+        );
+      case 'SUPERVISOR':
+        return (
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#70A6FF]/15 text-[#70A6FF] border border-[#70A6FF]/30">
+            Супервайзер
           </span>
         );
       case 'OPERATOR':
@@ -166,7 +183,12 @@ export const UsersView: React.FC = () => {
   };
 
   const adminCount = users.filter(u => u.role.toUpperCase() === 'ADMINISTRATOR' || u.role.toUpperCase() === 'ADMIN').length;
+  const supervisorCount = users.filter(u => u.role.toUpperCase() === 'SUPERVISOR').length;
   const operatorCount = users.filter(u => u.role.toUpperCase() === 'OPERATOR').length;
+
+  if (!isPrivileged) {
+    return null;
+  }
 
   return (
     <div className="space-y-6">
@@ -420,13 +442,15 @@ export const UsersView: React.FC = () => {
                   onChange={(e) => setNewRole(e.target.value as any)}
                   className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-[#A9DFD8]"
                 >
-                  <option value="OPERATOR">Оператор (Управление кассами и рекламой)</option>
-                  <option value="ADMINISTRATOR">Администратор (Полный доступ к системе)</option>
+                  <option value="OPERATOR">Оператор (Управление кассами и контентом)</option>
+                  <option value="SUPERVISOR">Супервайзер (Управление кассами, рекламой и аудитом)</option>
+                  <option value="ADMINISTRATOR">Администратор (Полный доступ к системе и пользователям)</option>
                   <option value="AUDITOR">Аудитор (Только просмотр и логи)</option>
                 </select>
                 <span className="text-[10px] text-[#737791] mt-1 block">
                   {newRole === 'ADMINISTRATOR' && 'Полный доступ: управление кассами, рекламой, настройками и пользователями'}
-                  {newRole === 'OPERATOR' && 'Рабочий доступ: публикация баннеров, расписания, управление кассами'}
+                  {newRole === 'SUPERVISOR' && 'Расширенный доступ: управление кассами, медиа, шаблонами, распределением и аудитом'}
+                  {newRole === 'OPERATOR' && 'Рабочий доступ: кассы, рестораны, медиатека, реклама, шаблоны и журнал аудита'}
                   {newRole === 'AUDITOR' && 'Только просмотр: мониторинг состояния и аудит-логи'}
                 </span>
               </div>
@@ -495,8 +519,9 @@ export const UsersView: React.FC = () => {
                   onChange={(e) => setEditRole(e.target.value)}
                   className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-[#A9DFD8]"
                 >
-                  <option value="OPERATOR">Оператор (Управление кассами и рекламой)</option>
-                  <option value="ADMINISTRATOR">Администратор (Полный доступ к системе)</option>
+                  <option value="OPERATOR">Оператор (Управление кассами и контентом)</option>
+                  <option value="SUPERVISOR">Супервайзер (Управление кассами, рекламой и аудитом)</option>
+                  <option value="ADMINISTRATOR">Администратор (Полный доступ к системе и пользователям)</option>
                   <option value="AUDITOR">Аудитор (Только просмотр и логи)</option>
                 </select>
               </div>

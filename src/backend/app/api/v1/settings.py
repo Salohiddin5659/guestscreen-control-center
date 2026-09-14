@@ -25,7 +25,7 @@ class SettingsUpdate(BaseModel):
 @router.get("", response_model=SystemSettings)
 async def get_system_settings(
     session: AsyncSession = Depends(get_db),
-    _: User = Depends(get_current_user)
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     settings_obj = (await session.exec(select(SystemSettings).where(SystemSettings.id == 1))).first()
     if not settings_obj:
@@ -40,7 +40,7 @@ async def get_system_settings(
 async def update_system_settings(
     req: SettingsUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     settings_obj = (await session.exec(select(SystemSettings).where(SystemSettings.id == 1))).first()
     if not settings_obj:

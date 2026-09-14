@@ -37,6 +37,17 @@ export const AppLayout: React.FC = () => {
   });
   const storedUser = getCurrentUserFromStorage();
   const user = meData || storedUser || { username: 'admin', role: 'ADMINISTRATOR', full_name: 'GS Administrator' };
+  const userRole = (user?.role || '').toUpperCase();
+  const isAdminOrSupervisor = userRole === 'ADMINISTRATOR' || userRole === 'ADMIN' || userRole === 'SUPERVISOR';
+
+  const getRoleLabel = (roleStr: string) => {
+    const r = (roleStr || '').toUpperCase();
+    if (r === 'ADMINISTRATOR' || r === 'ADMIN') return 'Администратор';
+    if (r === 'SUPERVISOR') return 'Супервайзер';
+    if (r === 'OPERATOR') return 'Оператор';
+    if (r === 'AUDITOR') return 'Аудитор';
+    return 'Пользователь';
+  };
 
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -65,6 +76,7 @@ export const AppLayout: React.FC = () => {
   const { data: users = [] } = useQuery({
     queryKey: ['users'],
     queryFn: () => usersApi.list(),
+    enabled: isAdminOrSupervisor,
   });
 
   // Fetch recent audit logs for notification feed
@@ -150,9 +162,9 @@ export const AppLayout: React.FC = () => {
     {
       title: 'БЕЗОПАСНОСТЬ И СИСТЕМА',
       items: [
-        { to: '/users', label: 'Пользователи и доступ', icon: UsersIcon, badge: users.length },
+        ...(isAdminOrSupervisor ? [{ to: '/users', label: 'Пользователи и доступ', icon: UsersIcon, badge: users.length }] : []),
         { to: '/audit', label: 'Журнал аудита', icon: FileText },
-        { to: '/settings', label: 'Настройки', icon: SettingsIcon },
+        ...(isAdminOrSupervisor ? [{ to: '/settings', label: 'Настройки', icon: SettingsIcon }] : []),
       ]
     }
   ];
@@ -485,7 +497,7 @@ export const AppLayout: React.FC = () => {
                 <div className="hidden md:flex flex-col text-left">
                   <span className="text-xs font-bold text-white leading-tight">{user.username}</span>
                   <span className="text-[10px] text-[#87888C] font-mono leading-tight">
-                    {user.role === 'ADMINISTRATOR' ? 'Администратор' : user.role === 'OPERATOR' ? 'Оператор' : 'Аудитор'}
+                    {getRoleLabel(user.role)}
                   </span>
                 </div>
                 <ChevronDown className={`w-3.5 h-3.5 text-[#87888C] transition-transform duration-200 ${userMenuOpen ? 'rotate-180 text-[#A9DFD8]' : ''}`} />
@@ -513,7 +525,7 @@ export const AppLayout: React.FC = () => {
                           <span className="text-[10px] font-semibold text-[#05C168]">Авторизован</span>
                           <span className="text-[#87888C] text-[10px]">•</span>
                           <span className="text-[10px] font-mono text-[#FFB648] font-bold">
-                            {user.role === 'ADMINISTRATOR' ? 'Администратор' : user.role === 'OPERATOR' ? 'Оператор' : 'Аудитор'}
+                            {getRoleLabel(user.role)}
                           </span>
                         </div>
                       </div>
@@ -530,26 +542,30 @@ export const AppLayout: React.FC = () => {
 
                   {/* Navigation Links inside profile */}
                   <div className="p-2 space-y-1 text-xs">
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        navigate('/users');
-                      }}
-                      className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-[#87888C] hover:text-white hover:bg-[#171821] transition text-left"
-                    >
-                      <UsersIcon className="w-4 h-4 text-[#A9DFD8]" />
-                      <span>Пользователи и доступ</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        navigate('/settings');
-                      }}
-                      className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-[#87888C] hover:text-white hover:bg-[#171821] transition text-left"
-                    >
-                      <SettingsIcon className="w-4 h-4 text-[#A9DFD8]" />
-                      <span>Параметры и настройки</span>
-                    </button>
+                    {isAdminOrSupervisor && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            navigate('/users');
+                          }}
+                          className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-[#87888C] hover:text-white hover:bg-[#171821] transition text-left"
+                        >
+                          <UsersIcon className="w-4 h-4 text-[#A9DFD8]" />
+                          <span>Пользователи и доступ</span>
+                        </button>
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            navigate('/settings');
+                          }}
+                          className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-[#87888C] hover:text-white hover:bg-[#171821] transition text-left"
+                        >
+                          <SettingsIcon className="w-4 h-4 text-[#A9DFD8]" />
+                          <span>Параметры и настройки</span>
+                        </button>
+                      </>
+                    )}
                     <button
                       onClick={() => {
                         setUserMenuOpen(false);

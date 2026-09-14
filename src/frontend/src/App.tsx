@@ -13,7 +13,7 @@ import { ReportsView } from './pages/ReportsView';
 import { AuditLogs } from './pages/AuditLogs';
 import { UsersView } from './pages/UsersView';
 import { SettingsPage } from './pages/Settings';
-import { getAuthToken } from './api/client';
+import { getAuthToken, getCurrentUserFromStorage } from './api/client';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,6 +28,16 @@ const RequireAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const token = getAuthToken();
   if (!token) {
     return <Navigate to="/login" replace />;
+  }
+  return <>{children}</>;
+};
+
+const RequireAdminOrSupervisor: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const user = getCurrentUserFromStorage();
+  const role = (user?.role || '').toUpperCase();
+  const isAllowed = role === 'ADMINISTRATOR' || role === 'ADMIN' || role === 'SUPERVISOR';
+  if (!isAllowed) {
+    return <Navigate to="/devices" replace />;
   }
   return <>{children}</>;
 };
@@ -62,8 +72,22 @@ export const App: React.FC = () => {
             {/* System, Reports & Audit */}
             <Route path="reports" element={<ReportsView />} />
             <Route path="audit" element={<AuditLogs />} />
-            <Route path="users" element={<UsersView />} />
-            <Route path="settings" element={<SettingsPage />} />
+            <Route
+              path="users"
+              element={
+                <RequireAdminOrSupervisor>
+                  <UsersView />
+                </RequireAdminOrSupervisor>
+              }
+            />
+            <Route
+              path="settings"
+              element={
+                <RequireAdminOrSupervisor>
+                  <SettingsPage />
+                </RequireAdminOrSupervisor>
+              }
+            />
           </Route>
 
           <Route path="*" element={<Navigate to="/" replace />} />
