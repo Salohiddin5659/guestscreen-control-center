@@ -3,7 +3,7 @@ import io
 import json
 import logging
 import time
-from typing import List, Optional, Tuple
+from typing import Any, List, Optional, Tuple
 from uuid import UUID
 import asyncssh
 
@@ -74,7 +74,8 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
                     password=password_to_use,
                     client_keys=client_keys if client_keys else None,
                     known_hosts=None,  # POS fleet in private network
-                    keepalive_interval=settings.SSH_KEEPALIVE_INTERVAL
+                    keepalive_interval=settings.SSH_KEEPALIVE_INTERVAL,
+                    encoding=None  # Raw bytes! Prevents transport UnicodeDecodeError on Russian Windows
                 ),
                 timeout=settings.SSH_CONNECT_TIMEOUT_SECONDS
             )
@@ -87,7 +88,7 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
     async def disconnect(self) -> None:
         if self._sftp:
             try:
-                self._sftp.exit()
+                await self._sftp.wait_closed()
             except Exception:
                 pass
             self._sftp = None
@@ -106,13 +107,26 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
             if not ok or not self._conn:
                 raise ConnectionError(f"Cannot establish SSH connection to {self.host}")
 
-    async def _run_command(self, cmd: str, timeout: int = 45) -> Tuple[int, str, str]:
+    @staticmethod
+    def _safe_decode(raw: Any) -> str:
+        if not raw:
+            return ""
+        if isinstance(raw, str):
+            return raw
+        for enc in ("utf-8", "cp866", "cp1251"):
+            try:
+                return raw.decode(enc)
+            except UnicodeDecodeError:
+                pass
+        return raw.decode("utf-8", errors="replace")
+
+    async def _run_command(self, cmd: str, input_data: Optional[bytes] = None, timeout: int = 45) -> Tuple[int, str, str]:
         for attempt in range(2):
             try:
                 await self._ensure_connected()
-                result = await asyncio.wait_for(self._conn.run(cmd), timeout=timeout)
-                stdout = result.stdout or ""
-                stderr = result.stderr or ""
+                result = await asyncio.wait_for(self._conn.run(cmd, input=input_data), timeout=timeout)
+                stdout = self._safe_decode(result.stdout)
+                stderr = self._safe_decode(result.stderr)
                 exit_code = result.exit_status if result.exit_status is not None else 0
                 return exit_code, stdout.strip(), stderr.strip()
             except (asyncssh.ChannelOpenError, asyncssh.ConnectionLost):
@@ -122,10 +136,10 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
         raise ConnectionError(f"Failed to execute command on {self.host}")
 
     async def _run_powershell(self, ps_script: str, timeout: int = 45) -> Tuple[int, str, str]:
-        import base64
-        encoded = base64.b64encode(ps_script.encode("utf-16le")).decode("ascii")
-        encoded_cmd = f"powershell -NoProfile -OutputFormat Text -ExecutionPolicy Bypass -EncodedCommand {encoded}"
-        return await self._run_command(encoded_cmd, timeout=timeout)
+        prefix = "$ProgressPreference = 'SilentlyContinue'; [Console]::OutputEncoding = [System.Text.Encoding]::UTF8; "
+        full_script = prefix + ps_script
+        cmd = "powershell -NoProfile -ExecutionPolicy Bypass -Command -"
+        return await self._run_command(cmd, input_data=full_script.encode("utf-8"), timeout=timeout)
 
     async def provision_sqlite(self) -> bool:
         """Auto-provisions sqlite3.exe to the cashier via SFTP if missing."""
@@ -402,9 +416,13 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
         $sqlExe = 'C:\\UCS\\GuestScreen\\sqlite3.exe'
         if (!(Test-Path $sqlExe)) {{ $sqlExe = 'sqlite3' }}
         $forwardTmp = $tmp.Replace('\\', '/')
-        $res = & $sqlExe 'C:\\UCS\\GuestScreen\\gs.db' ".read `"$forwardTmp`""
+        $res = & $sqlExe 'C:\\UCS\\GuestScreen\\gs.db' ".read `"$forwardTmp`"" 2>&1
         Remove-Item -Path $tmp -Force
-        Write-Output "DONE"
+        if ($res -and $res -match "Error:") {{
+            Write-Output ("SQL_ERROR: " + ($res | Out-String))
+        }} else {{
+            Write-Output "DONE"
+        }}
         """
         try:
             code, stdout, stderr = await self._run_powershell(ps_script, timeout=settings.SSH_COMMAND_TIMEOUT_SECONDS)

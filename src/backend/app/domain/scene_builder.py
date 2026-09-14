@@ -93,7 +93,7 @@ def build_guest_screen_scene(
         # Target payload for image-scene
         payload = {
             "guid": scene_guid,
-            "name": base_data.get("name", "Рекламный блок" if area == "FULL_SCREEN" else "Галерея"),
+            "name": base_data.get("name") or ("Рекламный блок" if area == "FULL_SCREEN" else "Галерея"),
             "type": "image",
             "src": f"media/uploads/{stored_name}",
             "fit": "cover",
@@ -119,7 +119,7 @@ def build_guest_screen_scene(
         frames = [{"type": "image", "name": s["src"].split("/")[-1]} for s in slides]
         payload = {
             "guid": scene_guid,
-            "name": base_data.get("name", "Рекламный блок" if area == "FULL_SCREEN" else "Галерея"),
+            "name": base_data.get("name") or ("Рекламный блок" if area == "FULL_SCREEN" else "Галерея"),
             "type": "gallery",
             "interval": interval,
             "slides": slides,

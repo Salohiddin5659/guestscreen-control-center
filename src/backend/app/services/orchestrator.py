@@ -155,15 +155,12 @@ class PublicationOrchestrator:
             return []
 
         retried_job_ids = []
-        arq_pool = await create_pool(redis_settings)
-
         for job in failed_jobs:
             job.status = "PENDING"
             job.current_attempt = 0
             job.error_message = None
             session.add(job)
             retried_job_ids.append(str(job.id))
-            await arq_pool.enqueue_job("execute_cashier_job", str(job.id))
 
         # Reset batch status if needed
         batch = await session.get(PublicationBatch, batch_id)
@@ -172,5 +169,21 @@ class PublicationOrchestrator:
             session.add(batch)
 
         await session.commit()
+
+        # Push jobs into Redis / ARQ worker queue or background tasks
+        enqueued_to_redis = False
+        try:
+            arq_pool = await create_pool(redis_settings)
+            for jid in retried_job_ids:
+                await arq_pool.enqueue_job("execute_cashier_job", jid)
+            enqueued_to_redis = True
+        except Exception as e:
+            logger.warning(f"Redis queue unavailable ({e}), launching retry jobs in background tasks directly...")
+
+        if not enqueued_to_redis:
+            from workers.main import execute_cashier_job
+            for jid in retried_job_ids:
+                asyncio.create_task(execute_cashier_job({"redis": None}, jid))
+
         logger.info(f"Retried {len(retried_job_ids)} jobs for batch {batch_id}")
         return retried_job_ids

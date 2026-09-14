@@ -265,6 +265,7 @@ async def execute_cashier_job(ctx, job_id_str: str):
             # Record Success
             duration_ms = int((time.perf_counter() - start_time) * 1000)
             job.status = final_status
+            job.error_message = None
             job.finished_at = datetime.now(timezone.utc)
             attempt.status = final_status
             attempt.finished_at = datetime.now(timezone.utc)
