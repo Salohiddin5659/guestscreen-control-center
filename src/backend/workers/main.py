@@ -27,15 +27,44 @@ from workers.arq_config import redis_settings
 
 logger = logging.getLogger("gs_control_center.worker")
 
+_in_process_limiter: Optional[asyncio.Semaphore] = None
+_branch_semaphores: dict = {}
+
+
+def get_in_process_limiter() -> asyncio.Semaphore:
+    global _in_process_limiter
+    if _in_process_limiter is None:
+        _in_process_limiter = asyncio.Semaphore(settings.WORKER_CONCURRENCY)
+    return _in_process_limiter
+
+
+def get_branch_limiter(branch_id: str) -> asyncio.Semaphore:
+    if branch_id not in _branch_semaphores:
+        _branch_semaphores[branch_id] = asyncio.Semaphore(settings.MAX_CONCURRENT_PER_BRANCH)
+    return _branch_semaphores[branch_id]
+
 
 async def execute_cashier_job(ctx, job_id_str: str):
     """
     Executes surgical publication sequence for a single POS cashier.
     Strictly zero agent on client monoblock.
+    Uses in-process semaphore to avoid saturating server/network when Redis is absent.
     """
+    redis: Optional[Redis] = ctx.get("redis") if ctx else None
+    if not redis:
+        async with get_in_process_limiter():
+            return await _execute_cashier_job_impl(ctx, job_id_str)
+    else:
+        return await _execute_cashier_job_impl(ctx, job_id_str)
+
+
+async def _execute_cashier_job_impl(ctx, job_id_str: str):
     job_id = UUID(job_id_str)
     redis: Optional[Redis] = ctx.get("redis") if ctx else None
 
+    # =========================================================================
+    # PHASE 1: DB READ & MARK RUNNING (Fast < 10ms hold of connection)
+    # =========================================================================
     async with async_session_factory() as session:
         job = await session.get(PublicationJob, job_id)
         if not job:
@@ -69,6 +98,18 @@ async def execute_cashier_job(ctx, job_id_str: str):
         )
         session.add(attempt)
         await session.commit()
+        await session.refresh(attempt)
+        attempt_id = attempt.id
+
+        batch_id = batch.id if batch else None
+        cashier_id = cashier.id
+        cashier_name = cashier.name
+        cashier_ip = cashier.ip_address
+        cashier_port = cashier.ssh_port
+        branch_id_str = str(branch.id) if branch else "default"
+        idempotency_key = job.idempotency_key
+        current_attempt = job.current_attempt
+        max_attempts = job.max_attempts
 
         # Load playlist items & media assets: prioritize immutable content_snapshot_json
         snapshot = batch.content_snapshot_json if batch else None
@@ -119,7 +160,7 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 from app.core.security import decrypt_secret
                 password = decrypt_secret(cashier.ssh_password_encrypted)
             except Exception as e:
-                logger.warning(f"Failed to decrypt in-memory password for cashier {cashier.name}: {e}")
+                logger.warning(f"Failed to decrypt in-memory password for cashier {cashier_name}: {e}")
         elif cashier.ssh_credential_id:
             cred = await session.get(SSHCredential, cashier.ssh_credential_id)
             if cred and cred.encrypted_secret:
@@ -127,21 +168,7 @@ async def execute_cashier_job(ctx, job_id_str: str):
                     from app.core.security import decrypt_secret
                     password = decrypt_secret(cred.encrypted_secret)
                 except Exception as e:
-                    logger.warning(f"Failed to decrypt password for cashier {cashier.name}: {e}")
-
-        # Concurrency Limiter
-        limiter = None
-        acquired = False
-        if redis:
-            limiter = DistributedBranchLimiter(
-                redis=redis,
-                global_max=settings.WORKER_CONCURRENCY,
-                per_branch_max=settings.MAX_CONCURRENT_PER_BRANCH
-            )
-            branch_id_str = str(branch.id) if branch else "default"
-            acquired = await limiter.acquire(branch_id_str, timeout_seconds=45)
-            if not acquired:
-                logger.warning(f"Could not acquire rate limiter slot for branch {branch_id_str} in time.")
+                    logger.warning(f"Failed to decrypt password for cashier {cashier_name}: {e}")
 
         # Resolve SSH credentials dynamically from central DB
         ssh_user = None
@@ -151,211 +178,230 @@ async def execute_cashier_job(ctx, job_id_str: str):
                 ssh_user = cred.username.strip()
 
         if not ssh_user:
-            raise ValueError(f"SSH username is missing for cashier {cashier.name} ({cashier.ip_address})")
+            ssh_user = "Administrator"
 
-        adapter = CashRegisterAdapterFactory.get_adapter(
-            cashier_id=cashier.id,
-            host=cashier.ip_address,
-            username=ssh_user,
-            port=cashier.ssh_port,
-            password=password
+    # =========================================================================
+    # PHASE 2: NETWORK EXECUTION (ZERO DB CONNECTION HELD!)
+    # =========================================================================
+    limiter = None
+    acquired = False
+    branch_sem = None
+    if redis:
+        limiter = DistributedBranchLimiter(
+            redis=redis,
+            global_max=settings.WORKER_CONCURRENCY,
+            per_branch_max=settings.MAX_CONCURRENT_PER_BRANCH
         )
+        acquired = await limiter.acquire(branch_id_str, timeout_seconds=45)
+        if not acquired:
+            logger.warning(f"Could not acquire rate limiter slot for branch {branch_id_str} in time.")
+    else:
+        branch_sem = get_branch_limiter(branch_id_str)
+        await branch_sem.acquire()
 
-        start_time = time.perf_counter()
-        execution_log = []
-        try:
-            # 1. Connect
-            execution_log.append("Connecting over SSH...")
-            connected = await adapter.connect()
-            if not connected:
-                raise ConnectionError(f"SSH handshake failed to {cashier.ip_address}")
+    adapter = CashRegisterAdapterFactory.get_adapter(
+        cashier_id=cashier_id,
+        host=cashier_ip,
+        username=ssh_user,
+        port=cashier_port,
+        password=password
+    )
 
-            # 2. Inspect Environment
-            execution_log.append("Inspecting cashier environment...")
-            insp = await adapter.inspect()
-            if not insp.success:
-                raise RuntimeError(f"Inspect failed: {insp.error_message}")
+    start_time = time.perf_counter()
+    execution_log = []
+    final_status = "FAILED"
+    error_str = None
+    remote_bak_path = None
+    prior_raw = None
+    guest_screen_ver = None
 
-            if insp.guest_screen_version:
-                cashier.guest_screen_version = insp.guest_screen_version
+    try:
+        # 1. Connect
+        execution_log.append("Connecting over SSH...")
+        connected = await adapter.connect()
+        if not connected:
+            raise ConnectionError(f"SSH handshake failed to {cashier_ip}")
 
-            # 3. Create Local gs.db Backup on Cashier
-            execution_log.append("Creating local gs.db backup...")
-            bak = await adapter.backup_database()
-            if not bak.success:
-                raise RuntimeError(f"Local backup failed: {bak.error_message}")
-            attempt.remote_backup_path = bak.backup_path
+        # 2. Inspect Environment
+        execution_log.append("Inspecting cashier environment...")
+        insp = await adapter.inspect()
+        if not insp.success:
+            raise RuntimeError(f"Inspect failed: {insp.error_message}")
 
-            # 4. Fetch Media from Storage & Upload to Cashier
-            execution_log.append("Downloading media from storage & transferring over SFTP...")
-            media_tuples = []
-            for item in items:
-                asset = media_map.get(str(item.media_asset_id))
-                if asset:
-                    file_bytes = None
-                    try:
-                        file_bytes = await storage_service.download_file_bytes(asset.s3_key)
-                    except Exception as e:
-                        logger.warning(f"StorageService download failed for {asset.s3_key}: {e}")
+        if insp.guest_screen_version:
+            guest_screen_ver = insp.guest_screen_version
 
-                    if not file_bytes:
-                        candidate_paths = [
-                            f"/app/data/storage/{asset.s3_key}",
-                            f"/app/data/storage/media/{asset.s3_key}",
-                            f"/app/data/media/{asset.original_name}",
-                            f"/app/data/media/{asset.stored_name}",
-                            f"/app/data/{asset.s3_key}",
-                        ]
-                        for cp in candidate_paths:
-                            if os.path.exists(cp):
-                                with open(cp, "rb") as f:
-                                    file_bytes = f.read()
-                                break
+        # 3. Create Local gs.db Backup on Cashier
+        execution_log.append("Creating local gs.db backup...")
+        bak = await adapter.backup_database()
+        if not bak.success:
+            raise RuntimeError(f"Local backup failed: {bak.error_message}")
+        remote_bak_path = bak.backup_path
 
-                    if not file_bytes:
-                        raise FileNotFoundError(f"Media file '{asset.original_name}' ({asset.s3_key}) not found in S3 or local storage")
+        # 4. Fetch Media from Storage & Upload to Cashier
+        execution_log.append("Downloading media from storage & transferring over SFTP...")
+        media_tuples = []
+        for item in items:
+            asset = media_map.get(str(item.media_asset_id))
+            if asset:
+                file_bytes = None
+                try:
+                    file_bytes = await storage_service.download_file_bytes(asset.s3_key)
+                except Exception as e:
+                    logger.warning(f"StorageService download failed for {asset.s3_key}: {e}")
 
-                    media_tuples.append((asset.stored_name, file_bytes))
+                if not file_bytes:
+                    candidate_paths = [
+                        f"/app/data/storage/{asset.s3_key}",
+                        f"/app/data/storage/media/{asset.s3_key}",
+                        f"/app/data/media/{asset.original_name}",
+                        f"/app/data/media/{asset.stored_name}",
+                        f"/app/data/{asset.s3_key}",
+                    ]
+                    for cp in candidate_paths:
+                        if os.path.exists(cp):
+                            with open(cp, "rb") as f:
+                                file_bytes = f.read()
+                            break
 
-            upload_res = await adapter.upload_media(media_tuples)
-            if not upload_res.success:
-                raise RuntimeError(f"Media transfer failed: {upload_res.error_message}")
+                if not file_bytes:
+                    raise FileNotFoundError(f"Media file '{asset.original_name}' ({asset.s3_key}) not found in S3 or local storage")
 
-            # 5. Build Scene & Capture Prior State
-            target_mode = "mode1" if block.area == "FULL_SCREEN" else "mode32"
-            active_guid = await adapter.get_active_scene_guid_for_mode(target_mode)
-            effective_guid = active_guid or ("2509359c-2d71-4344-9be4-7d90dd453083" if block.area == "FULL_SCREEN" else "68906ed2-49a3-4dc3-bb8a-6fa7943f39c3")
-            execution_log.append(f"Resolved active target scene GUID: {effective_guid} (mode: {target_mode})")
+                media_tuples.append((asset.stored_name, file_bytes))
 
-            execution_log.append("Capturing prior scenes.Raw into memory...")
-            built_scene_pre = build_guest_screen_scene(block, items, media_map, target_guid=effective_guid)
-            prior_raw = await adapter.get_current_scene_raw(built_scene_pre.scene_guid)
-            attempt.previous_scene_raw = prior_raw
-            built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw, target_guid=effective_guid)
+        upload_res = await adapter.upload_media(media_tuples)
+        if not upload_res.success:
+            raise RuntimeError(f"Media transfer failed: {upload_res.error_message}")
 
-            # 6. Surgical SQL Scene Update
-            execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
-            upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
-            if not upd_res.success:
-                # Tier 1 Surgical Rollback
-                execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
-                if prior_raw:
-                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
+        # 5. Build Scene & Capture Prior State
+        target_mode = "mode1" if block.area == "FULL_SCREEN" else "mode32"
+        active_guid = await adapter.get_active_scene_guid_for_mode(target_mode)
+        effective_guid = active_guid or ("2509359c-2d71-4344-9be4-7d90dd453083" if block.area == "FULL_SCREEN" else "68906ed2-49a3-4dc3-bb8a-6fa7943f39c3")
+        execution_log.append(f"Resolved active target scene GUID: {effective_guid} (mode: {target_mode})")
 
-            # 7. Verification Query
-            execution_log.append("Verifying written scene in gs.db...")
-            ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
-            if not ver_res.matches:
-                execution_log.append(f"Verification mismatch! Triggering Tier 1 Rollback...")
-                if prior_raw:
-                    await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
-                raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
+        execution_log.append("Capturing prior scenes.Raw into memory...")
+        built_scene_pre = build_guest_screen_scene(block, items, media_map, target_guid=effective_guid)
+        prior_raw = await adapter.get_current_scene_raw(built_scene_pre.scene_guid)
+        built_scene = build_guest_screen_scene(block, items, media_map, existing_scene_raw=prior_raw, target_guid=effective_guid)
 
-            # 8. Refresh Front
-            execution_log.append("Signaling front reload via sync_version.txt...")
-            ref_res = await adapter.refresh()
-            if ref_res.awaiting_restart:
-                final_status = "PUBLISHED_AWAITING_RESTART"
-                execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
-            else:
-                final_status = "SUCCESS"
-                execution_log.append("Front reloaded seamlessly.")
+        # 6. Surgical SQL Scene Update
+        execution_log.append(f"Executing surgical UPDATE on scenes for GUID {built_scene.scene_guid}...")
+        upd_res = await adapter.update_scene(built_scene.scene_guid, built_scene.raw_json)
+        if not upd_res.success:
+            execution_log.append(f"Update failed ({upd_res.error_message}). Triggering Tier 1 Rollback...")
+            if prior_raw:
+                await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+            raise RuntimeError(f"Scene update failed: {upd_res.error_message}")
 
-            # Record Success
-            duration_ms = int((time.perf_counter() - start_time) * 1000)
+        # 7. Verification Query
+        execution_log.append("Verifying written scene in gs.db...")
+        ver_res = await adapter.verify(built_scene.scene_guid, built_scene.raw_json)
+        if not ver_res.matches:
+            execution_log.append("Verification mismatch! Triggering Tier 1 Rollback...")
+            if prior_raw:
+                await adapter.rollback_scene(built_scene.scene_guid, prior_raw)
+            raise RuntimeError(f"Verification mismatch: {ver_res.error_message or 'Content differs'}")
+
+        # 8. Refresh Front
+        execution_log.append("Signaling front reload via sync_version.txt...")
+        ref_res = await adapter.refresh()
+        if ref_res.awaiting_restart:
+            final_status = "PUBLISHED_AWAITING_RESTART"
+            execution_log.append("Reload deferred: awaiting off-hours maintenance restart.")
+        else:
+            final_status = "SUCCESS"
+            execution_log.append("Front reloaded seamlessly.")
+
+    except Exception as e:
+        logger.error(f"Job {job_id} for cashier {cashier_name} failed: {e}")
+        execution_log.append(f"EXCEPTION: {str(e)}")
+        is_offline = isinstance(e, ConnectionError) or "connect" in str(e).lower()
+        final_status = "OFFLINE" if is_offline else "FAILED"
+        error_str = str(e)
+    finally:
+        await adapter.close()
+        if branch_sem:
+            branch_sem.release()
+        if acquired and limiter:
+            await limiter.release(branch_id_str)
+
+    duration_ms = int((time.perf_counter() - start_time) * 1000)
+
+    # =========================================================================
+    # PHASE 3: DB WRITE RESULTS & BATCH COUNTERS (Fast < 10ms hold of connection)
+    # =========================================================================
+    async with async_session_factory() as session:
+        job = await session.get(PublicationJob, job_id)
+        if job:
             job.status = final_status
-            job.error_message = None
+            job.error_message = error_str
             job.finished_at = datetime.now(timezone.utc)
+
+        attempt = await session.get(JobAttempt, attempt_id)
+        if attempt:
             attempt.status = final_status
             attempt.finished_at = datetime.now(timezone.utc)
             attempt.duration_ms = duration_ms
+            attempt.remote_backup_path = remote_bak_path
+            attempt.previous_scene_raw = prior_raw
             attempt.execution_log = "\n".join(execution_log)
 
+        cashier = await session.get(Cashier, cashier_id)
+        if cashier:
             cashier.last_seen_at = datetime.now(timezone.utc)
             cashier.last_sync_status = final_status
+            if guest_screen_ver:
+                cashier.guest_screen_version = guest_screen_ver
             if final_status in ("SUCCESS", "PUBLISHED_AWAITING_RESTART"):
-                cashier.current_content_version = job.idempotency_key
+                cashier.current_content_version = idempotency_key
                 if block.area == "FULL_SCREEN":
                     cashier.current_full_screen_block_id = block.id
                 elif block.area == "MODE32_PROMO":
                     cashier.current_mode32_block_id = block.id
 
-        except Exception as e:
-            duration_ms = int((time.perf_counter() - start_time) * 1000)
-            logger.error(f"Job {job.id} for cashier {cashier.name} failed: {e}")
-            execution_log.append(f"EXCEPTION: {str(e)}")
+        batch = await session.get(PublicationBatch, batch_id) if batch_id else None
+        if batch:
+            all_jobs_query = select(PublicationJob).where(PublicationJob.batch_id == batch.id)
+            all_jobs = (await session.exec(all_jobs_query)).all()
+            batch.total_cashiers = len(all_jobs)
+            batch.success_count = sum(1 for j in all_jobs if j.status == "SUCCESS")
+            batch.awaiting_restart_count = sum(1 for j in all_jobs if j.status == "PUBLISHED_AWAITING_RESTART")
+            batch.failed_count = sum(1 for j in all_jobs if j.status == "FAILED")
+            batch.offline_count = sum(1 for j in all_jobs if j.status == "OFFLINE")
 
-            can_retry, next_attempt = should_retry_job(job.current_attempt, job.max_attempts)
-            is_offline = isinstance(e, ConnectionError) or "connect" in str(e).lower()
-            job.status = "OFFLINE" if is_offline else "FAILED"
-            job.error_message = str(e)
-            attempt.status = job.status
-            attempt.finished_at = datetime.now(timezone.utc)
-            attempt.duration_ms = duration_ms
-            attempt.execution_log = "\n".join(execution_log)
+            pending_or_running = any(j.status in ("PENDING", "RUNNING") for j in all_jobs)
+            if not pending_or_running:
+                batch.finished_at = datetime.now(timezone.utc)
+                if batch.failed_count == 0 and batch.offline_count == 0:
+                    batch.status = "SUCCESS"
+                elif batch.success_count > 0 or batch.awaiting_restart_count > 0:
+                    batch.status = "PARTIAL"
+                else:
+                    batch.status = "FAILED"
 
-            cashier.last_sync_status = job.status
+        await session.commit()
 
-            if can_retry:
-                # Schedule retry with jittered delay
-                delay = calculate_exponential_backoff_with_jitter(job.current_attempt)
-                logger.info(f"Scheduling retry for job {job.id} in {delay:.2f}s...")
-                try:
-                    arq_pool = await create_pool(redis_settings)
-                    await arq_pool.enqueue_job("execute_cashier_job", str(job.id), _defer_by=int(delay))
-                except Exception:
-                    asyncio.get_event_loop().call_later(
-                        delay,
-                        lambda: asyncio.create_task(execute_cashier_job({"redis": None}, str(job.id)))
-                    )
-
-        finally:
-            await adapter.close()
-            if acquired and limiter:
-                await limiter.release(branch_id_str)
-
-            # Update batch counters
-            if batch:
-                all_jobs_query = select(PublicationJob).where(PublicationJob.batch_id == batch.id)
-                all_jobs = (await session.exec(all_jobs_query)).all()
-                batch.total_cashiers = len(all_jobs)
-                batch.success_count = sum(1 for j in all_jobs if j.status == "SUCCESS")
-                batch.awaiting_restart_count = sum(1 for j in all_jobs if j.status == "PUBLISHED_AWAITING_RESTART")
-                batch.failed_count = sum(1 for j in all_jobs if j.status == "FAILED")
-                batch.offline_count = sum(1 for j in all_jobs if j.status == "OFFLINE")
-
-                # Check if batch completed and set status (SUCCESS, PARTIAL, FAILED)
-                pending_or_running = any(j.status in ("PENDING", "RUNNING") for j in all_jobs)
-                if not pending_or_running:
-                    batch.finished_at = datetime.now(timezone.utc)
-                    if batch.failed_count == 0 and batch.offline_count == 0:
-                        batch.status = "SUCCESS"
-                    elif batch.success_count > 0 or batch.awaiting_restart_count > 0:
-                        batch.status = "PARTIAL"
-                    else:
-                        batch.status = "FAILED"
-
-            await session.commit()
-
-            # Publish SSE event to Redis
-            if batch and redis:
-                event_payload = {
-                    "event": "job_update",
-                    "batch_id": str(batch.id),
-                    "cashier_id": str(cashier.id),
-                    "status": job.status,
-                    "counters": {
-                        "total": batch.total_cashiers,
-                        "success": batch.success_count,
-                        "awaiting_restart": batch.awaiting_restart_count,
-                        "failed": batch.failed_count,
-                        "offline": batch.offline_count,
-                    }
+        # Publish SSE event to Redis if available
+        if batch and redis:
+            event_payload = {
+                "event": "job_update",
+                "batch_id": str(batch.id),
+                "cashier_id": str(cashier_id),
+                "status": final_status,
+                "counters": {
+                    "total": batch.total_cashiers,
+                    "success": batch.success_count,
+                    "awaiting_restart": batch.awaiting_restart_count,
+                    "failed": batch.failed_count,
+                    "offline": batch.offline_count,
                 }
+            }
+            try:
                 await redis.publish(f"batch_events:{batch.id}", json.dumps(event_payload))
+            except Exception:
+                pass
 
-            return job.status
+    return final_status
 
 
 class WorkerSettings:

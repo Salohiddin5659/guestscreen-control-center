@@ -8,7 +8,7 @@ class SystemSettings(SQLModel, table=True):
     __tablename__ = "system_settings"
 
     id: int = Field(default=1, primary_key=True)
-    worker_concurrency: int = Field(default=15)
+    worker_concurrency: int = Field(default=3)
     max_concurrent_per_branch: int = Field(default=2)
     ssh_connect_timeout_seconds: int = Field(default=10)
     ssh_command_timeout_seconds: int = Field(default=45)

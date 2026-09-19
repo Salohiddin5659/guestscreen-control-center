@@ -135,8 +135,12 @@ class PublicationOrchestrator:
 
         if not enqueued_to_redis:
             from workers.main import execute_cashier_job
-            for jid in job_ids:
-                asyncio.create_task(execute_cashier_job({"redis": None}, jid))
+            async def _staggered_dispatch(jids: List[str]):
+                for jid in jids:
+                    asyncio.create_task(execute_cashier_job({"redis": None}, jid))
+                    await asyncio.sleep(0.5)
+
+            asyncio.create_task(_staggered_dispatch(job_ids))
 
         return batch
 

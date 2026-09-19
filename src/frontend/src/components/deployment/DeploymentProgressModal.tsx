@@ -111,14 +111,14 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
       case 'RUNNING':
       case 'PENDING':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-accent-500/15 text-accent-400 border border-accent-500/30 flex items-center gap-1.5 inline-flex">
-            <Loader2 className="w-3.5 h-3.5 text-accent-400 animate-spin" />
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30 flex items-center gap-1.5 inline-flex">
+            <Loader2 className="w-3.5 h-3.5 text-teal-300 animate-spin" />
             Выполняется
           </span>
         );
       case 'OFFLINE':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-800 text-slate-400 border border-slate-700 flex items-center gap-1.5 inline-flex">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 flex items-center gap-1.5 inline-flex">
             <WifiOff className="w-3.5 h-3.5 text-slate-500" />
             Оффлайн
           </span>
@@ -139,7 +139,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         );
       default:
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-dark-750 text-slate-300">
+          <span className="px-3 py-1 rounded-full text-xs font-bold glass-surface-l2 text-slate-300">
             {job.status}
           </span>
         );
@@ -147,16 +147,16 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-dark-850 border border-dark-750 rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
         
         {/* Header */}
-        <div className="p-5 border-b border-dark-750 flex items-center justify-between">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               isFinished 
                 ? (failed > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400') 
-                : 'bg-accent-500/10 text-accent-400'
+                : 'bg-teal-500/10 text-teal-300'
             }`}>
               {isFinished ? (
                 failed > 0 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />
@@ -180,19 +180,19 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-dark-800">
+          <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress Bar & Summary Stats */}
-        <div className="p-6 border-b border-dark-750 bg-dark-900/40 space-y-4">
+        <div className="p-6 border-b border-white/[0.08] bg-black/20 space-y-4">
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-semibold">
               <span className="text-slate-300">Общий прогресс</span>
               <span className="text-white font-mono">{percent}%</span>
             </div>
-            <div className="w-full h-2.5 bg-dark-800 rounded-full overflow-hidden flex">
+            <div className="w-full h-2.5 bg-white/[0.08] rounded-full overflow-hidden flex">
               <div 
                 style={{ width: `${(success / total) * 100}%` }}
                 className="bg-emerald-500 transition-all duration-500"
@@ -214,19 +214,19 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
 
           {/* Counts row */}
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
-            <div className="bg-dark-850 border border-dark-750 p-2.5 rounded-xl">
+            <div className="glass-surface-l2 border border-white/10 p-2.5 rounded-xl">
               <span className="text-slate-400 block text-[10px]">Всего касс</span>
               <span className="font-mono font-bold text-white text-sm">{total}</span>
             </div>
-            <div className="bg-dark-850 border border-emerald-500/20 p-2.5 rounded-xl">
+            <div className="glass-surface-l2 border border-emerald-500/20 p-2.5 rounded-xl">
               <span className="text-emerald-400 block text-[10px]">Успешно</span>
               <span className="font-mono font-bold text-emerald-400 text-sm">{success}</span>
             </div>
-            <div className="bg-dark-850 border border-rose-500/20 p-2.5 rounded-xl">
+            <div className="glass-surface-l2 border border-rose-500/20 p-2.5 rounded-xl">
               <span className="text-rose-400 block text-[10px]">Ошибок</span>
               <span className="font-mono font-bold text-rose-400 text-sm">{failed}</span>
             </div>
-            <div className="bg-dark-850 border border-slate-700 p-2.5 rounded-xl">
+            <div className="glass-surface-l2 border border-white/10 p-2.5 rounded-xl">
               <span className="text-slate-400 block text-[10px]">Оффлайн</span>
               <span className="font-mono font-bold text-slate-300 text-sm">{offline}</span>
             </div>
@@ -252,18 +252,18 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
             )}
           </div>
 
-          <div className="border border-dark-750 rounded-xl overflow-hidden">
+          <div className="border border-white/10 rounded-xl overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-dark-900 border-b border-dark-750 text-slate-400 font-semibold text-[11px]">
+                <tr className="bg-black/20 border-b border-white/[0.08] text-slate-400 font-semibold text-[11px]">
                   <th className="py-2.5 px-4">Касса</th>
                   <th className="py-2.5 px-4">IP адрес</th>
                   <th className="py-2.5 px-4 text-right">Статус</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-dark-750/60 bg-dark-850/50">
+              <tbody className="divide-y divide-white/[0.05]">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-dark-800/40 transition-colors">
+                  <tr key={job.id} className="hover:bg-white/[0.03] transition-colors">
                     <td className="py-3 px-4 font-bold text-white">
                       {job.cashier_name}
                     </td>
@@ -281,15 +281,15 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-dark-750 bg-dark-900/40 flex items-center justify-between text-xs">
+        <div className="p-4 border-t border-white/[0.08] bg-black/20 flex items-center justify-between text-xs">
           <span className="text-slate-400">
-            Статус: <strong className={isFinished ? (failed > 0 ? 'text-amber-400' : 'text-emerald-400') : 'text-accent-400'}>
+            Статус: <strong className={isFinished ? (failed > 0 ? 'text-amber-400' : 'text-emerald-400') : 'text-teal-300'}>
               {isFinished ? (failed > 0 ? 'Завершено с ошибками' : 'Успешно') : 'Выполняется'}
             </strong>
           </span>
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl text-white font-bold bg-dark-800 hover:bg-dark-750 transition-colors"
+            className="glass-btn-secondary px-5 py-2 rounded-xl font-bold"
           >
             Закрыть
           </button>

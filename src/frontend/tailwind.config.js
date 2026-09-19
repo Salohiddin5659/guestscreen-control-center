@@ -32,6 +32,14 @@ export default {
           700: '#243450',
           600: '#334155',
         },
+        glass: {
+          l1: 'var(--glass-l1-bg)',
+          l2: 'var(--glass-l2-bg)',
+          l3: 'var(--glass-l3-bg)',
+          l4: 'var(--glass-l4-bg)',
+          cyan: 'rgba(169, 223, 216, 0.16)',
+          blue: 'rgba(59, 130, 246, 0.16)',
+        },
         accent: {
           50: '#EEF2FF',
           100: '#E0E7FF',
@@ -48,6 +56,27 @@ export default {
           noop: '#06b6d4',
           pending: '#8b5cf6',
         }
+      },
+      backdropBlur: {
+        xs: '4px',
+        l1: 'var(--glass-blur-l1)',
+        l2: 'var(--glass-blur-l2)',
+        l3: 'var(--glass-blur-l3)',
+        l4: 'var(--glass-blur-l4)',
+      },
+      boxShadow: {
+        'glass-l1': 'var(--glass-shadow-l1)',
+        'glass-l2': 'var(--glass-shadow-l2)',
+        'glass-l3': 'var(--glass-shadow-l3)',
+        'glass-l4': 'var(--glass-shadow-l4)',
+        'glass-rim': 'inset 0 1px 1px 0 rgba(255, 255, 255, 0.16)',
+        'glass-cyan': '0 8px 24px -4px rgba(169, 223, 216, 0.25)',
+      },
+      borderColor: {
+        'glass-subtle': 'var(--glass-border-subtle)',
+        'glass-surface': 'var(--glass-border-surface)',
+        'glass-elevated': 'var(--glass-border-elevated)',
+        'glass-specular': 'var(--glass-border-specular)',
       }
     },
   },

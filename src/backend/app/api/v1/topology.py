@@ -161,7 +161,7 @@ async def list_regions(session: AsyncSession = Depends(get_db), _: User = Depend
 async def create_region(
     req: RegionCreate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     region = Region(**req.model_dump())
     session.add(region)
@@ -176,7 +176,7 @@ async def update_region(
     region_id: UUID,
     req: RegionUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     region = await session.get(Region, region_id)
     if not region:
@@ -203,7 +203,7 @@ async def update_region(
 async def delete_region(
     region_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     region = await session.get(Region, region_id)
     if not region:
@@ -233,6 +233,7 @@ async def list_branches(
     query = select(Branch)
     if region_id:
         query = query.where(Branch.region_id == region_id)
+    query = query.order_by(Branch.name)
     return (await session.exec(query)).all()
 
 
@@ -240,7 +241,7 @@ async def list_branches(
 async def create_branch(
     req: BranchCreate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     branch = Branch(**req.model_dump())
     session.add(branch)
@@ -261,7 +262,7 @@ async def update_branch(
     branch_id: UUID,
     req: BranchUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     branch = await session.get(Branch, branch_id)
     if not branch:
@@ -295,7 +296,7 @@ async def update_branch(
 async def delete_branch(
     branch_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     branch = await session.get(Branch, branch_id)
     if not branch:
@@ -327,11 +328,12 @@ async def list_cashiers(
     session: AsyncSession = Depends(get_db),
     _: User = Depends(get_current_user)
 ):
-    query = select(Cashier)
+    query = select(Cashier).join(Branch, Cashier.branch_id == Branch.id, isouter=True)
     if branch_id:
         query = query.where(Cashier.branch_id == branch_id)
     if status_filter:
         query = query.where(Cashier.last_sync_status == status_filter)
+    query = query.order_by(Branch.name.asc(), Cashier.name.asc())
     cashiers = (await session.exec(query)).all()
 
     # Pre-fetch SSH credentials in batch
@@ -345,7 +347,7 @@ async def list_cashiers(
 async def create_cashier(
     req: CashierCreate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     # Check if branch exists
     branch = await session.get(Branch, req.branch_id)
@@ -409,7 +411,7 @@ async def update_cashier(
     cashier_id: UUID,
     req: CashierUpdate,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     cashier = await session.get(Cashier, cashier_id)
     if not cashier:
@@ -509,7 +511,7 @@ async def get_cashier(
 async def delete_cashier(
     cashier_id: UUID,
     session: AsyncSession = Depends(get_db),
-    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "SUPERVISOR"))
 ):
     cashier = await session.get(Cashier, cashier_id)
     if not cashier:

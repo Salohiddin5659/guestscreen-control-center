@@ -13,6 +13,7 @@ import { ReportsView } from './pages/ReportsView';
 import { AuditLogs } from './pages/AuditLogs';
 import { UsersView } from './pages/UsersView';
 import { SettingsPage } from './pages/Settings';
+import { WikiView } from './pages/WikiView';
 import { getAuthToken, getCurrentUserFromStorage } from './api/client';
 
 const queryClient = new QueryClient({
@@ -89,6 +90,10 @@ export const App: React.FC = () => {
               }
             />
           </Route>
+
+          {/* Standalone Separate Wiki - Hidden from main menu, accessible via direct link */}
+          <Route path="/wiki" element={<WikiView />} />
+          <Route path="/docs" element={<Navigate to="/wiki" replace />} />
 
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

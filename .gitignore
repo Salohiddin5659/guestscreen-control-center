@@ -60,6 +60,7 @@ redis_data/
 *.zip
 *.tar.gz
 *.sql
+!deploy/sql/*.sql
 *.7z
 *.rar
 Backup*/

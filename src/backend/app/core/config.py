@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     # Redis & Worker Queue
     REDIS_URL: str = "redis://redis_queue:6379/0"
-    WORKER_CONCURRENCY: int = 15
+    WORKER_CONCURRENCY: int = 3
     MAX_CONCURRENT_PER_BRANCH: int = 2
     SSH_CONNECT_TIMEOUT_SECONDS: int = 10
     SSH_COMMAND_TIMEOUT_SECONDS: int = 45

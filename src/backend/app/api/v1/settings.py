@@ -13,7 +13,7 @@ router = APIRouter(prefix="/settings", tags=["System Settings"])
 
 
 class SettingsUpdate(BaseModel):
-    worker_concurrency: int = Field(default=15, ge=5, le=30)
+    worker_concurrency: int = Field(default=3, ge=1, le=30)
     max_concurrent_per_branch: int = Field(default=2, ge=1, le=4)
     ssh_connect_timeout_seconds: int = Field(default=10, ge=3, le=60)
     ssh_command_timeout_seconds: int = Field(default=45, ge=10, le=180)

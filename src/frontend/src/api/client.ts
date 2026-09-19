@@ -423,6 +423,8 @@ export const authApi = {
 
   logout: () => {
     removeAuthToken();
+    localStorage.removeItem('gs_notifications_cleared');
+    sessionStorage.clear();
     window.location.href = '/login';
   },
 };

@@ -18,10 +18,15 @@ import {
   ChevronRight,
   ShieldCheck
 } from 'lucide-react';
-import { topologyApi, Branch, Region, Cashier } from '../api/client';
+import { topologyApi, Branch, Region, Cashier, getCurrentUserFromStorage } from '../api/client';
 
 export const RestaurantsView: React.FC = () => {
   const queryClient = useQueryClient();
+
+  const currentUser = getCurrentUserFromStorage();
+  const canManageBranches = Boolean(
+    currentUser?.role && ['ADMINISTRATOR', 'ADMIN', 'SUPERVISOR'].includes(currentUser.role.toUpperCase())
+  );
 
   const [selectedRegionId, setSelectedRegionId] = useState<string>('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -151,6 +156,7 @@ export const RestaurantsView: React.FC = () => {
   };
 
   const openAddRestaurant = (preselectedRegionId?: string) => {
+    if (!canManageBranches) return;
     resetRestForm();
     if (preselectedRegionId && preselectedRegionId !== 'ALL') {
       setRestRegionId(preselectedRegionId);
@@ -161,6 +167,7 @@ export const RestaurantsView: React.FC = () => {
   };
 
   const openEditRestaurant = (b: Branch) => {
+    if (!canManageBranches) return;
     setRestName(b.name);
     setRestRegionId(b.region_id);
     setRestCode(b.code);
@@ -170,6 +177,7 @@ export const RestaurantsView: React.FC = () => {
   };
 
   const openEditRegion = (r: Region) => {
+    if (!canManageBranches) return;
     setRegName(r.name);
     setRegCode(r.code);
     setRegError(null);
@@ -193,18 +201,20 @@ export const RestaurantsView: React.FC = () => {
 
   // Filtered branches
   const filteredBranches = useMemo(() => {
-    return branches.filter(b => {
-      if (selectedRegionId !== 'ALL' && b.region_id !== selectedRegionId) return false;
-      const q = searchQuery.toLowerCase().trim();
-      if (!q) return true;
-      const region = regionMap.get(b.region_id);
-      return (
-        b.name.toLowerCase().includes(q) ||
-        b.code.toLowerCase().includes(q) ||
-        (b.address && b.address.toLowerCase().includes(q)) ||
-        (region && region.name.toLowerCase().includes(q))
-      );
-    });
+    return branches
+      .filter(b => {
+        if (selectedRegionId !== 'ALL' && b.region_id !== selectedRegionId) return false;
+        const q = searchQuery.toLowerCase().trim();
+        if (!q) return true;
+        const region = regionMap.get(b.region_id);
+        return (
+          b.name.toLowerCase().includes(q) ||
+          b.code.toLowerCase().includes(q) ||
+          (b.address && b.address.toLowerCase().includes(q)) ||
+          (region && region.name.toLowerCase().includes(q))
+        );
+      })
+      .sort((a, b) => a.name.localeCompare(b.name, 'ru'));
   }, [branches, selectedRegionId, searchQuery, regionMap]);
 
   return (
@@ -218,48 +228,50 @@ export const RestaurantsView: React.FC = () => {
               <Building2 className="w-7 h-7 text-[#A9DFD8]" />
               <span>Рестораны и регионы</span>
             </h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#21222D] text-[#A9DFD8] border border-[#2C2D3A] flex items-center gap-1.5">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold glass-surface-l1 glass-specular-edge text-[#A9DFD8] border border-white/10 flex items-center gap-1.5 shadow-sm">
               <img src="/oqtepa_emblem.svg" className="w-3.5 h-3.5 rounded object-contain" alt="" />
               Oqtepa Lavash • {branches.length} ресторанов
             </span>
           </div>
-          <p className="text-xs text-[#87888C] mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Группировка ресторанов по регионам (Ташкент, Ташкентская область и другие), управление точками и кассами
           </p>
         </div>
 
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => {
-              setRegName('');
-              setRegCode('');
-              setRegError(null);
-              setAddRegionOpen(true);
-            }}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-[#21222D] hover:bg-[#282A37] border border-[#2C2D3A] flex items-center space-x-1.5 transition-all shadow-xl"
-          >
-            <MapPin className="w-4 h-4 text-[#A9DFD8]" />
-            <span>+ Добавить регион</span>
-          </button>
+        {canManageBranches && (
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => {
+                setRegName('');
+                setRegCode('');
+                setRegError(null);
+                setAddRegionOpen(true);
+              }}
+              className="glass-btn-secondary text-xs flex items-center space-x-1.5"
+            >
+              <MapPin className="w-4 h-4 text-[#A9DFD8]" />
+              <span>+ Добавить регион</span>
+            </button>
 
-          <button
-            onClick={() => openAddRestaurant(selectedRegionId)}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] flex items-center space-x-1.5 transition-all shadow-lg shadow-[#A9DFD8]/20"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Добавить ресторан</span>
-          </button>
-        </div>
+            <button
+              onClick={() => openAddRestaurant(selectedRegionId)}
+              className="glass-btn-primary text-xs flex items-center space-x-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>+ Добавить ресторан</span>
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Region Tabs */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-[#2C2D3A]">
+      <div className="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-white/10">
         <button
           onClick={() => setSelectedRegionId('ALL')}
           className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-2 shadow-sm ${
             selectedRegionId === 'ALL'
-              ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-md'
-              : 'bg-[#21222D] text-[#87888C] hover:text-white border border-[#2C2D3A]'
+              ? 'glass-active-capsule font-bold shadow-md'
+              : 'glass-surface-l1 text-slate-400 hover:text-white border border-white/10'
           }`}
         >
           <Layers className="w-3.5 h-3.5" />
@@ -278,8 +290,8 @@ export const RestaurantsView: React.FC = () => {
                 onClick={() => setSelectedRegionId(reg.id)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-2 shadow-sm ${
                   isSelected
-                    ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-md'
-                    : 'bg-[#21222D] text-[#87888C] hover:text-white border border-[#2C2D3A]'
+                    ? 'glass-active-capsule font-bold shadow-md'
+                    : 'glass-surface-l1 text-slate-400 hover:text-white border border-white/10'
                 }`}
               >
                 <MapPin className="w-3.5 h-3.5 opacity-70" />
@@ -290,32 +302,34 @@ export const RestaurantsView: React.FC = () => {
               </button>
 
               {/* Region quick edit icon */}
-              <button
-                onClick={(e) => { e.stopPropagation(); openEditRegion(reg); }}
-                className="ml-1 p-1 text-[#737791] hover:text-white opacity-0 group-hover:opacity-100 transition-opacity rounded"
-                title={`Редактировать регион "${reg.name}"`}
-              >
-                <Edit2 className="w-3 h-3" />
-              </button>
+              {canManageBranches && (
+                <button
+                  onClick={(e) => { e.stopPropagation(); openEditRegion(reg); }}
+                  className="ml-1 p-1 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity rounded"
+                  title={`Редактировать регион "${reg.name}"`}
+                >
+                  <Edit2 className="w-3 h-3" />
+                </button>
+              )}
             </div>
           );
         })}
       </div>
 
       {/* Filter & Search Bar */}
-      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 bg-[#21222D] p-3.5 rounded-2xl border border-[#2C2D3A] shadow-xl">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-3 glass-surface-l2 glass-specular-edge p-3.5 rounded-2xl shadow-xl">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-[#737791] absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
           <input
             type="text"
             placeholder="Поиск по ресторану, коду или адресу..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl pl-10 pr-3.5 py-2 text-xs text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8] transition-all"
+            className="glass-input pl-10 pr-3.5 py-2 text-xs"
           />
         </div>
 
-        <div className="flex items-center space-x-3 text-xs text-[#87888C] font-mono self-end sm:self-auto">
+        <div className="flex items-center space-x-3 text-xs text-slate-400 font-mono self-end sm:self-auto">
           <span>Найдено: <strong className="text-white">{filteredBranches.length}</strong></span>
           <span>•</span>
           <span>Касс: <strong className="text-[#A9DFD8]">{filteredBranches.reduce((acc, b) => acc + (cashiersByBranch.get(b.id)?.length || 0), 0)}</strong></span>
@@ -324,21 +338,23 @@ export const RestaurantsView: React.FC = () => {
 
       {/* Restaurants Grid */}
       {filteredBranches.length === 0 ? (
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-12 text-center shadow-xl">
-          <Store className="w-12 h-12 text-[#737791] mx-auto mb-3 opacity-40" />
+        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-12 text-center shadow-xl">
+          <Store className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
           <h3 className="text-sm font-bold text-white">Рестораны не найдены</h3>
-          <p className="text-xs text-[#87888C] mt-1 max-w-sm mx-auto">
+          <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
             {searchQuery 
               ? 'Ни один ресторан не совпадает с поисковым запросом'
               : 'В выбранном регионе пока нет добавленных ресторанов'}
           </p>
-          <button
-            onClick={() => openAddRestaurant(selectedRegionId)}
-            className="mt-4 px-4 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-md inline-flex items-center space-x-1.5"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Добавить ресторан</span>
-          </button>
+          {canManageBranches && (
+            <button
+              onClick={() => openAddRestaurant(selectedRegionId)}
+              className="mt-4 glass-btn-primary text-xs inline-flex items-center space-x-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Добавить ресторан</span>
+            </button>
+          )}
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -350,46 +366,48 @@ export const RestaurantsView: React.FC = () => {
             return (
               <div
                 key={branch.id}
-                className="bg-[#21222D] border border-[#2C2D3A] hover:border-[#A9DFD8]/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between transition-all group"
+                className="glass-surface-l2 glass-specular-edge hover:border-[#A9DFD8]/40 rounded-2xl p-5 shadow-xl flex flex-col justify-between transition-all duration-300 group"
               >
                 <div>
                   {/* Top Badges & Actions */}
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center space-x-1.5 flex-wrap">
                       <img src="/oqtepa_emblem.svg" className="w-4 h-4 rounded object-contain" alt="" />
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-[#171821] text-[#A9DFD8] border border-[#2C2D3A]">
+                      <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-white/5 text-[#A9DFD8] border border-white/10">
                         {branch.code}
                       </span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-[#171821] text-[#87888C] flex items-center space-x-1 border border-[#2C2D3A]">
-                        <MapPin className="w-3 h-3 text-[#737791]" />
+                      <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-white/5 text-slate-400 flex items-center space-x-1 border border-white/10">
+                        <MapPin className="w-3 h-3 text-slate-400" />
                         <span>{region?.name || 'Регион не указан'}</span>
                       </span>
                     </div>
 
-                    <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={() => openEditRestaurant(branch)}
-                        className="p-1.5 text-[#87888C] hover:text-[#A9DFD8] rounded-lg hover:bg-[#171821]"
-                        title="Редактировать"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => {
-                          if (branchCashiers.length > 0) {
-                            alert(`Невозможно удалить: к ресторану "${branch.name}" привязано ${branchCashiers.length} касс. Сначала удалите или переместите кассы.`);
-                            return;
-                          }
-                          if (window.confirm(`Удалить ресторан "${branch.name}" (${branch.code})?`)) {
-                            deleteBranchMutation.mutate(branch.id);
-                          }
-                        }}
-                        className="p-1.5 text-[#737791] hover:text-[#FF5B5B] rounded-lg hover:bg-[#FF5B5B]/15"
-                        title="Удалить"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    {canManageBranches && (
+                      <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => openEditRestaurant(branch)}
+                          className="p-1.5 text-slate-400 hover:text-[#A9DFD8] rounded-lg hover:bg-white/10 transition-colors"
+                          title="Редактировать"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                        </button>
+                        <button
+                          onClick={() => {
+                            if (branchCashiers.length > 0) {
+                              alert(`Невозможно удалить: к ресторану "${branch.name}" привязано ${branchCashiers.length} касс. Сначала удалите или переместите кассы.`);
+                              return;
+                            }
+                            if (window.confirm(`Удалить ресторан "${branch.name}" (${branch.code})?`)) {
+                              deleteBranchMutation.mutate(branch.id);
+                            }
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-rose-400 rounded-lg hover:bg-rose-500/15 transition-colors"
+                          title="Удалить"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    )}
                   </div>
 
                   {/* Title */}
@@ -398,20 +416,20 @@ export const RestaurantsView: React.FC = () => {
                   </h3>
 
                   {/* Address */}
-                  <p className="text-xs text-[#87888C] mt-1 min-h-[32px] line-clamp-2">
+                  <p className="text-xs text-slate-400 mt-1 min-h-[32px] line-clamp-2">
                     {branch.address || 'Адрес не указан'}
                   </p>
                 </div>
 
                 {/* Cashiers Fleet Footer */}
-                <div className="mt-4 pt-3 border-t border-[#2C2D3A]/60 flex items-center justify-between">
+                <div className="mt-4 pt-3 border-t border-white/[0.08] flex items-center justify-between">
                   <div className="flex items-center space-x-2">
-                    <Monitor className="w-4 h-4 text-[#737791]" />
-                    <span className="text-xs font-bold text-gray-200">
+                    <Monitor className="w-4 h-4 text-slate-400" />
+                    <span className="text-xs font-bold text-slate-200">
                       {branchCashiers.length} касс
                     </span>
                     {branchCashiers.length > 0 && (
-                      <span className="text-[10px] font-mono text-[#05C168] bg-[#05C168]/15 border border-[#05C168]/30 px-1.5 py-0.5 rounded font-bold">
+                      <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-1.5 py-0.5 rounded font-bold shadow-[0_0_8px_rgba(16,185,129,0.15)]">
                         {onlineCashiers} онлайн
                       </span>
                     )}
@@ -422,13 +440,13 @@ export const RestaurantsView: React.FC = () => {
                       <span
                         key={c.id}
                         className={`w-2 h-2 rounded-full ${
-                          (c.last_sync_status === 'SUCCESS' || c.last_sync_status === 'ONLINE') ? 'bg-[#05C168]' : 'bg-gray-600'
+                          (c.last_sync_status === 'SUCCESS' || c.last_sync_status === 'ONLINE') ? 'bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.4)]' : 'bg-slate-600'
                         }`}
                         title={`${c.name} (${c.ip_address}): ${c.last_sync_status}`}
                       />
                     ))}
                     {branchCashiers.length > 3 && (
-                      <span className="text-[9px] text-[#737791] font-mono">+{branchCashiers.length - 3}</span>
+                      <span className="text-[9px] text-slate-400 font-mono">+{branchCashiers.length - 3}</span>
                     )}
                   </div>
                 </div>
@@ -439,18 +457,18 @@ export const RestaurantsView: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: Добавить / Изменить ресторан */}
+      {/* MODAL: Добавить / Изменить ресторан (Liquid Glass Level 4) */}
       {(addRestaurantOpen || editRestaurant) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-[#2C2D3A] flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">
                 <Store className="w-4 h-4 text-[#A9DFD8]" />
                 <span>{editRestaurant ? 'Редактировать ресторан' : 'Новый ресторан'}</span>
               </h3>
               <button 
                 onClick={() => { setAddRestaurantOpen(false); setEditRestaurant(null); }}
-                className="text-[#87888C] hover:text-white"
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -485,73 +503,73 @@ export const RestaurantsView: React.FC = () => {
               className="p-5 space-y-4 text-xs"
             >
               {formError && (
-                <div className="p-3 bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 rounded-xl text-rose-300 text-xs flex items-center space-x-2">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-[#FF5B5B]" />
+                <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center space-x-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
                   <span>{formError}</span>
                 </div>
               )}
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Название ресторана / филиала *</label>
+                <label className="text-slate-300 block mb-1 font-bold">Название ресторана / филиала *</label>
                 <input
                   type="text"
                   placeholder="Например: Ресторан Юнусабад"
                   value={restName}
                   onChange={(e) => handleNameChange(e.target.value)}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8] font-medium"
+                  className="glass-input text-xs font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Регион (Область) *</label>
+                <label className="text-slate-300 block mb-1 font-bold">Регион (Область) *</label>
                 <select
                   value={restRegionId}
                   onChange={(e) => setRestRegionId(e.target.value)}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white focus:outline-none focus:border-[#A9DFD8] font-medium"
+                  className="glass-input text-xs font-medium"
                   required
                 >
                   {regions.map(r => (
-                    <option key={r.id} value={r.id}>{r.name} ({r.code})</option>
+                    <option key={r.id} value={r.id} className="bg-slate-900 text-white">{r.name} ({r.code})</option>
                   ))}
                 </select>
               </div>
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Код ресторана (для интеграций) *</label>
+                <label className="text-slate-300 block mb-1 font-bold">Код ресторана (для интеграций) *</label>
                 <input
                   type="text"
                   placeholder="YUNUSABAD"
                   value={restCode}
                   onChange={(e) => setRestCode(e.target.value.toUpperCase())}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                  className="glass-input font-mono text-xs"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Адрес ресторана</label>
+                <label className="text-slate-300 block mb-1 font-bold">Адрес ресторана</label>
                 <input
                   type="text"
                   placeholder="г. Ташкент, Юнусабадский район, кв-л 14"
                   value={restAddress}
                   onChange={(e) => setRestAddress(e.target.value)}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                  className="glass-input text-xs"
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-end space-x-2 border-t border-[#2C2D3A]">
+              <div className="pt-4 flex items-center justify-end space-x-2 border-t border-white/10">
                 <button
                   type="button"
                   onClick={() => { setAddRestaurantOpen(false); setEditRestaurant(null); }}
-                  className="px-4 py-2.5 rounded-xl text-white hover:text-white bg-[#171821] border border-[#2C2D3A] hover:bg-[#282A37] font-semibold"
+                  className="glass-btn-secondary text-xs"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={createBranchMutation.isPending || updateBranchMutation.isPending}
-                  className="px-5 py-2.5 rounded-xl text-[#171821] font-bold bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-md shadow-[#A9DFD8]/20 disabled:opacity-50"
+                  className="glass-btn-primary text-xs"
                 >
                   {createBranchMutation.isPending || updateBranchMutation.isPending ? 'Сохранение...' : (editRestaurant ? 'Сохранить изменения' : 'Создать ресторан')}
                 </button>
@@ -561,18 +579,18 @@ export const RestaurantsView: React.FC = () => {
         </div>
       )}
 
-      {/* MODAL: Добавить / Изменить регион */}
+      {/* MODAL: Добавить / Изменить регион (Liquid Glass Level 4) */}
       {(addRegionOpen || editRegion) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl w-full max-w-md overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-[#2C2D3A] flex items-center justify-between">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-[#A9DFD8]" />
                 <span>{editRegion ? 'Редактировать регион' : 'Новый регион'}</span>
               </h3>
               <button 
                 onClick={() => { setAddRegionOpen(false); setEditRegion(null); }}
-                className="text-[#87888C] hover:text-white"
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -603,14 +621,14 @@ export const RestaurantsView: React.FC = () => {
               className="p-5 space-y-4 text-xs"
             >
               {regError && (
-                <div className="p-3 bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 rounded-xl text-rose-300 text-xs flex items-center space-x-2">
-                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-[#FF5B5B]" />
+                <div className="p-3 bg-rose-500/15 border border-rose-500/30 rounded-xl text-rose-300 text-xs flex items-center space-x-2">
+                  <AlertTriangle className="w-4 h-4 flex-shrink-0 text-rose-400" />
                   <span>{regError}</span>
                 </div>
               )}
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Название региона (Области) *</label>
+                <label className="text-slate-300 block mb-1 font-bold">Название региона (Области) *</label>
                 <input
                   type="text"
                   placeholder="Например: Бухарская область"
@@ -622,24 +640,24 @@ export const RestaurantsView: React.FC = () => {
                       setRegCode(code);
                     }
                   }}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8] font-medium"
+                  className="glass-input text-xs font-medium"
                   required
                 />
               </div>
 
               <div>
-                <label className="text-[#87888C] block mb-1 font-bold">Код региона *</label>
+                <label className="text-slate-300 block mb-1 font-bold">Код региона *</label>
                 <input
                   type="text"
                   placeholder="BUK"
                   value={regCode}
                   onChange={(e) => setRegCode(e.target.value.toUpperCase())}
-                  className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                  className="glass-input font-mono text-xs"
                   required
                 />
               </div>
 
-              <div className="pt-3 flex items-center justify-between border-t border-[#2C2D3A]">
+              <div className="pt-4 flex items-center justify-between border-t border-white/10">
                 {editRegion ? (
                   <button
                     type="button"
@@ -654,7 +672,7 @@ export const RestaurantsView: React.FC = () => {
                         setEditRegion(null);
                       }
                     }}
-                    className="px-3 py-2 text-[#FF5B5B] hover:bg-[#FF5B5B]/15 rounded-xl font-semibold transition-colors"
+                    className="px-3 py-2 text-rose-400 hover:bg-rose-500/15 rounded-xl font-semibold transition-colors"
                   >
                     Удалить регион
                   </button>
@@ -664,14 +682,14 @@ export const RestaurantsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => { setAddRegionOpen(false); setEditRegion(null); }}
-                    className="px-4 py-2.5 rounded-xl text-white hover:text-white bg-[#171821] border border-[#2C2D3A] hover:bg-[#282A37] font-semibold"
+                    className="glass-btn-secondary text-xs"
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
                     disabled={createRegionMutation.isPending || updateRegionMutation.isPending}
-                    className="px-5 py-2.5 rounded-xl text-[#171821] font-bold bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-md shadow-[#A9DFD8]/20 disabled:opacity-50"
+                    className="glass-btn-primary text-xs"
                   >
                     {createRegionMutation.isPending || updateRegionMutation.isPending ? 'Сохранение...' : (editRegion ? 'Сохранить' : 'Создать регион')}
                   </button>

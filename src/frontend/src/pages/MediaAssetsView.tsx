@@ -30,25 +30,25 @@ const MediaCardThumbnail: React.FC<{
   return (
     <div
       onClick={onPreview}
-      className="aspect-[4/3] bg-[#171821] rounded-xl overflow-hidden relative cursor-pointer flex items-center justify-center mb-2.5 border border-[#2C2D3A] hover:border-[#A9DFD8] transition-all select-none group"
+      className="aspect-[4/3] bg-white/5 rounded-xl overflow-hidden relative cursor-pointer flex items-center justify-center mb-2.5 border border-white/10 hover:border-[#A9DFD8]/60 transition-all duration-300 select-none group shadow-inner"
     >
       {isVideo ? (
-        <div className="flex flex-col items-center justify-center text-[#87888C] p-2">
-          <div className="w-10 h-10 rounded-full bg-[#21222D] text-[#A9DFD8] border border-[#2C2D3A] flex items-center justify-center mb-1.5 shadow-sm">
+        <div className="flex flex-col items-center justify-center text-slate-400 p-2">
+          <div className="w-10 h-10 rounded-full glass-surface-l1 text-[#A9DFD8] border border-white/10 flex items-center justify-center mb-1.5 shadow-sm">
             <Film className="w-5 h-5" />
           </div>
-          <span className="text-[10px] font-mono font-bold text-gray-300">MP4 VIDEO</span>
+          <span className="text-[10px] font-mono font-bold text-slate-300">MP4 VIDEO</span>
         </div>
       ) : hasError ? (
-        <div className="flex flex-col items-center justify-center text-[#737791] p-2 text-center">
-          <ImageIcon className="w-7 h-7 text-[#737791] mb-1" />
-          <span className="text-[9px] text-[#87888C] font-medium">Ошибка загрузки</span>
+        <div className="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+          <ImageIcon className="w-7 h-7 text-slate-500 mb-1" />
+          <span className="text-[9px] text-slate-400 font-medium">Ошибка загрузки</span>
         </div>
       ) : (
         <>
           {!loaded && (
-            <div className="absolute inset-0 bg-[#171821] animate-pulse flex items-center justify-center z-10">
-              <Loader2 className="w-4 h-4 text-[#737791] animate-spin" />
+            <div className="absolute inset-0 bg-white/5 animate-pulse flex items-center justify-center z-10">
+              <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
             </div>
           )}
           <img
@@ -70,12 +70,12 @@ const MediaCardThumbnail: React.FC<{
       {/* Aspect Ratio Badge */}
       <div className="absolute top-2 left-2 flex gap-1 z-20 pointer-events-none">
         {isFull && (
-          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[#05C168] text-[#171821] shadow-sm">
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-emerald-400 text-black shadow-sm">
             FULL 4:3
           </span>
         )}
         {isPromo && (
-          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[#A9DFD8] text-[#171821] shadow-sm">
+          <span className="px-2 py-0.5 rounded-md text-[9px] font-mono font-bold bg-[#A9DFD8] text-black shadow-sm">
             50/50 2:3
           </span>
         )}
@@ -205,11 +205,11 @@ export const MediaAssetsView: React.FC = () => {
         <div>
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-black text-white tracking-tight">Медиатека</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#21222D] text-[#A9DFD8] border border-[#2C2D3A]">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold glass-surface-l1 glass-specular-edge text-[#A9DFD8] border border-white/10 shadow-sm">
               {mediaList.length} файлов
             </span>
           </div>
-          <p className="text-xs text-[#87888C] mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Хранилище рекламных баннеров и видеороликов, валидация разрешений (1024×768, 512×768) и контроль SHA-256
           </p>
         </div>
@@ -226,11 +226,11 @@ export const MediaAssetsView: React.FC = () => {
           <button
             onClick={() => fileInputRef.current?.click()}
             disabled={uploading}
-            className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-lg shadow-[#A9DFD8]/20 flex items-center space-x-2 transition-all disabled:opacity-50"
+            className="glass-btn-primary text-xs flex items-center space-x-2 shadow-lg shadow-[#A9DFD8]/20"
           >
             {uploading ? (
               <>
-                <Loader2 className="w-4 h-4 animate-spin text-[#171821]" />
+                <Loader2 className="w-4 h-4 animate-spin text-slate-900" />
                 <span>Загрузка файлов...</span>
               </>
             ) : (
@@ -245,40 +245,40 @@ export const MediaAssetsView: React.FC = () => {
 
       {/* Upload Alerts */}
       {uploadError && (
-        <div className="p-4 rounded-xl bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 text-rose-300 text-xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-rose-500/15 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between shadow-lg">
           <div className="flex items-center space-x-2">
-            <AlertTriangle className="w-4 h-4 text-[#FF5B5B] flex-shrink-0" />
+            <AlertTriangle className="w-4 h-4 text-rose-400 flex-shrink-0" />
             <span>{uploadError}</span>
           </div>
-          <button onClick={() => setUploadError(null)} className="text-[#87888C] hover:text-white">✕</button>
+          <button onClick={() => setUploadError(null)} className="text-slate-400 hover:text-white p-1">✕</button>
         </div>
       )}
 
       {uploadSuccessCount !== null && (
-        <div className="p-4 rounded-xl bg-[#05C168]/15 border border-[#05C168]/30 text-emerald-300 text-xs flex items-center justify-between">
+        <div className="p-4 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between shadow-lg">
           <div className="flex items-center space-x-2">
-            <CheckCircle2 className="w-4 h-4 text-[#05C168]" />
+            <CheckCircle2 className="w-4 h-4 text-emerald-400" />
             <span>Успешно загружено файлов: {uploadSuccessCount}. SHA-256 хеши проверены и зарегистрированы в библиотеке.</span>
           </div>
-          <button onClick={() => setUploadSuccessCount(null)} className="text-[#87888C] hover:text-white">✕</button>
+          <button onClick={() => setUploadSuccessCount(null)} className="text-slate-400 hover:text-white p-1">✕</button>
         </div>
       )}
 
       {/* Toolbar: Search and Filter Tabs */}
-      <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-xl">
+      <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-xl">
         <div className="relative min-w-[280px]">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#737791]" />
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Поиск по названию файла или SHA-256..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl pl-10 pr-3.5 py-2 text-xs text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8] transition-all"
+            className="glass-input pl-10 pr-3.5 py-2 text-xs"
           />
         </div>
 
         {/* Filter Buttons */}
-        <div className="flex items-center bg-[#171821] p-1 rounded-xl text-xs overflow-x-auto border border-[#2C2D3A]">
+        <div className="flex items-center bg-white/5 p-1 rounded-xl text-xs overflow-x-auto border border-white/10">
           {[
             { id: 'ALL', label: 'Все файлы' },
             { id: 'IMAGE', label: 'Изображения' },
@@ -291,8 +291,8 @@ export const MediaAssetsView: React.FC = () => {
               onClick={() => setFilterType(tab.id as any)}
               className={`px-3.5 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap ${
                 filterType === tab.id 
-                  ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-sm' 
-                  : 'text-[#87888C] hover:text-white'
+                  ? 'glass-active-capsule font-bold shadow-sm' 
+                  : 'text-slate-400 hover:text-white'
               }`}
             >
               {tab.label}
@@ -303,14 +303,14 @@ export const MediaAssetsView: React.FC = () => {
 
       {/* Media Grid */}
       {isLoading ? (
-        <div className="text-center py-16 text-[#737791] text-xs">
+        <div className="text-center py-16 text-slate-400 text-xs">
           Загрузка медиатеки...
         </div>
       ) : filteredMedia.length === 0 ? (
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-12 text-center shadow-xl">
-          <ImageIcon className="w-12 h-12 text-[#737791] mx-auto mb-3 opacity-40" />
+        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-12 text-center shadow-xl">
+          <ImageIcon className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
           <h3 className="text-base font-bold text-white mb-1">Медиафайлы не найдены</h3>
-          <p className="text-xs text-[#87888C] max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             {searchQuery 
               ? 'По вашему запросу ничего не найдено.' 
               : 'В медиатеке пока нет файлов. Нажмите "Загрузить медиа", чтобы добавить изображения или видео.'}
@@ -322,7 +322,7 @@ export const MediaAssetsView: React.FC = () => {
             return (
               <div 
                 key={m.id}
-                className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-3 flex flex-col justify-between hover:border-[#A9DFD8]/50 hover:shadow-xl transition-all group"
+                className="glass-surface-l2 glass-specular-edge rounded-2xl p-3 flex flex-col justify-between hover:border-[#A9DFD8]/50 hover:shadow-xl transition-all duration-300 group"
               >
                 <div>
                   <MediaCardThumbnail asset={m} onPreview={() => handleOpenPreview(m)} />
@@ -330,28 +330,28 @@ export const MediaAssetsView: React.FC = () => {
                   {/* Title & Info */}
                   <h4 
                     onClick={() => handleOpenPreview(m)}
-                    className="font-bold text-white text-xs truncate hover:text-[#A9DFD8] cursor-pointer"
+                    className="font-bold text-white text-xs truncate hover:text-[#A9DFD8] transition-colors cursor-pointer"
                     title={m.original_name}
                   >
                     {m.original_name}
                   </h4>
 
-                  <div className="flex items-center justify-between text-[10px] text-[#87888C] font-mono mt-1">
+                  <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono mt-1">
                     <span>{m.width}×{m.height}</span>
                     <span>{formatFileSize(m.file_size_bytes ?? m.size_bytes)}</span>
                   </div>
                 </div>
 
                 {/* Actions Row */}
-                <div className="pt-2.5 mt-2.5 border-t border-[#2C2D3A]/60 flex items-center justify-between">
-                  <span className="text-[9px] text-[#737791] font-mono truncate max-w-[80px]" title={m.sha256}>
+                <div className="pt-2.5 mt-2.5 border-t border-white/[0.08] flex items-center justify-between">
+                  <span className="text-[9px] text-slate-400 font-mono truncate max-w-[80px]" title={m.sha256}>
                     {m.sha256.substring(0, 8)}...
                   </span>
 
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => handleOpenPreview(m)}
-                      className="p-1.5 text-[#87888C] hover:text-[#A9DFD8] hover:bg-[#171821] rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-[#A9DFD8] hover:bg-white/10 rounded-lg transition-colors"
                       title="Просмотр"
                     >
                       <Eye className="w-3.5 h-3.5" />
@@ -362,7 +362,7 @@ export const MediaAssetsView: React.FC = () => {
                           deleteMutation.mutate({ id: m.id });
                         }
                       }}
-                      className="p-1.5 text-[#737791] hover:text-[#FF5B5B] hover:bg-[#FF5B5B]/15 rounded-lg transition-colors"
+                      className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/15 rounded-lg transition-colors"
                       title="Удалить"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -376,18 +376,18 @@ export const MediaAssetsView: React.FC = () => {
         </div>
       )}
 
-      {/* Media Detail & Inspection Modal */}
+      {/* Media Detail & Inspection Modal (Liquid Glass Level 4) */}
       {previewMedia && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
             
-            <div className="p-4 border-b border-[#2C2D3A] flex items-center justify-between">
+            <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm truncate max-w-md">
                 {previewMedia.original_name}
               </h3>
               <button 
                 onClick={() => { setPreviewMedia(null); setMediaUsage(null); }}
-                className="text-[#87888C] hover:text-white p-1 rounded-lg hover:bg-[#171821]"
+                className="text-slate-400 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -396,7 +396,7 @@ export const MediaAssetsView: React.FC = () => {
             <div className="p-6 overflow-y-auto space-y-4 text-xs">
               
               {/* Media Preview Box */}
-              <div className="w-full min-h-56 max-h-80 bg-[#171821] rounded-xl border border-[#2C2D3A] overflow-hidden flex items-center justify-center relative">
+              <div className="w-full min-h-56 max-h-80 bg-white/5 rounded-2xl border border-white/10 overflow-hidden flex items-center justify-center relative shadow-inner">
                 {previewMedia.media_type === 'VIDEO' ? (
                   <video 
                     src={mediaApi.getFileUrl(previewMedia.id)}
@@ -415,20 +415,20 @@ export const MediaAssetsView: React.FC = () => {
 
               {/* Technical Details Grid */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-[#171821] p-2.5 rounded-xl border border-[#2C2D3A]">
-                  <span className="text-[#87888C] text-[10px] block font-medium">Разрешение</span>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <span className="text-slate-400 text-[10px] block font-medium">Разрешение</span>
                   <span className="text-white font-mono font-bold text-xs">{previewMedia.width} × {previewMedia.height}</span>
                 </div>
-                <div className="bg-[#171821] p-2.5 rounded-xl border border-[#2C2D3A]">
-                  <span className="text-[#87888C] text-[10px] block font-medium">Размер файла</span>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <span className="text-slate-400 text-[10px] block font-medium">Размер файла</span>
                   <span className="text-white font-mono font-bold text-xs">{formatFileSize(previewMedia.file_size_bytes ?? previewMedia.size_bytes)}</span>
                 </div>
-                <div className="bg-[#171821] p-2.5 rounded-xl border border-[#2C2D3A]">
-                  <span className="text-[#87888C] text-[10px] block font-medium">MIME-тип</span>
-                  <span className="text-gray-300 font-mono text-xs">{previewMedia.mime_type}</span>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <span className="text-slate-400 text-[10px] block font-medium">MIME-тип</span>
+                  <span className="text-slate-200 font-mono text-xs">{previewMedia.mime_type}</span>
                 </div>
-                <div className="bg-[#171821] p-2.5 rounded-xl border border-[#2C2D3A]">
-                  <span className="text-[#87888C] text-[10px] block font-medium">Используется</span>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/10">
+                  <span className="text-slate-400 text-[10px] block font-medium">Используется</span>
                   <span className="text-[#A9DFD8] font-bold text-xs font-mono">
                     {mediaUsage ? `${mediaUsage.usage_count} блоков` : 'Загрузка...'}
                   </span>
@@ -436,17 +436,17 @@ export const MediaAssetsView: React.FC = () => {
               </div>
 
               {/* SHA-256 Checksum Card */}
-              <div className="bg-[#171821] p-3 rounded-xl border border-[#2C2D3A] space-y-1">
-                <span className="text-[#87888C] text-[11px] block font-medium">Контрольная сумма SHA-256:</span>
-                <div className="flex items-center justify-between">
+              <div className="bg-white/5 p-3.5 rounded-2xl border border-white/10 space-y-1.5">
+                <span className="text-slate-400 text-[11px] block font-medium">Контрольная сумма SHA-256:</span>
+                <div className="flex items-center justify-between gap-2">
                   <code className="text-[#A9DFD8] font-mono text-[11px] break-all select-all">
                     {previewMedia.sha256}
                   </code>
                   <button
                     onClick={() => copyHash(previewMedia.sha256)}
-                    className="p-1.5 bg-[#21222D] border border-[#2C2D3A] hover:bg-[#282A37] rounded-lg text-gray-300 flex items-center space-x-1 ml-2 flex-shrink-0"
+                    className="p-1.5 bg-white/10 border border-white/15 hover:bg-white/20 rounded-lg text-slate-200 flex items-center space-x-1 flex-shrink-0 transition-colors"
                   >
-                    {copiedHash === previewMedia.sha256 ? <Check className="w-3.5 h-3.5 text-[#05C168]" /> : <Copy className="w-3.5 h-3.5" />}
+                    {copiedHash === previewMedia.sha256 ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
                   </button>
                 </div>
               </div>
@@ -457,11 +457,11 @@ export const MediaAssetsView: React.FC = () => {
                   <span className="font-semibold text-white block">Рекламные шаблоны, использующие этот файл:</span>
                   <div className="space-y-1.5 max-h-32 overflow-y-auto">
                     {mediaUsage.templates.map((tmpl) => (
-                      <div key={tmpl.id} className="p-2 bg-[#171821] border border-[#2C2D3A] rounded-lg flex items-center justify-between">
+                      <div key={tmpl.id} className="p-2.5 bg-white/5 border border-white/10 rounded-xl flex items-center justify-between">
                         <span className="font-medium text-white">{tmpl.name}</span>
                         <div className="flex items-center space-x-2">
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#21222D] text-[#87888C] border border-[#2C2D3A]">{tmpl.area}</span>
-                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#A9DFD8]/20 text-[#A9DFD8] font-semibold">{tmpl.display_mode}</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10">{tmpl.area}</span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-[#A9DFD8]/20 text-[#A9DFD8] font-semibold">{tmpl.display_mode}</span>
                         </div>
                       </div>
                     ))}
@@ -471,21 +471,21 @@ export const MediaAssetsView: React.FC = () => {
 
             </div>
 
-            <div className="p-4 border-t border-[#2C2D3A] bg-[#1A1C26] flex items-center justify-between">
+            <div className="p-4 border-t border-white/10 bg-white/[0.02] flex items-center justify-between">
               <button
                 onClick={() => {
                   if (window.confirm(`Удалить файл "${previewMedia.original_name}"?`)) {
                     deleteMutation.mutate({ id: previewMedia.id });
                   }
                 }}
-                className="px-4 py-2 rounded-xl text-[#FF5B5B] hover:bg-[#FF5B5B]/15 font-semibold border border-[#FF5B5B]/30 transition-colors"
+                className="glass-btn-danger text-xs"
               >
                 Удалить файл
               </button>
 
               <button
                 onClick={() => { setPreviewMedia(null); setMediaUsage(null); }}
-                className="px-5 py-2 rounded-xl text-white font-semibold bg-[#171821] border border-[#2C2D3A] hover:bg-[#282A37] transition-colors"
+                className="glass-btn-secondary text-xs"
               >
                 Закрыть
               </button>

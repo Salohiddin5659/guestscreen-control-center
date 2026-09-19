@@ -79,17 +79,17 @@ export const SettingsPage: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <Sliders className="w-6 h-6 text-[#A9DFD8]" />
+          <Sliders className="w-6 h-6 text-teal-300" />
           Параметры и настройки
         </h1>
-        <p className="text-xs text-[#87888C] mt-1">
+        <p className="text-xs text-slate-400 mt-1">
           Конфигурация параллелизма оркестратора публикаций, таймаутов SSH/SFTP и политик ротации
         </p>
       </div>
 
       {savedToast && (
-        <div className="p-4 rounded-xl bg-[#05C168]/15 border border-[#05C168]/30 text-[#05C168] flex items-center space-x-2">
-          <CheckCircle2 className="w-4 h-4 text-[#05C168]" />
+        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
           <span>Системные настройки успешно сохранены в базе данных и применены к рабочему пулу.</span>
         </div>
       )}
@@ -97,9 +97,9 @@ export const SettingsPage: React.FC = () => {
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Concurrency and Worker Pool */}
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#2C2D3A] pb-3">
-            <div className="w-8 h-8 rounded-lg bg-[#A9DFD8]/10 text-[#A9DFD8] flex items-center justify-center">
+        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-300 flex items-center justify-center">
               <Cpu className="w-4 h-4" />
             </div>
             <span>Оркестратор параллельной доставки (Worker Pool)</span>
@@ -110,13 +110,13 @@ export const SettingsPage: React.FC = () => {
               <label className="text-white block mb-1 font-semibold">Общий пул воркеров (Worker Concurrency)</label>
               <input
                 type="number"
-                min={5}
+                min={1}
                 max={30}
                 value={workerConcurrency}
                 onChange={(e) => setWorkerConcurrency(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
-              <span className="text-[11px] text-[#87888C] mt-1 block">Максимум одновременных задач деплоя в кластере (5-30)</span>
+              <span className="text-[11px] text-slate-400 mt-1 block">Одновременных касс при публикации (рекомендуется 2-4)</span>
             </div>
 
             <div>
@@ -127,17 +127,17 @@ export const SettingsPage: React.FC = () => {
                 max={4}
                 value={maxConcurrentPerBranch}
                 onChange={(e) => setMaxConcurrentPerBranch(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
-              <span className="text-[11px] text-[#87888C] mt-1 block">Защита от перегрузки локальной сети филиала (1-4)</span>
+              <span className="text-[11px] text-slate-500 mt-1 block">Защита от перегрузки локальной сети филиала (1-4)</span>
             </div>
           </div>
         </div>
 
         {/* SSH and Network Timeouts */}
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#2C2D3A] pb-3">
-            <div className="w-8 h-8 rounded-lg bg-[#05C168]/15 text-[#05C168] flex items-center justify-center">
+        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
               <Server className="w-4 h-4" />
             </div>
             <span>Сетевые протоколы и таймауты SSH / SFTP</span>
@@ -152,7 +152,7 @@ export const SettingsPage: React.FC = () => {
                 max={60}
                 value={sshConnectTimeout}
                 onChange={(e) => setSshConnectTimeout(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
             </div>
 
@@ -164,7 +164,7 @@ export const SettingsPage: React.FC = () => {
                 max={180}
                 value={sshCommandTimeout}
                 onChange={(e) => setSshCommandTimeout(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
             </div>
 
@@ -176,16 +176,16 @@ export const SettingsPage: React.FC = () => {
                 max={300}
                 value={sftpTimeout}
                 onChange={(e) => setSftpTimeout(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
             </div>
           </div>
         </div>
 
         {/* Storage Retention & Backup */}
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#2C2D3A] pb-3">
-            <div className="w-8 h-8 rounded-lg bg-[#FFB648]/15 text-[#FFB648] flex items-center justify-center">
+        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
               <HardDrive className="w-4 h-4" />
             </div>
             <span>Хранилище MinIO и политики резервного копирования</span>
@@ -200,9 +200,9 @@ export const SettingsPage: React.FC = () => {
                 max={365}
                 value={minioRetention}
                 onChange={(e) => setMinioRetention(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
-              <span className="text-[11px] text-[#87888C] mt-1 block">Автоматический Garbage Collector удаляет неиспользуемые объекты</span>
+              <span className="text-[11px] text-slate-500 mt-1 block">Автоматический Garbage Collector удаляет неиспользуемые объекты</span>
             </div>
 
             <div>
@@ -213,9 +213,9 @@ export const SettingsPage: React.FC = () => {
                 max={90}
                 value={backupRetention}
                 onChange={(e) => setBackupRetention(Number(e.target.value))}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl p-2.5 text-white font-mono focus:border-[#A9DFD8] focus:outline-none transition-all"
+                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
               />
-              <span className="text-[11px] text-[#87888C] mt-1 block">Ротация контрольных снимков gs.db</span>
+              <span className="text-[11px] text-slate-500 mt-1 block">Ротация контрольных снимков gs.db</span>
             </div>
           </div>
         </div>
@@ -225,7 +225,7 @@ export const SettingsPage: React.FC = () => {
           <button
             type="submit"
             disabled={updateMutation.isPending}
-            className="px-6 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8fd0c8] shadow-lg shadow-[#A9DFD8]/20 flex items-center space-x-2 transition-all disabled:opacity-50"
+            className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
             <span>{updateMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}</span>

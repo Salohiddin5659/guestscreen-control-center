@@ -371,13 +371,13 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-      <div className="bg-dark-850 border border-dark-750 rounded-2xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-scale-up">
         
         {/* Header */}
-        <div className="p-5 border-b border-dark-750 flex items-center justify-between">
+        <div className="p-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-accent-500/10 text-accent-400 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-teal-500/10 text-teal-300 flex items-center justify-center">
               <Layers className="w-5 h-5" />
             </div>
             <div>
@@ -392,12 +392,12 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
 
           <div className="flex items-center space-x-3">
             {/* Step Navigation Tabs */}
-            <div className="flex bg-dark-900 border border-dark-750 rounded-xl p-1 text-xs">
+            <div className="flex glass-surface-l2 border border-white/10 rounded-xl p-1 text-xs">
               <button
                 type="button"
                 onClick={() => setStep(1)}
                 className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                  step === 1 ? 'bg-accent-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                  step === 1 ? 'bg-teal-500 text-white font-bold' : 'text-slate-400 hover:text-white'
                 }`}
               >
                 1. Шаблон и слайды
@@ -424,7 +424,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
               </button>
             </div>
 
-            <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-dark-800">
+            <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -449,9 +449,9 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
             <div className="space-y-6">
 
               {/* Existing Template Picker / Switcher */}
-              <div className="p-3.5 bg-dark-900/90 border border-dark-750 rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+              <div className="p-3.5 glass-surface-l3 border border-white/[0.08] rounded-xl flex flex-col md:flex-row md:items-center justify-between gap-3">
                 <div className="flex items-center space-x-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-teal-500/15 text-teal-300 flex items-center justify-center flex-shrink-0">
                     <Layers className="w-4 h-4" />
                   </div>
                   <div>
@@ -471,7 +471,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                   <select
                     value={currentBlock?.id || ''}
                     onChange={(e) => handleSelectExistingTemplate(e.target.value)}
-                    className="bg-dark-800 border border-dark-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-accent-500 max-w-[280px]"
+                    className="glass-input px-3 py-1.5 text-xs text-white focus:outline-none max-w-[280px]"
                   >
                     <option value="">+ Создать новый шаблон с нуля</option>
                     {availableBlocks.map((b) => (
@@ -492,7 +492,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     value={templateName}
                     onChange={(e) => setTemplateName(e.target.value)}
                     placeholder="например: Осеннее промо 2026"
-                    className="w-full bg-dark-900 border border-dark-750 rounded-xl p-2.5 text-white font-medium focus:outline-none focus:border-accent-500"
+                    className="glass-input w-full p-2.5 text-white font-medium focus:outline-none"
                   />
                 </div>
 
@@ -504,8 +504,8 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                       onClick={() => setArea('FULL_SCREEN')}
                       className={`p-2.5 rounded-xl border flex items-center justify-center space-x-2 font-bold transition-all ${
                         area === 'FULL_SCREEN'
-                          ? 'bg-accent-500/15 border-accent-500 text-white'
-                          : 'bg-dark-900 border-dark-750 text-slate-400 hover:text-white'
+                          ? 'bg-teal-500/15 border-teal-400 text-white'
+                          : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                       }`}
                     >
                       <Monitor className="w-4 h-4" />
@@ -518,7 +518,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                       className={`p-2.5 rounded-xl border flex items-center justify-center space-x-2 font-bold transition-all ${
                         area === 'MODE32_PROMO'
                           ? 'bg-emerald-500/15 border-emerald-500 text-white'
-                          : 'bg-dark-900 border-dark-750 text-slate-400 hover:text-white'
+                          : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                       }`}
                     >
                       <Columns className="w-4 h-4" />
@@ -538,7 +538,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     className={`p-3 rounded-xl border flex items-center justify-center space-x-2 font-bold transition-all ${
                       displayMode === 'STATIC'
                         ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                        : 'bg-dark-900 border-dark-750 text-slate-400 hover:text-white'
+                        : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     <ImageIcon className="w-4 h-4" />
@@ -551,7 +551,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     className={`p-3 rounded-xl border flex items-center justify-center space-x-2 font-bold transition-all ${
                       displayMode === 'SLIDESHOW'
                         ? 'bg-indigo-600/20 border-indigo-500 text-white'
-                        : 'bg-dark-900 border-dark-750 text-slate-400 hover:text-white'
+                        : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     <Film className="w-4 h-4" />
@@ -569,7 +569,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                   {loadingMedia ? (
                     <div className="text-center py-8 text-slate-500">Загрузка медиафайлов...</div>
                   ) : suitableMedia.length === 0 ? (
-                    <div className="p-6 bg-dark-900 border border-dark-750 rounded-xl text-center text-slate-400">
+                    <div className="p-6 glass-surface-l2 border border-white/10 rounded-xl text-center text-slate-400">
                       В библиотеке нет загруженных медиа. Перейдите в раздел "Медиа", чтобы загрузить файлы.
                     </div>
                   ) : (
@@ -580,13 +580,13 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                           <div
                             key={m.id}
                             onClick={() => setSelectedSingleAssetId(m.id)}
-                            className={`cursor-pointer rounded-xl border p-2 flex flex-col justify-between transition-all bg-dark-900 ${
+                            className={`cursor-pointer rounded-xl border p-2 flex flex-col justify-between transition-all glass-surface-l2 ${
                               isSelected 
-                                ? 'border-accent-500 shadow-md shadow-accent-500/20 ring-1 ring-accent-500' 
-                                : 'border-dark-750 hover:border-dark-700'
+                                ? 'border-teal-400 shadow-md shadow-teal-400/20 ring-1 ring-teal-400' 
+                                : 'border-white/10 hover:border-white/20'
                             }`}
                           >
-                            <div className="aspect-[4/3] bg-dark-850 rounded-lg overflow-hidden flex items-center justify-center mb-1.5 relative border border-dark-750/50">
+                            <div className="aspect-[4/3] bg-black/30 rounded-lg overflow-hidden flex items-center justify-center mb-1.5 relative border border-white/10">
                               <img
                                 src={mediaApi.getThumbnailUrl(m.id)}
                                 alt={m.original_name}
@@ -597,7 +597,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                                 }}
                               />
                               {isSelected && (
-                                <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-accent-500 text-white flex items-center justify-center shadow">
+                                <div className="absolute top-1 right-1 w-5 h-5 rounded-full bg-teal-400 text-black flex items-center justify-center shadow">
                                   ✓
                                 </div>
                               )}
@@ -630,7 +630,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     </div>
 
                     {playlistItems.length === 0 ? (
-                      <div className="p-6 bg-dark-900 border border-dark-750 rounded-xl text-center text-slate-500">
+                      <div className="p-6 glass-surface-l2 border border-white/10 rounded-xl text-center text-slate-500">
                         Плейлист пуст. Выберите слайды справа для добавления.
                       </div>
                     ) : (
@@ -639,7 +639,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                           <div
                             key={`${item.asset.id}-${idx}`}
                             className={`p-2 rounded-xl border flex items-center justify-between transition-colors ${
-                              previewSlideIdx === idx ? 'bg-dark-800 border-accent-500/50' : 'bg-dark-900 border-dark-750'
+                              previewSlideIdx === idx ? 'glass-surface-l3 border-teal-400/50' : 'glass-surface-l2 border-white/10'
                             }`}
                           >
                             <div className="flex items-center space-x-2">
@@ -647,7 +647,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                               <img
                                 src={mediaApi.getThumbnailUrl(item.asset.id)}
                                 alt=""
-                                className="w-10 h-10 object-cover rounded-lg bg-dark-850 border border-dark-750/50"
+                                className="w-10 h-10 object-cover rounded-lg bg-black/30 border border-white/10"
                                 loading="lazy"
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).src = mediaApi.getFileUrl(item.asset.id);
@@ -665,7 +665,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
 
                             <div className="flex items-center space-x-2">
                               {/* Duration Input */}
-                              <div className="flex items-center space-x-1 bg-dark-950 px-2 py-1 rounded-lg border border-dark-750">
+                              <div className="flex items-center space-x-1 glass-surface-l3 px-2 py-1 rounded-lg border border-white/[0.08]">
                                 <Clock className="w-3 h-3 text-slate-400" />
                                 <input
                                   type="number"
@@ -721,9 +721,9 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                         <div
                           key={m.id}
                           onClick={() => handleAddSlide(m)}
-                          className="cursor-pointer bg-dark-900 border border-dark-750 hover:border-accent-500 rounded-xl p-1.5 transition-all group"
+                          className="cursor-pointer glass-surface-l2 border border-white/10 hover:border-teal-400 rounded-xl p-1.5 transition-all group"
                         >
-                          <div className="aspect-[4/3] bg-dark-850 rounded-lg overflow-hidden flex items-center justify-center relative mb-1 border border-dark-750/50">
+                          <div className="aspect-[4/3] bg-black/30 rounded-lg overflow-hidden flex items-center justify-center relative mb-1 border border-white/10">
                             <img
                               src={mediaApi.getThumbnailUrl(m.id)}
                               alt=""
@@ -733,7 +733,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                                 (e.target as HTMLImageElement).src = mediaApi.getFileUrl(m.id);
                               }}
                             />
-                            <div className="absolute inset-0 bg-accent-500/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                            <div className="absolute inset-0 bg-teal-400/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
                               <Plus className="w-5 h-5 text-white" />
                             </div>
                           </div>
@@ -753,9 +753,9 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
             /* STEP 2: Targeting Scope & Dispatch Confirmation */
             <div className="space-y-6">
               
-              <div className="bg-dark-900 border border-dark-750 rounded-xl p-4 space-y-3">
-                <h4 className="font-bold text-white text-xs border-b border-dark-750 pb-2 flex items-center space-x-2">
-                  <ShieldCheck className="w-4 h-4 text-accent-400" />
+              <div className="glass-surface-l2 border border-white/10 rounded-xl p-4 space-y-3">
+                <h4 className="font-bold text-white text-xs border-b border-white/[0.08] pb-2 flex items-center space-x-2">
+                  <ShieldCheck className="w-4 h-4 text-teal-300" />
                   <span>Область назначения рекламы (Target Scope)</span>
                 </h4>
 
@@ -765,8 +765,8 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     onClick={() => setScopeType('CUSTOM_CASHIERS')}
                     className={`p-3 rounded-xl border text-center font-bold transition-all ${
                       scopeType === 'CUSTOM_CASHIERS'
-                        ? 'bg-accent-500/15 border-accent-500 text-white'
-                        : 'bg-dark-850 border-dark-750 text-slate-400 hover:text-white'
+                        ? 'bg-teal-500/15 border-teal-400 text-white'
+                        : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     Выбранные кассы ({selectedCashierIds.length})
@@ -777,8 +777,8 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     onClick={() => setScopeType('BRANCH')}
                     className={`p-3 rounded-xl border text-center font-bold transition-all ${
                       scopeType === 'BRANCH'
-                        ? 'bg-accent-500/15 border-accent-500 text-white'
-                        : 'bg-dark-850 border-dark-750 text-slate-400 hover:text-white'
+                        ? 'bg-teal-500/15 border-teal-400 text-white'
+                        : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     По филиалу
@@ -789,8 +789,8 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     onClick={() => setScopeType('REGION')}
                     className={`p-3 rounded-xl border text-center font-bold transition-all ${
                       scopeType === 'REGION'
-                        ? 'bg-accent-500/15 border-accent-500 text-white'
-                        : 'bg-dark-850 border-dark-750 text-slate-400 hover:text-white'
+                        ? 'bg-teal-500/15 border-teal-400 text-white'
+                        : 'glass-surface-l2 border-white/10 text-slate-400 hover:text-white'
                     }`}
                   >
                     По региону
@@ -805,7 +805,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                       <button
                         type="button"
                         onClick={() => setSelectedCashierIds(selectedCashierIds.length === cashiers.length ? [] : cashiers.map(c => c.id))}
-                        className="text-accent-400 hover:underline"
+                        className="text-teal-300 hover:underline"
                       >
                         {selectedCashierIds.length === cashiers.length ? 'Снять все' : 'Выбрать все'}
                       </button>
@@ -817,7 +817,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                           <label
                             key={c.id}
                             className={`flex items-center space-x-2 p-2 rounded-lg border cursor-pointer ${
-                              isChecked ? 'bg-accent-500/10 border-accent-500/40 text-white' : 'bg-dark-850 border-dark-750 text-slate-400'
+                              isChecked ? 'bg-teal-500/10 border-teal-400/40 text-white' : 'glass-surface-l2 border-white/10 text-slate-400'
                             }`}
                           >
                             <input
@@ -828,7 +828,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                                   prev.includes(c.id) ? prev.filter(x => x !== c.id) : [...prev, c.id]
                                 );
                               }}
-                              className="rounded border-dark-700 bg-dark-900 text-accent-500"
+                              className="rounded border-white/20 bg-white/5 text-teal-400"
                             />
                             <div className="truncate">
                               <span className="font-bold text-[11px] block truncate">{c.name}</span>
@@ -847,7 +847,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     <select
                       value={selectedBranchId}
                       onChange={(e) => setSelectedBranchId(e.target.value)}
-                      className="w-full bg-dark-850 border border-dark-750 rounded-xl p-2.5 text-white"
+                      className="glass-input w-full p-2.5 text-white"
                     >
                       {branches.map(b => (
                         <option key={b.id} value={b.id}>{b.name} ({b.code})</option>
@@ -862,7 +862,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     <select
                       value={selectedRegionId}
                       onChange={(e) => setSelectedRegionId(e.target.value)}
-                      className="w-full bg-dark-850 border border-dark-750 rounded-xl p-2.5 text-white"
+                      className="glass-input w-full p-2.5 text-white"
                     >
                       {regions.map(r => (
                         <option key={r.id} value={r.id}>{r.name} ({r.code})</option>
@@ -874,8 +874,8 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
               </div>
 
               {/* Summary Pre-Flight Card */}
-              <div className="bg-dark-900 border border-dark-750 rounded-xl p-4 space-y-3">
-                <h4 className="font-bold text-white text-xs border-b border-dark-750 pb-2">
+              <div className="glass-surface-l2 border border-white/10 rounded-xl p-4 space-y-3">
+                <h4 className="font-bold text-white text-xs border-b border-white/[0.08] pb-2">
                   Итоговая сводка деплоя (Pre-flight check)
                 </h4>
 
@@ -886,7 +886,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                   </div>
                   <div>
                     <span className="text-slate-500 block">Зона экрана:</span>
-                    <span className="text-accent-400 font-bold">{area === 'FULL_SCREEN' ? 'FULL SCREEN (1024×768)' : '50/50 PROMO (512×768)'}</span>
+                    <span className="text-teal-300 font-bold">{area === 'FULL_SCREEN' ? 'FULL SCREEN (1024×768)' : '50/50 PROMO (512×768)'}</span>
                   </div>
                   <div>
                     <span className="text-slate-500 block">Режим контента:</span>
@@ -898,7 +898,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                   </div>
                 </div>
 
-                <div className="p-3 bg-dark-950 rounded-xl border border-dark-750/60 text-slate-400 text-[11px] leading-relaxed">
+                <div className="p-3 glass-surface-l3 rounded-xl border border-white/[0.08] text-slate-400 text-[11px] leading-relaxed">
                   Публикация будет обработана через транзакционный конвейер FastAPI: проверка хешей SHA-256, безопасная доставка в staging по SSH/SFTP, атомарное обновление базы <code className="text-white">gs.db</code> и hot-reload без перезапуска кассы.
                 </div>
               </div>
@@ -909,13 +909,13 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
         </div>
 
         {/* Footer Navigation */}
-        <div className="p-4 border-t border-dark-750 bg-dark-900/40 flex items-center justify-between">
+        <div className="p-4 border-t border-white/[0.08] bg-black/20 flex items-center justify-between">
           {step === 1 ? (
             <div>
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 rounded-xl text-slate-400 hover:text-white bg-dark-800"
+                className="glass-btn-secondary px-4 py-2 rounded-xl"
               >
                 Отмена
               </button>
@@ -925,7 +925,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className="px-4 py-2 rounded-xl text-slate-300 hover:text-white bg-dark-800"
+                className="glass-btn-secondary px-4 py-2 rounded-xl"
               >
                 ← Назад
               </button>
@@ -960,7 +960,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     setDeployError(null);
                     setStep(2);
                   }}
-                  className="px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-accent-500 hover:bg-accent-600 flex items-center space-x-1.5 shadow-lg shadow-accent-500/25"
+                  className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-1.5"
                 >
                   <span>Далее: Выбор касс</span>
                   <ChevronRight className="w-4 h-4" />

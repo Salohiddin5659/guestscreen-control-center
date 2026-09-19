@@ -2,6 +2,7 @@ import asyncio
 import io
 import json
 import logging
+import os
 import time
 from typing import Any, List, Optional, Tuple
 from uuid import UUID
@@ -347,7 +348,7 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
         $db = 'C:\\UCS\\GuestScreen\\gs.db'
         $sqlExe = 'C:\\UCS\\GuestScreen\\sqlite3.exe'
         if (!(Test-Path $sqlExe)) {{ $sqlExe = 'sqlite3' }}
-        $tmp = [System.IO.Path]::GetTempFileName()
+        $tmp = "C:\\UCS\\GuestScreen\\tmp_$([Guid]::NewGuid().ToString('N')).sql"
         [System.IO.File]::WriteAllText($tmp, "SELECT Raw FROM scenarios WHERE lower(Mode) = '{mode.lower()}';", [System.Text.Encoding]::UTF8)
         $forwardTmp = $tmp.Replace('\\', '/')
         $res = & $sqlExe $db ".read `"$forwardTmp`""
@@ -411,7 +412,7 @@ class ProductionCashRegisterAdapter(CashRegisterAdapter):
             $sql += "UPDATE scenes SET Raw = '$cpEsc' WHERE lower(Guid) = 'ecc5d909-3f0a-4e7f-8da0-f876bcdda46c'; "
         }}
         
-        $tmp = [System.IO.Path]::GetTempFileName()
+        $tmp = "C:\\UCS\\GuestScreen\\tmp_$([Guid]::NewGuid().ToString('N')).sql"
         [System.IO.File]::WriteAllText($tmp, $sql, [System.Text.Encoding]::UTF8)
         $sqlExe = 'C:\\UCS\\GuestScreen\\sqlite3.exe'
         if (!(Test-Path $sqlExe)) {{ $sqlExe = 'sqlite3' }}

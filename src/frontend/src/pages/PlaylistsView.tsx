@@ -101,18 +101,18 @@ export const PlaylistsView: React.FC = () => {
         <div>
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-black text-white tracking-tight">Рекламные шаблоны и плейлисты</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#21222D] text-[#A9DFD8] border border-[#2C2D3A]">
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold glass-surface-l1 glass-specular-edge text-[#A9DFD8] border border-white/10 shadow-sm">
               {blocks.length} блоков
             </span>
           </div>
-          <p className="text-xs text-[#87888C] mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Управление шаблонами рекламных блоков, таймингами слайдов и быстрая публикация на кассы
           </p>
         </div>
 
         <button
           onClick={() => setAdConfigOpen(true)}
-          className="px-5 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-lg shadow-[#A9DFD8]/20 flex items-center space-x-2 transition-all self-start sm:self-auto"
+          className="glass-btn-primary text-xs flex items-center space-x-2 self-start sm:self-auto shadow-lg shadow-[#A9DFD8]/20"
         >
           <Plus className="w-4 h-4" />
           <span>+ Создать рекламный блок</span>
@@ -120,19 +120,19 @@ export const PlaylistsView: React.FC = () => {
       </div>
 
       {/* Area Filter Tabs */}
-      <div className="flex items-center space-x-2 bg-[#21222D] border border-[#2C2D3A] p-1.5 rounded-xl w-fit text-xs shadow-xl">
+      <div className="flex items-center space-x-2 glass-surface-l1 glass-specular-edge border border-white/10 p-1.5 rounded-2xl w-fit text-xs shadow-lg">
         <button
           onClick={() => setAreaFilter('ALL')}
-          className={`px-3.5 py-1.5 rounded-lg font-medium transition-all ${
-            areaFilter === 'ALL' ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-sm' : 'text-[#87888C] hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
+            areaFilter === 'ALL' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
           }`}
         >
           Все форматы
         </button>
         <button
           onClick={() => setAreaFilter('FULL_SCREEN')}
-          className={`px-3.5 py-1.5 rounded-lg font-medium transition-all flex items-center space-x-1.5 ${
-            areaFilter === 'FULL_SCREEN' ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-sm' : 'text-[#87888C] hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all flex items-center space-x-1.5 ${
+            areaFilter === 'FULL_SCREEN' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
           }`}
         >
           <Monitor className="w-3.5 h-3.5" />
@@ -140,8 +140,8 @@ export const PlaylistsView: React.FC = () => {
         </button>
         <button
           onClick={() => setAreaFilter('MODE32_PROMO')}
-          className={`px-3.5 py-1.5 rounded-lg font-medium transition-all flex items-center space-x-1.5 ${
-            areaFilter === 'MODE32_PROMO' ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-sm' : 'text-[#87888C] hover:text-white'
+          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all flex items-center space-x-1.5 ${
+            areaFilter === 'MODE32_PROMO' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
           }`}
         >
           <Columns className="w-3.5 h-3.5" />
@@ -151,15 +151,15 @@ export const PlaylistsView: React.FC = () => {
 
       {/* Main Grid: List on Left, Detail & Preview on Right */}
       {blocks.length === 0 ? (
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-12 text-center shadow-xl">
-          <Layers className="w-12 h-12 text-[#737791] mx-auto mb-3 opacity-40" />
+        <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-12 text-center shadow-xl">
+          <Layers className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
           <h3 className="text-base font-bold text-white mb-1">Шаблоны пока не созданы</h3>
-          <p className="text-xs text-[#87888C] max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             Создайте первый рекламный блок или динамическое слайдшоу для показа на экранах покупателей.
           </p>
           <button
             onClick={() => setAdConfigOpen(true)}
-            className="px-4 py-2 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] inline-flex items-center space-x-2 shadow-sm"
+            className="glass-btn-primary text-xs inline-flex items-center space-x-2"
           >
             <Plus className="w-4 h-4" />
             <span>Создать блок</span>
@@ -178,37 +178,39 @@ export const PlaylistsView: React.FC = () => {
                 <div
                   key={b.id}
                   onClick={() => setSelectedBlockId(b.id)}
-                  className={`cursor-pointer bg-[#21222D] border rounded-2xl p-4 transition-all shadow-xl ${
+                  className={`cursor-pointer rounded-2xl p-4 transition-all duration-300 shadow-lg ${
                     isSelected 
-                      ? 'border-[#A9DFD8] ring-1 ring-[#A9DFD8]/40 bg-[#282A37]' 
-                      : 'border-[#2C2D3A] hover:border-[#A9DFD8]/40'
+                      ? 'glass-surface-l2 border border-[#A9DFD8]/60 ring-1 ring-[#A9DFD8]/30 scale-[1.01]' 
+                      : 'glass-surface-l1 glass-specular-edge border border-white/10 hover:border-[#A9DFD8]/40 hover:bg-white/[0.04]'
                   }`}
                 >
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                        isFull ? 'bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30' : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30'
+                        isFull 
+                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]' 
+                          : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30 shadow-[0_0_10px_rgba(169,223,216,0.15)]'
                       }`}>
                         {isFull ? <Monitor className="w-4 h-4" /> : <Columns className="w-4 h-4" />}
                       </div>
                       <div>
                         <h4 className="font-bold text-white text-xs">{b.name}</h4>
-                        <span className="text-[10px] text-[#87888C] font-mono">
+                        <span className="text-[10px] text-slate-400 font-mono">
                           {b.display_mode === 'STATIC' ? 'Баннер' : 'Слайдшоу'}
                         </span>
                       </div>
                     </div>
 
                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold font-mono ${
-                      isFull ? 'bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30' : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30'
+                      isFull ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30'
                     }`}>
                       {isFull ? '1024×768' : '512×768'}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-[#87888C] pt-2.5 border-t border-[#2C2D3A]/60 mt-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2.5 border-t border-white/[0.08] mt-2">
                     <span>Слайдов: <strong className="text-white font-semibold font-mono">{b.items_count}</strong></span>
-                    <span className="text-[10px] text-[#737791] font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono">
                       {new Date(b.created_at).toLocaleDateString('ru-RU')}
                     </span>
                   </div>
@@ -220,15 +222,15 @@ export const PlaylistsView: React.FC = () => {
           {/* Right Column: Active Block Detail & Preview */}
           <div className="lg:col-span-2">
             {blockDetail ? (
-              <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-6 space-y-6 shadow-xl">
+              <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-6 space-y-6 shadow-xl">
                 
                 {/* Header of detail */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#2C2D3A] pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4">
                   <div>
                     <div className="flex items-center space-x-3">
                       <h2 className="text-lg font-bold text-white">{blockDetail.name}</h2>
                     </div>
-                    <p className="text-xs text-[#87888C] mt-0.5">
+                    <p className="text-xs text-slate-400 mt-0.5">
                       Зона: <strong className="text-white">{blockDetail.area}</strong> • Режим: <strong className="text-white">{blockDetail.display_mode}</strong>
                     </p>
                   </div>
@@ -239,7 +241,7 @@ export const PlaylistsView: React.FC = () => {
                         setEditingBlock(blockDetail);
                         setAdConfigOpen(true);
                       }}
-                      className="p-2 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-xl text-[#87888C] hover:text-[#A9DFD8] transition-colors"
+                      className="p-2 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-xl text-slate-300 hover:text-[#A9DFD8] transition-colors"
                       title="Редактировать шаблон"
                     >
                       <Pencil className="w-4 h-4" />
@@ -247,7 +249,7 @@ export const PlaylistsView: React.FC = () => {
 
                     <button
                       onClick={() => duplicateMutation.mutate(blockDetail.id)}
-                      className="p-2 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-xl text-[#87888C] hover:text-white transition-colors"
+                      className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl text-slate-300 hover:text-white transition-colors"
                       title="Дублировать шаблон"
                     >
                       <Copy className="w-4 h-4" />
@@ -259,7 +261,7 @@ export const PlaylistsView: React.FC = () => {
                           deleteMutation.mutate(blockDetail.id);
                         }
                       }}
-                      className="p-2 bg-[#171821] hover:bg-[#FF5B5B]/15 border border-[#2C2D3A] hover:border-[#FF5B5B]/30 rounded-xl text-[#737791] hover:text-[#FF5B5B] transition-colors"
+                      className="p-2 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-xl text-slate-400 hover:text-rose-400 transition-colors"
                       title="Удалить"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -270,7 +272,7 @@ export const PlaylistsView: React.FC = () => {
                         setEditingBlock(blockDetail || null);
                         setAdConfigOpen(true);
                       }}
-                      className="px-4 py-2 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-sm flex items-center space-x-1.5"
+                      className="glass-btn-primary text-xs flex items-center space-x-1.5 shadow-md shadow-[#A9DFD8]/20"
                     >
                       <Send className="w-3.5 h-3.5" />
                       <span>Развернуть на кассы</span>
@@ -282,20 +284,20 @@ export const PlaylistsView: React.FC = () => {
                 <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs">
                     <span className="font-bold text-white">Слайды блока ({blockDetail.items.length})</span>
-                    <span className="text-[#87888C] font-mono">
+                    <span className="text-slate-400 font-mono">
                       Общая длительность цикла: {blockDetail.items.reduce((a, b) => a + b.duration_seconds, 0)} сек
                     </span>
                   </div>
 
                   {blockDetail.items.length === 0 ? (
-                    <div className="p-8 bg-[#171821] border border-[#2C2D3A] rounded-xl text-center text-[#737791] text-xs">
+                    <div className="p-8 bg-white/5 border border-white/10 rounded-2xl text-center text-slate-400 text-xs">
                       В блоке нет добавленных слайдов
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {blockDetail.items.map((it) => (
-                        <div key={it.id} className="bg-[#171821] border border-[#2C2D3A] rounded-xl p-3 space-y-2 hover:border-[#A9DFD8]/40 transition-all">
-                          <div className="aspect-[4/3] bg-[#21222D] rounded-lg overflow-hidden flex items-center justify-center relative border border-[#2C2D3A]">
+                        <div key={it.id} className="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2 hover:border-[#A9DFD8]/40 transition-all">
+                          <div className="aspect-[4/3] bg-white/5 rounded-xl overflow-hidden flex items-center justify-center relative border border-white/10">
                             {it.media ? (
                               <img
                                 src={mediaApi.getThumbnailUrl(it.media.id)}
@@ -309,9 +311,9 @@ export const PlaylistsView: React.FC = () => {
                                 }}
                               />
                             ) : (
-                              <Film className="w-6 h-6 text-[#737791]" />
+                              <Film className="w-6 h-6 text-slate-500" />
                             )}
-                            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-[#171821]/80 text-[#A9DFD8] border border-[#2C2D3A] backdrop-blur-xs">
+                            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/60 text-[#A9DFD8] border border-white/15 backdrop-blur-md">
                               {it.duration_seconds} сек
                             </div>
                           </div>
@@ -320,7 +322,7 @@ export const PlaylistsView: React.FC = () => {
                             <span className="font-semibold text-white truncate block" title={it.media?.original_name}>
                               {it.media?.original_name || 'Слайд'}
                             </span>
-                            <span className="text-[10px] text-[#737791] font-mono block">
+                            <span className="text-[10px] text-slate-400 font-mono block">
                               Порядок: #{it.order_index + 1}
                             </span>
                           </div>
@@ -332,7 +334,7 @@ export const PlaylistsView: React.FC = () => {
 
               </div>
             ) : (
-              <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-12 text-center text-[#737791] text-xs shadow-xl">
+              <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-12 text-center text-slate-400 text-xs shadow-xl">
                 Выберите рекламный блок слева для просмотра деталей
               </div>
             )}

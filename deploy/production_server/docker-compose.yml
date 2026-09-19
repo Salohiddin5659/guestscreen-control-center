@@ -1,0 +1,58 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: guestscreen_postgres16
+    restart: always
+    environment:
+      POSTGRES_DB: guestscreen_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: gs_postgres_pass_2026
+    ports:
+      - "5433:5432"
+    volumes:
+      - /opt/guestscreen-server/postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d guestscreen_db"]
+      interval: 4s
+      timeout: 4s
+      retries: 5
+
+  guestscreen_server:
+    image: guestscreen-server-guestscreen_server:latest
+    container_name: guestscreen_central_server
+    restart: always
+    network_mode: "host"
+    volumes:
+      - /opt/guestscreen-server/data:/app/data
+      - /opt/guestscreen-server/server.js:/app/server.js
+      - /opt/guestscreen-server/public:/app/public
+      - /opt/guestscreen-server/deployment_orchestrator.py:/app/deployment_orchestrator.py
+      - /opt/guestscreen-server/api_v1.js:/app/api_v1.js
+    environment:
+      - PORT=8101
+      - DATA_DIR=/app/data
+      - SERVER_IP=10.0.0.111
+      - DATABASE_URL=postgres://postgres:gs_postgres_pass_2026@127.0.0.1:5433/guestscreen_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  fastapi_server:
+    image: guestscreen-fastapi:latest
+    container_name: guestscreen_fastapi_server
+    restart: always
+    network_mode: "host"
+    volumes:
+      - /opt/guestscreen-server/data:/app/data
+      - /opt/guestscreen-server/backend/app:/app/app
+      - /opt/guestscreen-server/backend/workers:/app/workers
+    environment:
+      - PORT=8000
+      - SERVER_PORT=8000
+      - DATABASE_URL=postgresql+asyncpg://postgres:gs_postgres_pass_2026@127.0.0.1:5433/gs_control_center
+      - CREDENTIAL_ENCRYPTION_KEY=00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff
+      - JWT_SECRET_KEY=insecure_default_secret_please_change_via_env
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+    depends_on:
+      postgres:
+        condition: service_healthy

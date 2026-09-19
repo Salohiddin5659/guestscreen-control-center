@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
   Monitor, 
@@ -24,7 +25,8 @@ import {
   SlidersHorizontal,
   ArrowUpDown,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Building2
 } from 'lucide-react';
 import { 
   topologyApi, 
@@ -33,7 +35,8 @@ import {
   Branch, 
   Region, 
   AdvertisingBlockListItem,
-  ConnectionTestResult 
+  ConnectionTestResult,
+  getCurrentUserFromStorage
 } from '../api/client';
 import { useLiveFleet } from '../api/useLiveFleet';
 import { DeviceDetailModal } from '../components/devices/DeviceDetailModal';
@@ -43,6 +46,12 @@ import { DeploymentProgressModal } from '../components/deployment/DeploymentProg
 export const DevicesView: React.FC = () => {
   const queryClient = useQueryClient();
   const { isConnected } = useLiveFleet();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const currentUser = getCurrentUserFromStorage();
+  const canManageDevices = Boolean(
+    currentUser?.role && ['ADMINISTRATOR', 'ADMIN', 'SUPERVISOR'].includes(currentUser.role.toUpperCase())
+  );
 
   // View mode
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
@@ -53,11 +62,27 @@ export const DevicesView: React.FC = () => {
   const [versionFilter, setVersionFilter] = useState<string>('ALL');
   const [branchFilter, setBranchFilter] = useState<string>('ALL');
 
+  // Sync state with URL search params (e.g. from notification clicks ?search=192.168.106.101 or ?status=OFFLINE)
+  useEffect(() => {
+    const searchParam = searchParams.get('search');
+    if (searchParam !== null) {
+      setSearchQuery(searchParam);
+    }
+    const statusParam = searchParams.get('status');
+    if (statusParam && ['ALL', 'ONLINE', 'OFFLINE', 'FAILED', 'PENDING'].includes(statusParam.toUpperCase())) {
+      setStatusFilter(statusParam.toUpperCase() as any);
+    }
+    const branchParam = searchParams.get('branch');
+    if (branchParam !== null) {
+      setBranchFilter(branchParam);
+    }
+  }, [searchParams]);
+
   // Sorting state
   type SortField = 'status' | 'name' | 'ip' | 'branch' | 'version' | 'last_seen';
   type SortDirection = 'asc' | 'desc';
-  const [sortField, setSortField] = useState<SortField | null>('status');
-  const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
+  const [sortField, setSortField] = useState<SortField | null>('branch');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
@@ -173,6 +198,7 @@ export const DevicesView: React.FC = () => {
 
   // Edit Cashier Handlers & Mutation
   const handleOpenEdit = (c: Cashier) => {
+    if (!canManageDevices) return;
     setEditingCashier(c);
     setEditName(c.name);
     setEditIp(c.ip_address);
@@ -323,33 +349,45 @@ export const DevicesView: React.FC = () => {
       return true;
     });
 
-    // 5. Sorting
-    if (sortField) {
-      result.sort((a, b) => {
-        let cmp = 0;
-        if (sortField === 'status') {
-          cmp = getStatusRank(a) - getStatusRank(b);
-        } else if (sortField === 'name') {
-          cmp = a.name.localeCompare(b.name, 'ru');
-        } else if (sortField === 'ip') {
+    // 5. Sorting (Default: Branch name А-Я)
+    const activeSortField = sortField || 'branch';
+    const activeSortDir = sortDirection || 'asc';
+
+    result.sort((a, b) => {
+      let cmp = 0;
+      if (activeSortField === 'branch') {
+        const branchA = branchMap.get(a.branch_id)?.name || '';
+        const branchB = branchMap.get(b.branch_id)?.name || '';
+        cmp = branchA.localeCompare(branchB, 'ru');
+        if (cmp === 0) {
+          cmp = a.name.localeCompare(b.name, 'ru', { numeric: true });
+        }
+        if (cmp === 0) {
           cmp = compareIps(a.ip_address, b.ip_address);
-        } else if (sortField === 'branch') {
+        }
+      } else if (activeSortField === 'status') {
+        cmp = getStatusRank(a) - getStatusRank(b);
+        if (cmp === 0) {
           const branchA = branchMap.get(a.branch_id)?.name || '';
           const branchB = branchMap.get(b.branch_id)?.name || '';
           cmp = branchA.localeCompare(branchB, 'ru');
-        } else if (sortField === 'version') {
-          const verA = a.guest_screen_version || '3.1.1.0';
-          const verB = b.guest_screen_version || '3.1.1.0';
-          cmp = verA.localeCompare(verB);
-        } else if (sortField === 'last_seen') {
-          const timeA = new Date(a.last_seen_at || a.updated_at || 0).getTime();
-          const timeB = new Date(b.last_seen_at || b.updated_at || 0).getTime();
-          cmp = timeA - timeB;
         }
+      } else if (activeSortField === 'name') {
+        cmp = a.name.localeCompare(b.name, 'ru', { numeric: true });
+      } else if (activeSortField === 'ip') {
+        cmp = compareIps(a.ip_address, b.ip_address);
+      } else if (activeSortField === 'version') {
+        const verA = a.guest_screen_version || '3.1.1.0';
+        const verB = b.guest_screen_version || '3.1.1.0';
+        cmp = verA.localeCompare(verB);
+      } else if (activeSortField === 'last_seen') {
+        const timeA = new Date(a.last_seen_at || a.updated_at || 0).getTime();
+        const timeB = new Date(b.last_seen_at || b.updated_at || 0).getTime();
+        cmp = timeA - timeB;
+      }
 
-        return sortDirection === 'asc' ? cmp : -cmp;
-      });
-    }
+      return activeSortDir === 'asc' ? cmp : -cmp;
+    });
 
     return result;
   }, [cashiers, searchQuery, statusFilter, versionFilter, branchFilter, branchMap, regionMap, sortField, sortDirection]);
@@ -378,15 +416,16 @@ export const DevicesView: React.FC = () => {
   const failedCount = cashiers.filter(c => c.last_sync_status === 'FAILED').length;
   const pendingCount = cashiers.filter(c => c.last_sync_status === 'PENDING' || c.last_sync_status === 'PUBLISHED_AWAITING_RESTART').length;
 
-  const hasActiveFilters = statusFilter !== 'ALL' || versionFilter !== 'ALL' || branchFilter !== 'ALL' || searchQuery.trim() !== '' || (sortField !== 'status' || sortDirection !== 'desc');
+  const hasActiveFilters = statusFilter !== 'ALL' || versionFilter !== 'ALL' || branchFilter !== 'ALL' || searchQuery.trim() !== '' || (sortField !== 'branch' || sortDirection !== 'asc');
 
   const resetAllFilters = () => {
     setStatusFilter('ALL');
     setVersionFilter('ALL');
     setBranchFilter('ALL');
     setSearchQuery('');
-    setSortField('status');
-    setSortDirection('desc');
+    setSortField('branch');
+    setSortDirection('asc');
+    setSearchParams({}, { replace: true });
   };
 
   const handleConfigureAdForCashier = (cashierId: string) => {
@@ -404,6 +443,7 @@ export const DevicesView: React.FC = () => {
   };
 
   const handleDeleteCashier = (c: Cashier) => {
+    if (!canManageDevices) return;
     if (window.confirm(`Вы уверены, что хотите удалить кассу "${c.name}" (${c.ip_address})?`)) {
       deleteCashierMutation.mutate(c.id);
     }
@@ -433,18 +473,18 @@ export const DevicesView: React.FC = () => {
         <div>
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-black text-white tracking-tight">Устройства</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-[#21222D] text-[#A9DFD8] border border-[#2C2D3A] flex items-center gap-1.5">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold glass-surface-l1 text-[#A9DFD8] border border-glass-subtle flex items-center gap-1.5 shadow-sm">
               <img src="/oqtepa_emblem.svg" className="w-3.5 h-3.5 rounded object-contain" alt="" />
               Oqtepa Lavash • {totalCount} касс
             </span>
             {isConnected && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-[#21222D] text-[#05C168] border border-[#05C168]/30 flex items-center gap-1.5">
+              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold glass-surface-l1 text-[#05C168] border border-[#05C168]/30 flex items-center gap-1.5 shadow-sm">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
                 Live Sync
               </span>
             )}
           </div>
-          <p className="text-xs text-[#87888C] mt-1">
+          <p className="text-xs text-slate-400 mt-1">
             Центральное управление парком кассовых экранов GuestScreen, мониторинг состояния и доставка рекламы
           </p>
         </div>
@@ -453,34 +493,38 @@ export const DevicesView: React.FC = () => {
           {selectedIds.length > 0 && (
             <button
               onClick={handleConfigureAdForSelected}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-lg shadow-[#A9DFD8]/20 flex items-center space-x-2 transition-all"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary flex items-center space-x-2 shadow-lg liquid-interactive relative overflow-hidden"
             >
+              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
               <Send className="w-3.5 h-3.5" />
               <span>Применить рекламу ({selectedIds.length})</span>
             </button>
           )}
 
-          <button
-            onClick={() => setAddCashierModalOpen(true)}
-            className="px-4 py-2.5 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-lg shadow-[#A9DFD8]/20 flex items-center space-x-2 transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            <span>+ Добавить кассу</span>
-          </button>
+          {canManageDevices && (
+            <button
+              onClick={() => setAddCashierModalOpen(true)}
+              className="px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary flex items-center space-x-2 shadow-lg liquid-interactive relative overflow-hidden"
+            >
+              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
+              <Plus className="w-4 h-4" />
+              <span>Добавить кассу</span>
+            </button>
+          )}
         </div>
       </div>
 
-      {/* 2. Nickelfox Signature KPI Summary Card ("Today's Sales" Style) */}
-      <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-5 shadow-xl">
+      {/* 2. Signature Liquid Glass KPI Summary Cluster */}
+      <div className="glass-surface-l2 rounded-2xl p-5 shadow-glass-l2 glass-specular-edge liquid-chromatic-edge relative">
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-base font-bold text-white tracking-tight">Состояние парка касс</h2>
-            <p className="text-xs text-[#737791]">Интерактивная сводка мониторинга экранов GuestScreen (кликните для фильтрации)</p>
+            <p className="text-xs text-slate-400">Мониторинг кассового оборудования и экранов в реальном времени</p>
           </div>
           {hasActiveFilters && (
             <button
               onClick={resetAllFilters}
-              className="flex items-center space-x-1.5 text-xs text-[#A9DFD8] hover:underline"
+              className="flex items-center space-x-1.5 text-xs text-[#A9DFD8] hover:underline transition"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Сбросить фильтры</span>
@@ -488,43 +532,60 @@ export const DevicesView: React.FC = () => {
           )}
         </div>
 
-        {/* 4 Cards inside Nickelfox container */}
+        {/* 4 Cards inside Liquid Glass container */}
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
           
           {/* 1. Всего касс */}
           <div 
-            onClick={() => setStatusFilter('ALL')}
-            className={`cursor-pointer bg-[#171821] rounded-xl p-4 transition-all border ${
+            onClick={() => {
+              setStatusFilter('ALL');
+              if (searchParams.has('status')) {
+                searchParams.delete('status');
+                setSearchParams(searchParams, { replace: true });
+              }
+            }}
+            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
               statusFilter === 'ALL' 
-                ? 'border-[#FFB648] ring-1 ring-[#FFB648]/40 bg-[#1C1E2B]' 
-                : 'border-[#2C2D3A] hover:border-[#FFB648]/60'
+                ? 'border-[#A9DFD8] ring-1 ring-[#A9DFD8]/40 bg-gradient-to-b from-[#A9DFD8]/10 to-transparent shadow-lg' 
+                : 'border-glass-subtle hover:border-[#A9DFD8]/50 hover:bg-white/[0.04]'
             }`}
             title="Показать все устройства"
           >
+            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#87888C]">Всего касс</span>
-              <div className="w-8 h-8 rounded-xl bg-[#FFB648]/15 flex items-center justify-center text-[#FFB648]">
+              <span className="text-xs font-semibold text-slate-400">Всего касс</span>
+              <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[#A9DFD8]">
                 <Monitor className="w-4 h-4" />
               </div>
             </div>
             <div className="text-2xl font-black text-white font-mono">{totalCount}</div>
-            <div className="text-[11px] text-[#FFB648] font-mono mt-1 flex items-center gap-1">
+            <div className="text-[11px] text-[#A9DFD8] font-mono mt-1 flex items-center gap-1">
               <span>●</span> Все устройства
             </div>
           </div>
 
           {/* 2. В сети (Онлайн) */}
           <div 
-            onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
-            className={`cursor-pointer bg-[#171821] rounded-xl p-4 transition-all border ${
+            onClick={() => {
+              const next = statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE';
+              setStatusFilter(next);
+              if (next === 'ALL') {
+                searchParams.delete('status');
+              } else {
+                searchParams.set('status', next);
+              }
+              setSearchParams(searchParams, { replace: true });
+            }}
+            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
               statusFilter === 'ONLINE' 
-                ? 'border-[#05C168] ring-1 ring-[#05C168]/40 bg-[#1C1E2B]' 
-                : 'border-[#2C2D3A] hover:border-[#05C168]/60'
+                ? 'border-[#05C168] ring-1 ring-[#05C168]/40 bg-gradient-to-b from-[#05C168]/10 to-transparent shadow-lg' 
+                : 'border-glass-subtle hover:border-[#05C168]/50 hover:bg-white/[0.04]'
             }`}
             title="Кликните, чтобы отфильтровать кассы онлайн"
           >
+            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#05C168]/30 to-transparent pointer-events-none" />
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#87888C]">В сети</span>
+              <span className="text-xs font-semibold text-slate-400">В сети</span>
               <div className="w-8 h-8 rounded-xl bg-[#05C168]/15 flex items-center justify-center text-[#05C168]">
                 <Wifi className="w-4 h-4" />
               </div>
@@ -537,16 +598,26 @@ export const DevicesView: React.FC = () => {
 
           {/* 3. Не в сети (Офлайн) */}
           <div 
-            onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
-            className={`cursor-pointer bg-[#171821] rounded-xl p-4 transition-all border ${
+            onClick={() => {
+              const next = statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE';
+              setStatusFilter(next);
+              if (next === 'ALL') {
+                searchParams.delete('status');
+              } else {
+                searchParams.set('status', next);
+              }
+              setSearchParams(searchParams, { replace: true });
+            }}
+            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
               statusFilter === 'OFFLINE' 
-                ? 'border-[#FF5B5B] ring-1 ring-[#FF5B5B]/40 bg-[#1C1E2B]' 
-                : 'border-[#2C2D3A] hover:border-[#FF5B5B]/60'
+                ? 'border-[#FF5B5B] ring-1 ring-[#FF5B5B]/40 bg-gradient-to-b from-[#FF5B5B]/10 to-transparent shadow-lg' 
+                : 'border-glass-subtle hover:border-[#FF5B5B]/50 hover:bg-white/[0.04]'
             }`}
             title="Кликните, чтобы отфильтровать кассы офлайн"
           >
+            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#FF5B5B]/30 to-transparent pointer-events-none" />
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#87888C]">Не в сети</span>
+              <span className="text-xs font-semibold text-slate-400">Не в сети</span>
               <div className="w-8 h-8 rounded-xl bg-[#FF5B5B]/15 flex items-center justify-center text-[#FF5B5B]">
                 <WifiOff className="w-4 h-4" />
               </div>
@@ -559,22 +630,32 @@ export const DevicesView: React.FC = () => {
 
           {/* 4. Ошибки / Очередь */}
           <div 
-            onClick={() => setStatusFilter(statusFilter === 'FAILED' ? 'ALL' : 'FAILED')}
-            className={`cursor-pointer bg-[#171821] rounded-xl p-4 transition-all border ${
+            onClick={() => {
+              const next = statusFilter === 'FAILED' ? 'ALL' : 'FAILED';
+              setStatusFilter(next);
+              if (next === 'ALL') {
+                searchParams.delete('status');
+              } else {
+                searchParams.set('status', next);
+              }
+              setSearchParams(searchParams, { replace: true });
+            }}
+            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
               statusFilter === 'FAILED' 
-                ? 'border-[#5D5FEF] ring-1 ring-[#5D5FEF]/40 bg-[#1C1E2B]' 
-                : 'border-[#2C2D3A] hover:border-[#5D5FEF]/60'
+                ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]/40 bg-gradient-to-b from-[#3b82f6]/10 to-transparent shadow-lg' 
+                : 'border-glass-subtle hover:border-[#3b82f6]/50 hover:bg-white/[0.04]'
             }`}
             title="Кликните, чтобы отфильтровать кассы со сбоями или в очереди"
           >
+            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#3b82f6]/30 to-transparent pointer-events-none" />
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-[#87888C]">Сбои / Очередь</span>
-              <div className="w-8 h-8 rounded-xl bg-[#5D5FEF]/15 flex items-center justify-center text-[#5D5FEF]">
+              <span className="text-xs font-semibold text-slate-400">Сбои / Очередь</span>
+              <div className="w-8 h-8 rounded-xl bg-[#3b82f6]/15 flex items-center justify-center text-[#3b82f6]">
                 <AlertTriangle className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl font-black text-[#5D5FEF] font-mono">{failedCount + pendingCount}</div>
-            <div className="text-[11px] text-[#5D5FEF] font-mono mt-1 flex items-center gap-1">
+            <div className="text-2xl font-black text-[#3b82f6] font-mono">{failedCount + pendingCount}</div>
+            <div className="text-[11px] text-[#3b82f6] font-mono mt-1 flex items-center gap-1">
               <span>●</span> Требуют внимания
             </div>
           </div>
@@ -583,7 +664,7 @@ export const DevicesView: React.FC = () => {
       </div>
 
       {/* 3. Comprehensive Filter & Search Toolbar */}
-      <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-4 shadow-xl space-y-3">
+      <div className="glass-surface-l2 rounded-2xl p-4 shadow-glass-l2 glass-specular-edge space-y-3">
         
         {/* Main Controls Row */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
@@ -592,18 +673,24 @@ export const DevicesView: React.FC = () => {
             
             {/* Search Input */}
             <div className="relative min-w-[240px] flex-1 max-w-sm">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#737791]" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Поиск по IP, названию, филиалу, версии..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl pl-10 pr-8 py-2 text-xs text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8] transition-all"
+                className="w-full glass-input rounded-xl pl-10 pr-8 py-2 text-xs placeholder-slate-400 focus:outline-none"
               />
               {searchQuery && (
                 <button
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#737791] hover:text-white"
+                  onClick={() => {
+                    setSearchQuery('');
+                    if (searchParams.has('search')) {
+                      searchParams.delete('search');
+                      setSearchParams(searchParams, { replace: true });
+                    }
+                  }}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
                 >
                   <X className="w-3.5 h-3.5" />
                 </button>
@@ -615,7 +702,7 @@ export const DevicesView: React.FC = () => {
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="bg-[#171821] border border-[#2C2D3A] text-xs text-white rounded-xl px-3 py-2 pr-8 focus:outline-none focus:border-[#A9DFD8] transition-all cursor-pointer font-medium"
+                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
               >
                 <option value="ALL">Все статусы</option>
                 <option value="ONLINE">В сети (Online)</option>
@@ -630,7 +717,7 @@ export const DevicesView: React.FC = () => {
               <select
                 value={versionFilter}
                 onChange={(e) => setVersionFilter(e.target.value)}
-                className="bg-[#171821] border border-[#2C2D3A] text-xs text-white rounded-xl px-3 py-2 pr-8 focus:outline-none focus:border-[#A9DFD8] transition-all cursor-pointer font-medium font-mono"
+                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium font-mono"
               >
                 <option value="ALL">Все версии GS</option>
                 {availableVersions.map(v => (
@@ -644,7 +731,7 @@ export const DevicesView: React.FC = () => {
               <select
                 value={branchFilter}
                 onChange={(e) => setBranchFilter(e.target.value)}
-                className="bg-[#171821] border border-[#2C2D3A] text-xs text-white rounded-xl px-3 py-2 pr-8 focus:outline-none focus:border-[#A9DFD8] transition-all cursor-pointer font-medium"
+                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
               >
                 <option value="ALL">Все рестораны</option>
                 {branches.map(b => (
@@ -654,12 +741,30 @@ export const DevicesView: React.FC = () => {
             </div>
 
             {/* Quick Status Sort Button */}
+            {/* Quick Branch Sort Button */}
+            <button
+              onClick={() => handleSort('branch')}
+              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
+                sortField === 'branch' && sortDirection === 'asc'
+                  ? 'bg-[#A9DFD8]/20 border-[#A9DFD8]/50 text-[#A9DFD8]'
+                  : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
+              }`}
+              title="Сортировать по названию филиала (А-Я)"
+            >
+              <Building2 className="w-3.5 h-3.5 text-[#A9DFD8]" />
+              <span>Филиал (А-Я)</span>
+              {sortField === 'branch' && (
+                sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-[#A9DFD8]" /> : <ArrowDown className="w-3 h-3 text-[#A9DFD8]" />
+              )}
+            </button>
+
+            {/* Quick Status Sort Button */}
             <button
               onClick={() => handleSort('status')}
               className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
                 sortField === 'status' && sortDirection === 'desc'
-                  ? 'bg-[#05C168]/15 border-[#05C168]/50 text-[#05C168]'
-                  : 'bg-[#171821] border-[#2C2D3A] text-[#87888C] hover:text-white'
+                  ? 'bg-[#05C168]/20 border-[#05C168]/50 text-[#05C168]'
+                  : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
               }`}
               title="Сортировать: кассы онлайн вверх"
             >
@@ -678,24 +783,24 @@ export const DevicesView: React.FC = () => {
             <button
               onClick={() => refetchCashiers()}
               disabled={loadingCashiers}
-              className="p-2 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-xl text-[#87888C] hover:text-white transition-colors"
+              className="p-2 glass-surface-l1 hover:bg-white/10 border border-glass-subtle rounded-xl text-slate-300 hover:text-white transition-colors"
               title="Обновить список касс"
             >
               <RefreshCw className={`w-4 h-4 ${loadingCashiers ? 'animate-spin text-[#A9DFD8]' : ''}`} />
             </button>
 
             {/* Grid / Table Toggle */}
-            <div className="flex items-center bg-[#171821] border border-[#2C2D3A] rounded-xl p-1">
+            <div className="flex items-center glass-surface-l1 border border-glass-subtle rounded-xl p-1">
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'table' ? 'bg-[#21222D] text-white font-bold shadow-sm' : 'text-[#87888C] hover:text-white'}`}
+                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'table' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
                 title="Таблица"
               >
                 <ListIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'bg-[#21222D] text-white font-bold shadow-sm' : 'text-[#87888C] hover:text-white'}`}
+                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
                 title="Сетка"
               >
                 <LayoutGrid className="w-4 h-4" />
@@ -707,40 +812,40 @@ export const DevicesView: React.FC = () => {
 
         {/* Active Filter Chips & Counter (When filters applied) */}
         {hasActiveFilters && (
-          <div className="pt-2 border-t border-[#2C2D3A]/60 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div className="pt-2 border-t border-glass-subtle flex flex-wrap items-center justify-between gap-2 text-xs">
             <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-[#737791] text-[11px] font-semibold uppercase tracking-wider mr-1">Активные фильтры:</span>
+              <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider mr-1">Активные фильтры:</span>
               
               {statusFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171821] text-white border border-[#2C2D3A]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
                   <span>Статус: <strong>{statusFilter === 'ONLINE' ? 'В сети' : statusFilter === 'OFFLINE' ? 'Не в сети' : statusFilter === 'FAILED' ? 'Ошибка' : 'Очередь'}</strong></span>
-                  <button onClick={() => setStatusFilter('ALL')} className="text-[#87888C] hover:text-white">✕</button>
+                  <button onClick={() => setStatusFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
                 </span>
               )}
 
               {versionFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171821] text-[#A9DFD8] border border-[#2C2D3A] font-mono">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-[#A9DFD8] border border-glass-subtle font-mono">
                   <span>Версия: <strong>{versionFilter}</strong></span>
-                  <button onClick={() => setVersionFilter('ALL')} className="text-[#87888C] hover:text-white">✕</button>
+                  <button onClick={() => setVersionFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
                 </span>
               )}
 
               {branchFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171821] text-white border border-[#2C2D3A]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
                   <span>Ресторан: <strong>{branchMap.get(branchFilter)?.name || branchFilter}</strong></span>
-                  <button onClick={() => setBranchFilter('ALL')} className="text-[#87888C] hover:text-white">✕</button>
+                  <button onClick={() => setBranchFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
                 </span>
               )}
 
               {searchQuery && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171821] text-white border border-[#2C2D3A]">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
                   <span>Поиск: <strong>{searchQuery}</strong></span>
-                  <button onClick={() => setSearchQuery('')} className="text-[#87888C] hover:text-white">✕</button>
+                  <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-white">✕</button>
                 </span>
               )}
 
-              {sortField && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#171821] text-[#A9DFD8] border border-[#2C2D3A]">
+              {(sortField !== 'branch' || sortDirection !== 'asc') && (
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-[#A9DFD8] border border-glass-subtle">
                   <span>Сортировка: <strong>
                     {sortField === 'status' ? (sortDirection === 'desc' ? 'В сети первые' : 'Офлайн первые') :
                      sortField === 'name' ? (sortDirection === 'asc' ? 'Касса (А-Я)' : 'Касса (Я-А)') :
@@ -749,7 +854,7 @@ export const DevicesView: React.FC = () => {
                      sortField === 'version' ? (sortDirection === 'desc' ? 'Версия (новые)' : 'Версия (старые)') :
                      (sortDirection === 'desc' ? 'Связь (свежие)' : 'Связь (старые)')}
                   </strong></span>
-                  <button onClick={() => { setSortField('status'); setSortDirection('desc'); }} className="text-[#87888C] hover:text-white" title="Сбросить сортировку">✕</button>
+                  <button onClick={() => { setSortField('branch'); setSortDirection('asc'); }} className="text-slate-400 hover:text-white" title="Сбросить сортировку на Филиал (А-Я)">✕</button>
                 </span>
               )}
 
@@ -761,7 +866,7 @@ export const DevicesView: React.FC = () => {
               </button>
             </div>
 
-            <div className="text-[11px] font-mono text-[#87888C]">
+            <div className="text-[11px] font-mono text-slate-400">
               Показано: <strong className="text-white">{filteredCashiers.length}</strong> из {cashiers.length} касс
             </div>
           </div>
@@ -785,16 +890,16 @@ export const DevicesView: React.FC = () => {
                 : `Не удалось подключиться: ${testResult.res.error_message || 'Касса недоступна'}`}
             </span>
           </div>
-          <button onClick={() => setTestResult(null)} className="text-[#87888C] hover:text-white">✕</button>
+          <button onClick={() => setTestResult(null)} className="text-slate-400 hover:text-white">✕</button>
         </div>
       )}
 
       {/* 5. Main Content Area */}
       {filteredCashiers.length === 0 ? (
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-12 text-center shadow-xl">
-          <Monitor className="w-12 h-12 text-[#737791] mx-auto mb-3 opacity-40" />
+        <div className="glass-surface-l2 rounded-2xl p-12 text-center shadow-glass-l2 glass-specular-edge">
+          <Monitor className="w-12 h-12 text-slate-400 mx-auto mb-3 opacity-40" />
           <h3 className="text-base font-bold text-white mb-1">Кассы не найдены</h3>
-          <p className="text-xs text-[#87888C] max-w-sm mx-auto mb-4">
+          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             {hasActiveFilters 
               ? 'По вашим критериям фильтрации ничего не найдено. Нажмите "Сбросить фильтры", чтобы увидеть все кассы.'
               : 'В системе пока не добавлено ни одной кассы. Нажмите "+ Добавить кассу", чтобы зарегистрировать первое устройство.'}
@@ -802,7 +907,7 @@ export const DevicesView: React.FC = () => {
           {hasActiveFilters ? (
             <button
               onClick={resetAllFilters}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] transition-colors inline-flex items-center space-x-2"
+              className="px-4 py-2 rounded-xl text-xs font-bold glass-btn-primary inline-flex items-center space-x-2"
             >
               <RotateCcw className="w-3.5 h-3.5" />
               <span>Сбросить все фильтры</span>
@@ -810,7 +915,7 @@ export const DevicesView: React.FC = () => {
           ) : (
             <button
               onClick={() => setAddCashierModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-[#171821] bg-[#A9DFD8] hover:bg-[#8ee0d6] transition-colors inline-flex items-center space-x-2"
+              className="px-4 py-2 rounded-xl text-xs font-bold glass-btn-primary inline-flex items-center space-x-2"
             >
               <Plus className="w-4 h-4" />
               <span>Добавить кассу</span>
@@ -819,18 +924,18 @@ export const DevicesView: React.FC = () => {
         </div>
       ) : viewMode === 'table' ? (
         
-        /* 6. TABLE VIEW ("Top Products" Nickelfox Style) */
-        <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl overflow-hidden shadow-xl">
+        /* 6. TABLE VIEW */
+        <div className="glass-surface-l2 rounded-2xl overflow-hidden shadow-glass-l2 glass-specular-edge">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#2C2D3A] bg-[#1A1C26] text-[#737791] font-semibold text-[11px] uppercase tracking-wider">
+                <tr className="border-b border-glass-subtle bg-white/[0.03] text-slate-400 font-semibold text-[11px] uppercase tracking-wider">
                   <th className="py-3.5 px-4 w-10">
                     <input
                       type="checkbox"
                       checked={selectedIds.length === filteredCashiers.length && filteredCashiers.length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-[#2C2D3A] bg-[#171821] text-[#A9DFD8] focus:ring-[#A9DFD8]"
+                      className="rounded border-glass-surface bg-slate-900/60 text-[#A9DFD8] focus:ring-[#A9DFD8]"
                     />
                   </th>
                   <th className="py-3.5 px-4 select-none">
@@ -959,7 +1064,7 @@ export const DevicesView: React.FC = () => {
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => handleSelectOne(c.id)}
-                          className="rounded border-[#2C2D3A] bg-[#171821] text-[#A9DFD8] focus:ring-[#A9DFD8]"
+                          className="rounded border-white/20 bg-white/5 text-[#A9DFD8] focus:ring-[#A9DFD8]/40 cursor-pointer"
                         />
                       </td>
 
@@ -967,8 +1072,8 @@ export const DevicesView: React.FC = () => {
                         <div className="flex items-center space-x-3">
                           <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-bold text-xs ${
                             isOnline 
-                              ? 'bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30' 
-                              : 'bg-[#171821] text-[#737791] border border-[#2C2D3A]'
+                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]' 
+                              : 'bg-white/5 text-slate-400 border border-white/10'
                           }`}>
                             <Monitor className="w-4 h-4" />
                           </div>
@@ -983,7 +1088,7 @@ export const DevicesView: React.FC = () => {
                             <button
                               onClick={() => setSearchQuery(c.ip_address)}
                               title="Нажмите, чтобы отфильтровать по IP"
-                              className="font-mono text-[11px] text-[#A9DFD8]/75 hover:text-[#A9DFD8] hover:underline block text-left"
+                              className="font-mono text-[11px] text-[#A9DFD8]/80 hover:text-[#A9DFD8] hover:underline block text-left"
                             >
                               {c.ip_address}:{c.ssh_port}
                             </button>
@@ -1000,7 +1105,7 @@ export const DevicesView: React.FC = () => {
                         >
                           {branch?.name || '—'}
                         </button>
-                        <div className="text-[10px] text-[#737791]">{region?.name || 'Ташкент'}</div>
+                        <div className="text-[10px] text-slate-400">{region?.name || 'Ташкент'}</div>
                       </td>
 
                       <td className="py-3.5 px-4">
@@ -1008,11 +1113,11 @@ export const DevicesView: React.FC = () => {
                         <button
                           onClick={() => setVersionFilter(versionFilter === ver ? 'ALL' : ver)}
                           title="Нажмите, чтобы отфильтровать по версии"
-                          className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-[#171821] text-[#A9DFD8] border border-[#2C2D3A] hover:border-[#A9DFD8] transition-all cursor-pointer block"
+                          className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-white/5 text-[#A9DFD8] border border-white/10 hover:border-[#A9DFD8]/40 hover:bg-white/10 transition-all cursor-pointer block"
                         >
                           {ver}
                         </button>
-                        <span className="text-[10px] text-[#737791] font-mono block mt-0.5">
+                        <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
                           v{c.current_content_version || 1}
                         </span>
                       </td>
@@ -1020,12 +1125,12 @@ export const DevicesView: React.FC = () => {
                       <td className="py-3.5 px-4">
                         <div className="space-y-1 max-w-[200px]">
                           <div className="flex items-center space-x-1 text-[11px] truncate" title={fullBlock?.name || 'По умолчанию'}>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#171821] text-[#87888C] border border-[#2C2D3A]">FULL</span>
-                            <span className="text-gray-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">FULL</span>
+                            <span className="text-slate-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
                           </div>
                           <div className="flex items-center space-x-1 text-[11px] truncate" title={promoBlock?.name || 'По умолчанию'}>
-                            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-[#171821] text-[#87888C] border border-[#2C2D3A]">50/50</span>
-                            <span className="text-gray-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">50/50</span>
+                            <span className="text-slate-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
                           </div>
                         </div>
                       </td>
@@ -1036,42 +1141,42 @@ export const DevicesView: React.FC = () => {
                           <button
                             onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
                             title="Нажмите для фильтрации: только В СЕТИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30 hover:bg-[#05C168]/25 flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.15)]"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
                             В СЕТИ
                           </button>
                         ) : c.last_sync_status === 'FAILED' ? (
                           <button
                             onClick={() => setStatusFilter(statusFilter === 'FAILED' ? 'ALL' : 'FAILED')}
                             title="Нажмите для фильтрации: только ОШИБКИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FF5B5B]/15 text-[#FF5B5B] border border-[#FF5B5B]/30 hover:bg-[#FF5B5B]/25 flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_10px_rgba(244,63,94,0.15)]"
                           >
-                            <AlertTriangle className="w-3 h-3 text-[#FF5B5B]" />
+                            <AlertTriangle className="w-3 h-3 text-rose-400" />
                             ОШИБКА
                           </button>
                         ) : c.last_sync_status === 'PENDING' || c.last_sync_status === 'PUBLISHED_AWAITING_RESTART' ? (
                           <button
                             onClick={() => setStatusFilter(statusFilter === 'PENDING' ? 'ALL' : 'PENDING')}
                             title="Нажмите для фильтрации: только ОЧЕРЕДЬ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#5D5FEF]/15 text-[#5D5FEF] border border-[#5D5FEF]/30 hover:bg-[#5D5FEF]/25 flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/25 flex items-center gap-1.5 transition-all cursor-pointer"
                           >
-                            <Clock className="w-3 h-3 text-[#5D5FEF]" />
+                            <Clock className="w-3 h-3 text-indigo-400" />
                             ОЖИДАЕТ
                           </button>
                         ) : (
                           <button
                             onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
                             title="Нажмите для фильтрации: только НЕ В СЕТИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-gray-500/15 text-gray-400 border border-gray-500/30 hover:bg-gray-500/25 flex items-center gap-1.5 transition-all cursor-pointer"
+                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FF5B5B]/10 text-[#FF5B5B] border border-[#FF5B5B]/25 hover:bg-[#FF5B5B]/20 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-gray-500" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B5B]" />
                             НЕ В СЕТИ
                           </button>
                         )}
                       </td>
 
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-[#87888C]">
+                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
                         {formatDateTime(c.last_seen_at)}
                       </td>
 
@@ -1081,47 +1186,51 @@ export const DevicesView: React.FC = () => {
                           <button
                             onClick={() => testConnectionMutation.mutate(c.id)}
                             disabled={isTestingThis}
-                            className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#05C168] transition-colors"
+                            className="p-1.5 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
                             title="Тест SSH связи"
                           >
-                            <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-[#05C168]' : ''}`} />
+                            <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-400' : ''}`} />
                           </button>
 
                           {/* Configure Ad */}
                           <button
                             onClick={() => handleConfigureAdForCashier(c.id)}
-                            className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#A9DFD8] transition-colors"
+                            className="p-1.5 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-lg text-slate-400 hover:text-[#A9DFD8] transition-colors"
                             title="Настроить рекламу"
                           >
                             <Send className="w-3.5 h-3.5" />
                           </button>
 
                           {/* Edit */}
-                          <button
-                            onClick={() => handleOpenEdit(c)}
-                            className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#FFB648] transition-colors"
-                            title="Редактировать параметры"
-                          >
-                            <Pencil className="w-3.5 h-3.5" />
-                          </button>
+                          {canManageDevices && (
+                            <button
+                              onClick={() => handleOpenEdit(c)}
+                              className="p-1.5 bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 rounded-lg text-slate-400 hover:text-amber-400 transition-colors"
+                              title="Редактировать параметры"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                          )}
 
                           {/* Details */}
                           <button
                             onClick={() => handleOpenDetails(c)}
-                            className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-white transition-colors"
+                            className="p-1.5 bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/30 rounded-lg text-slate-400 hover:text-white transition-colors"
                             title="Карточка кассы"
                           >
                             <Eye className="w-3.5 h-3.5" />
                           </button>
 
                           {/* Delete */}
-                          <button
-                            onClick={() => handleDeleteCashier(c)}
-                            className="p-1.5 bg-[#171821] hover:bg-[#FF5B5B]/15 border border-[#2C2D3A] hover:border-[#FF5B5B]/30 rounded-lg text-[#737791] hover:text-[#FF5B5B] transition-colors"
-                            title="Удалить"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          {canManageDevices && (
+                            <button
+                              onClick={() => handleDeleteCashier(c)}
+                              className="p-1.5 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                              title="Удалить"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -1146,26 +1255,26 @@ export const DevicesView: React.FC = () => {
             return (
               <div 
                 key={c.id}
-                className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl p-5 flex flex-col justify-between hover:border-[#A9DFD8]/40 transition-all shadow-xl"
+                className="glass-surface-l2 glass-specular-edge rounded-2xl p-5 flex flex-col justify-between hover:border-[#A9DFD8]/40 transition-all duration-300 shadow-xl group"
               >
                 <div>
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm ${
                         isOnline 
-                          ? 'bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30' 
-                          : 'bg-[#171821] text-[#737791] border border-[#2C2D3A]'
+                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]' 
+                          : 'bg-white/5 text-slate-400 border border-white/10'
                       }`}>
                         <Monitor className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-bold text-white text-sm hover:text-[#A9DFD8] cursor-pointer" onClick={() => handleOpenDetails(c)}>
+                        <h4 className="font-bold text-white text-sm hover:text-[#A9DFD8] transition-colors cursor-pointer" onClick={() => handleOpenDetails(c)}>
                           {c.name}
                         </h4>
                         <button
                           onClick={() => setSearchQuery(c.ip_address)}
                           title="Кликните для фильтра по IP"
-                          className="font-mono text-xs text-[#A9DFD8]/75 hover:text-[#A9DFD8] hover:underline block text-left"
+                          className="font-mono text-xs text-[#A9DFD8]/80 hover:text-[#A9DFD8] hover:underline block text-left"
                         >
                           {c.ip_address}:{c.ssh_port}
                         </button>
@@ -1175,35 +1284,35 @@ export const DevicesView: React.FC = () => {
                     {isOnline ? (
                       <button
                         onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-[#05C168]/15 text-[#05C168] border border-[#05C168]/30 cursor-pointer"
+                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 cursor-pointer shadow-[0_0_8px_rgba(16,185,129,0.15)]"
                       >
                         В СЕТИ
                       </button>
                     ) : (
                       <button
                         onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-gray-500/15 text-gray-400 border border-gray-500/30 cursor-pointer"
+                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/15 text-slate-400 border border-slate-500/30 cursor-pointer"
                       >
                         НЕ В СЕТИ
                       </button>
                     )}
                   </div>
 
-                  <div className="space-y-2 text-xs py-3 border-y border-[#2C2D3A]/60 my-3">
-                    <div className="flex justify-between items-center text-[#87888C]">
+                  <div className="space-y-2 text-xs py-3 border-y border-white/[0.08] my-3">
+                    <div className="flex justify-between items-center text-slate-400">
                       <span>Филиал:</span>
                       <button 
                         onClick={() => setBranchFilter(branchFilter === c.branch_id ? 'ALL' : c.branch_id)} 
-                        className="text-white hover:text-[#A9DFD8] font-semibold"
+                        className="text-white hover:text-[#A9DFD8] font-semibold transition-colors"
                       >
                         {branch?.name || '—'}
                       </button>
                     </div>
-                    <div className="flex justify-between items-center text-[#87888C]">
+                    <div className="flex justify-between items-center text-slate-400">
                       <span>Регион:</span>
-                      <span className="text-gray-300">{region?.name || 'Ташкент'}</span>
+                      <span className="text-slate-200">{region?.name || 'Ташкент'}</span>
                     </div>
-                    <div className="flex justify-between items-center text-[#87888C]">
+                    <div className="flex justify-between items-center text-slate-400">
                       <span>GuestScreen:</span>
                       <button 
                         onClick={() => setVersionFilter(versionFilter === ver ? 'ALL' : ver)}
@@ -1212,15 +1321,15 @@ export const DevicesView: React.FC = () => {
                         {ver}
                       </button>
                     </div>
-                    <div className="flex justify-between items-center text-[#87888C]">
+                    <div className="flex justify-between items-center text-slate-400">
                       <span>FULL блок:</span>
-                      <span className="text-gray-300 font-medium truncate max-w-[130px]" title={fullBlock?.name}>
+                      <span className="text-slate-200 font-medium truncate max-w-[130px]" title={fullBlock?.name}>
                         {fullBlock ? fullBlock.name : 'По умолчанию'}
                       </span>
                     </div>
-                    <div className="flex justify-between items-center text-[#87888C]">
+                    <div className="flex justify-between items-center text-slate-400">
                       <span>50/50 промо:</span>
-                      <span className="text-gray-300 font-medium truncate max-w-[130px]" title={promoBlock?.name}>
+                      <span className="text-slate-200 font-medium truncate max-w-[130px]" title={promoBlock?.name}>
                         {promoBlock ? promoBlock.name : 'По умолчанию'}
                       </span>
                     </div>
@@ -1228,46 +1337,50 @@ export const DevicesView: React.FC = () => {
                 </div>
 
                 <div className="flex items-center justify-between pt-2">
-                  <div className="text-[10px] font-mono text-[#737791]">
+                  <div className="text-[10px] font-mono text-slate-400">
                     {formatDateTime(c.last_seen_at)}
                   </div>
                   <div className="flex items-center space-x-1">
                     <button
                       onClick={() => testConnectionMutation.mutate(c.id)}
                       disabled={isTestingThis}
-                      className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#05C168] transition-colors"
+                      className="p-1.5 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
                       title="SSH тест"
                     >
-                      <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-[#05C168]' : ''}`} />
+                      <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-400' : ''}`} />
                     </button>
                     <button
                       onClick={() => handleConfigureAdForCashier(c.id)}
-                      className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#A9DFD8] transition-colors"
+                      className="p-1.5 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-lg text-slate-400 hover:text-[#A9DFD8] transition-colors"
                       title="Реклама"
                     >
                       <Send className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={() => handleOpenEdit(c)}
-                      className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-[#FFB648] transition-colors"
-                      title="Редактировать"
-                    >
-                      <Pencil className="w-3.5 h-3.5" />
-                    </button>
+                    {canManageDevices && (
+                      <button
+                        onClick={() => handleOpenEdit(c)}
+                        className="p-1.5 bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 rounded-lg text-slate-400 hover:text-amber-400 transition-colors"
+                        title="Редактировать"
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                     <button
                       onClick={() => handleOpenDetails(c)}
-                      className="p-1.5 bg-[#171821] hover:bg-[#282A37] border border-[#2C2D3A] rounded-lg text-[#87888C] hover:text-white transition-colors"
+                      className="p-1.5 bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/30 rounded-lg text-slate-400 hover:text-white transition-colors"
                       title="Детали"
                     >
                       <Eye className="w-3.5 h-3.5" />
                     </button>
-                    <button
-                      onClick={() => handleDeleteCashier(c)}
-                      className="p-1.5 bg-[#171821] hover:bg-[#FF5B5B]/15 border border-[#2C2D3A] hover:border-[#FF5B5B]/30 rounded-lg text-[#737791] hover:text-[#FF5B5B] transition-colors"
-                      title="Удалить"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
+                    {canManageDevices && (
+                      <button
+                        onClick={() => handleDeleteCashier(c)}
+                        className="p-1.5 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
+                        title="Удалить"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -1276,21 +1389,21 @@ export const DevicesView: React.FC = () => {
         </div>
       )}
 
-      {/* 8. Add Cashier Modal (Nickelfox Dark Theme) */}
+      {/* 8. Add Cashier Modal (Liquid Glass Level 4) */}
       {addCashierModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-[#2C2D3A] flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#A9DFD8]/20 text-[#A9DFD8] flex items-center justify-center font-bold">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-[#A9DFD8]/20 text-[#A9DFD8] flex items-center justify-center font-bold border border-[#A9DFD8]/30">
                   <Plus className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">Добавить новую кассу</h3>
-                  <p className="text-[11px] text-[#737791]">Регистрация терминала GuestScreen для удаленного управления</p>
+                  <p className="text-[11px] text-slate-400">Регистрация терминала GuestScreen для удаленного управления</p>
                 </div>
               </div>
-              <button onClick={() => setAddCashierModalOpen(false)} className="p-1 text-[#87888C] hover:text-white">
+              <button onClick={() => setAddCashierModalOpen(false)} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -1311,94 +1424,94 @@ export const DevicesView: React.FC = () => {
               });
             }} className="p-6 space-y-4 text-xs">
               {addError && (
-                <div className="p-3 rounded-xl bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 text-[#FF5B5B]">
+                <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300">
                   {addError}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3.5">
                 <div className="col-span-2">
-                  <label className="text-[#87888C] font-semibold block mb-1">Название кассы *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Название кассы *</label>
                   <input
                     type="text"
                     required
                     placeholder="Например: Касса №1 (Основной зал)"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">IP адрес *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">IP адрес *</label>
                   <input
                     type="text"
                     required
                     placeholder="192.168.131.202"
                     value={newIp}
                     onChange={(e) => setNewIp(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white font-mono placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input font-mono w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">SSH Порт</label>
+                  <label className="text-slate-300 font-semibold block mb-1">SSH Порт</label>
                   <input
                     type="number"
                     value={newPort}
                     onChange={(e) => setNewPort(parseInt(e.target.value) || 22)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white font-mono focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input font-mono w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="text-[#87888C] font-semibold block mb-1">Ресторан / Филиал *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Ресторан / Филиал *</label>
                   <select
                     value={newBranchId}
                     onChange={(e) => setNewBranchId(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white cursor-pointer focus:outline-none"
                   >
                     {branches.map((b) => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
+                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">{b.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">SSH логин</label>
+                  <label className="text-slate-300 font-semibold block mb-1">SSH логин</label>
                   <input
                     type="text"
                     placeholder="ucs (по умолч.)"
                     value={newSshUsername}
                     onChange={(e) => setNewSshUsername(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">SSH пароль</label>
+                  <label className="text-slate-300 font-semibold block mb-1">SSH пароль</label>
                   <input
                     type="password"
                     placeholder="••••••••"
                     value={newSshPassword}
                     onChange={(e) => setNewSshPassword(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#2C2D3A] flex items-center justify-end space-x-2">
+              <div className="pt-5 border-t border-white/10 flex items-center justify-end space-x-2.5">
                 <button
                   type="button"
                   onClick={() => setAddCashierModalOpen(false)}
-                  className="px-4 py-2 rounded-xl text-white bg-[#171821] border border-[#2C2D3A] hover:bg-[#282A37]"
+                  className="glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={addCashierMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-[#171821] font-bold bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-md shadow-[#A9DFD8]/20 transition-all disabled:opacity-50"
+                  className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50"
                 >
                   {addCashierMutation.isPending ? 'Сохранение...' : 'Зарегистрировать кассу'}
                 </button>
@@ -1408,113 +1521,113 @@ export const DevicesView: React.FC = () => {
         </div>
       )}
 
-      {/* 9. Edit Cashier Modal */}
+      {/* 9. Edit Cashier Modal (Liquid Glass Level 4) */}
       {editingCashier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#21222D] border border-[#2C2D3A] rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl">
-            <div className="p-5 border-b border-[#2C2D3A] flex items-center justify-between">
-              <div className="flex items-center space-x-2.5">
-                <div className="w-8 h-8 rounded-xl bg-[#FFB648]/20 text-[#FFB648] flex items-center justify-center font-bold">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
+            <div className="p-6 border-b border-white/10 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold border border-amber-500/30">
                   <Pencil className="w-4 h-4" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-white">Редактировать кассу</h3>
-                  <p className="text-[11px] text-[#737791]">{editingCashier.name} ({editingCashier.ip_address})</p>
+                  <p className="text-[11px] text-slate-400">Изменение параметров подключения и привязки терминала</p>
                 </div>
               </div>
-              <button onClick={() => setEditingCashier(null)} className="p-1 text-[#87888C] hover:text-white">
+              <button onClick={() => setEditingCashier(null)} className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSaveEdit} className="p-6 space-y-4 text-xs">
               {editError && (
-                <div className="p-3 rounded-xl bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 text-[#FF5B5B]">
+                <div className="p-3 rounded-xl bg-rose-500/15 border border-rose-500/30 text-rose-300">
                   {editError}
                 </div>
               )}
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3.5">
                 <div className="col-span-2">
-                  <label className="text-[#87888C] font-semibold block mb-1">Название кассы *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Название кассы *</label>
                   <input
                     type="text"
                     required
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">IP адрес *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">IP адрес *</label>
                   <input
                     type="text"
                     required
                     value={editIp}
                     onChange={(e) => setEditIp(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white font-mono focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input font-mono w-full px-3.5 py-2.5 text-xs text-white focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">SSH Порт</label>
+                  <label className="text-slate-300 font-semibold block mb-1">SSH Порт</label>
                   <input
                     type="number"
                     value={editPort}
                     onChange={(e) => setEditPort(parseInt(e.target.value) || 22)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white font-mono focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input font-mono w-full px-3.5 py-2.5 text-xs text-white focus:outline-none"
                   />
                 </div>
 
                 <div className="col-span-2">
-                  <label className="text-[#87888C] font-semibold block mb-1">Ресторан / Филиал *</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Ресторан / Филиал *</label>
                   <select
                     value={editBranchId}
                     onChange={(e) => setEditBranchId(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white cursor-pointer focus:outline-none"
                   >
                     {branches.map((b) => (
-                      <option key={b.id} value={b.id}>{b.name}</option>
+                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">{b.name}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">SSH логин</label>
+                  <label className="text-slate-300 font-semibold block mb-1">SSH логин</label>
                   <input
                     type="text"
                     placeholder="Оставить прежний"
                     value={editSshUsername}
                     onChange={(e) => setEditSshUsername(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#87888C] font-semibold block mb-1">Новый SSH пароль</label>
+                  <label className="text-slate-300 font-semibold block mb-1">Новый SSH пароль</label>
                   <input
                     type="password"
                     placeholder="Оставьте пустым, если не меняется"
                     value={editSshPassword}
                     onChange={(e) => setEditSshPassword(e.target.value)}
-                    className="w-full bg-[#171821] border border-[#2C2D3A] rounded-xl px-3.5 py-2 text-white placeholder-[#737791] focus:outline-none focus:border-[#A9DFD8]"
+                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-[#2C2D3A] flex items-center justify-end space-x-2">
+              <div className="pt-5 border-t border-white/10 flex items-center justify-end space-x-2.5">
                 <button
                   type="button"
                   onClick={() => setEditingCashier(null)}
-                  className="px-4 py-2 rounded-xl text-white bg-[#171821] border border-[#2C2D3A] hover:bg-[#282A37]"
+                  className="glass-btn-secondary px-4 py-2.5 rounded-xl text-xs font-semibold"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={updateCashierMutation.isPending}
-                  className="px-4 py-2 rounded-xl text-[#171821] font-bold bg-[#A9DFD8] hover:bg-[#8ee0d6] shadow-md shadow-[#A9DFD8]/20 transition-all disabled:opacity-50"
+                  className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold disabled:opacity-50"
                 >
                   {updateCashierMutation.isPending ? 'Сохранение...' : 'Обновить параметры'}
                 </button>
@@ -1536,10 +1649,10 @@ export const DevicesView: React.FC = () => {
             setDetailCashier(null);
             handleConfigureAdForCashier(id);
           }}
-          onEdit={(c) => {
+          onEdit={canManageDevices ? ((c) => {
             setDetailCashier(null);
             handleOpenEdit(c);
-          }}
+          }) : undefined}
         />
       )}
 
