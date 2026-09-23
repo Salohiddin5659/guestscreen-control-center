@@ -205,6 +205,11 @@ body {
 
 /* Primary Liquid Glass Button */
 .glass-btn-primary {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: linear-gradient(135deg, #A9DFD8 0%, #87D0C7 100%);
   color: #070B12;
   font-weight: 700;
@@ -223,6 +228,11 @@ body {
 
 /* Secondary Neutral Glass Button */
 .glass-btn-secondary {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid var(--glass-border-surface);
   color: #E2E8F0;
@@ -237,6 +247,11 @@ body {
 
 /* Danger Glass Button */
 .glass-btn-danger {
+  padding: 0.5rem 1rem;
+  border-radius: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background-color: var(--status-offline-glass);
   border: 1px solid rgba(255, 91, 91, 0.35);
   color: #FF7070;

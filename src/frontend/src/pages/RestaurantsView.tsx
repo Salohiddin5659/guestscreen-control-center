@@ -239,7 +239,7 @@ export const RestaurantsView: React.FC = () => {
         </div>
 
         {canManageBranches && (
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-2.5">
             <button
               onClick={() => {
                 setRegName('');
@@ -247,18 +247,20 @@ export const RestaurantsView: React.FC = () => {
                 setRegError(null);
                 setAddRegionOpen(true);
               }}
-              className="glass-btn-secondary text-xs flex items-center space-x-1.5"
+              className="px-4 py-2.5 rounded-xl text-xs font-semibold glass-btn-secondary flex items-center space-x-2 shadow-md liquid-interactive relative overflow-hidden transition-all duration-200 hover:border-[#A9DFD8]/40"
             >
-              <MapPin className="w-4 h-4 text-[#A9DFD8]" />
-              <span>+ Добавить регион</span>
+              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
+              <MapPin className="w-3.5 h-3.5 text-[#A9DFD8]" />
+              <span>Добавить регион</span>
             </button>
 
             <button
               onClick={() => openAddRestaurant(selectedRegionId)}
-              className="glass-btn-primary text-xs flex items-center space-x-1.5"
+              className="px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary flex items-center space-x-2 shadow-lg shadow-[#A9DFD8]/20 liquid-interactive relative overflow-hidden transition-all duration-200"
             >
+              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
               <Plus className="w-4 h-4" />
-              <span>+ Добавить ресторан</span>
+              <span>Добавить ресторан</span>
             </button>
           </div>
         )}
@@ -349,8 +351,9 @@ export const RestaurantsView: React.FC = () => {
           {canManageBranches && (
             <button
               onClick={() => openAddRestaurant(selectedRegionId)}
-              className="mt-4 glass-btn-primary text-xs inline-flex items-center space-x-1.5"
+              className="mt-4 px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary inline-flex items-center space-x-2 shadow-lg shadow-[#A9DFD8]/20 liquid-interactive relative overflow-hidden"
             >
+              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
               <Plus className="w-3.5 h-3.5" />
               <span>Добавить ресторан</span>
             </button>
@@ -562,14 +565,14 @@ export const RestaurantsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => { setAddRestaurantOpen(false); setEditRestaurant(null); }}
-                  className="glass-btn-secondary text-xs"
+                  className="px-4 py-2 rounded-xl glass-btn-secondary text-xs font-semibold"
                 >
                   Отмена
                 </button>
                 <button
                   type="submit"
                   disabled={createBranchMutation.isPending || updateBranchMutation.isPending}
-                  className="glass-btn-primary text-xs"
+                  className="px-5 py-2 rounded-xl glass-btn-primary text-xs font-bold shadow-md shadow-[#A9DFD8]/20"
                 >
                   {createBranchMutation.isPending || updateBranchMutation.isPending ? 'Сохранение...' : (editRestaurant ? 'Сохранить изменения' : 'Создать ресторан')}
                 </button>
@@ -682,14 +685,14 @@ export const RestaurantsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => { setAddRegionOpen(false); setEditRegion(null); }}
-                    className="glass-btn-secondary text-xs"
+                    className="px-4 py-2 rounded-xl glass-btn-secondary text-xs font-semibold"
                   >
                     Отмена
                   </button>
                   <button
                     type="submit"
                     disabled={createRegionMutation.isPending || updateRegionMutation.isPending}
-                    className="glass-btn-primary text-xs"
+                    className="px-5 py-2 rounded-xl glass-btn-primary text-xs font-bold shadow-md shadow-[#A9DFD8]/20"
                   >
                     {createRegionMutation.isPending || updateRegionMutation.isPending ? 'Сохранение...' : (editRegion ? 'Сохранить' : 'Создать регион')}
                   </button>

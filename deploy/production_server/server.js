@@ -539,16 +539,18 @@ app.use(cors());
 // are transparently forwarded to FastAPI Uvicorn engine.
 // Mounted BEFORE express.json() to prevent stream consumption.
 // -------------------------------------------------------------
+const FASTAPI_HOST = process.env.FASTAPI_HOST || '127.0.0.1';
+const FASTAPI_PORT = parseInt(process.env.FASTAPI_PORT || '8000', 10);
 const proxyToFastAPI = (req, res) => {
   const targetPath = req.originalUrl || req.url;
   const options = {
-    hostname: '127.0.0.1',
-    port: 8000,
+    hostname: FASTAPI_HOST,
+    port: FASTAPI_PORT,
     path: targetPath,
     method: req.method,
     headers: {
       ...req.headers,
-      host: '127.0.0.1:8000'
+      host: `${FASTAPI_HOST}:${FASTAPI_PORT}`
     }
   };
 

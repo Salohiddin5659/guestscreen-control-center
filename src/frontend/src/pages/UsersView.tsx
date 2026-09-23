@@ -209,10 +209,11 @@ export const UsersView: React.FC = () => {
 
         <button
           onClick={() => setAddUserOpen(true)}
-          className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 self-start sm:self-auto"
+          className="glass-btn-primary px-5 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 self-start sm:self-auto shadow-lg shadow-[#A9DFD8]/20 liquid-interactive relative overflow-hidden"
         >
+          <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
           <Plus className="w-4 h-4" />
-          <span>+ Добавить пользователя</span>
+          <span>Добавить пользователя</span>
         </button>
       </div>
 
