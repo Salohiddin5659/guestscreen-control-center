@@ -1391,7 +1391,7 @@ export const DevicesView: React.FC = () => {
 
       {/* 8. Add Cashier Modal (Liquid Glass Level 4) */}
       {addCashierModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -1523,7 +1523,7 @@ export const DevicesView: React.FC = () => {
 
       {/* 9. Edit Cashier Modal (Liquid Glass Level 4) */}
       {editingCashier && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-3">

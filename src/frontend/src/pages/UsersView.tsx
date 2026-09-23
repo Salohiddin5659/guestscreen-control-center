@@ -352,7 +352,7 @@ export const UsersView: React.FC = () => {
 
       {/* Add User Modal */}
       {addUserOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">
@@ -479,7 +479,7 @@ export const UsersView: React.FC = () => {
 
       {/* Edit User Modal */}
       {editUser && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-2.5">

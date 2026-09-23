@@ -462,7 +462,7 @@ export const RestaurantsView: React.FC = () => {
 
       {/* MODAL: Добавить / Изменить ресторан (Liquid Glass Level 4) */}
       {(addRestaurantOpen || editRestaurant) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">
@@ -584,7 +584,7 @@ export const RestaurantsView: React.FC = () => {
 
       {/* MODAL: Добавить / Изменить регион (Liquid Glass Level 4) */}
       {(addRegionOpen || editRegion) && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">

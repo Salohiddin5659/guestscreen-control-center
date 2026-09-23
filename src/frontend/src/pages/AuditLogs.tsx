@@ -87,7 +87,7 @@ export const AuditLogs: React.FC = () => {
 
       {/* Payload Diff Modal (Liquid Glass Level 4) */}
       {selectedDiff && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
+        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center bg-black/60 backdrop-blur-md p-4">
           <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-xl shadow-2xl overflow-hidden animate-scale-up">
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="text-sm font-bold text-white flex items-center gap-2">
