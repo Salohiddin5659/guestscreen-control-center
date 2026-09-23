@@ -60,6 +60,10 @@ export async function apiRequest<T = any>(
     if (!window.location.pathname.includes('/login')) {
       window.location.href = '/login';
     }
+    if (endpoint.includes('/auth/login')) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new ApiError(401, errorData.detail || 'Неверный логин или пароль');
+    }
     throw new ApiError(401, 'Сессия истекла. Пожалуйста, войдите снова.');
   }
 
