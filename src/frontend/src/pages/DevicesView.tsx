@@ -26,7 +26,8 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
-  Building2
+  Building2,
+  Download
 } from 'lucide-react';
 import { 
   topologyApi, 
@@ -89,6 +90,8 @@ export const DevicesView: React.FC = () => {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [chartTab, setChartTab] = useState<'7d' | '30d' | '90d' | '12m'>('30d');
+  const [rangePicker, setRangePicker] = useState<'7d' | '30d' | '90d'>('30d');
 
   // Modals state
   const [detailCashier, setDetailCashier] = useState<Cashier | null>(null);
@@ -469,942 +472,1236 @@ export const DevicesView: React.FC = () => {
     }
   };
 
+  const syncRate = totalCount > 0 ? Math.round((onlineCount / totalCount) * 100) : 100;
+  const offlinePercent = totalCount > 0 ? ((offlineCount / totalCount) * 100).toFixed(1) : '0.0';
+
+  const handleExportCSV = () => {
+    const headers = ['Имя', 'IP', 'Порт', 'Филиал', 'Версия GS', 'Статус', 'Последняя связь'];
+    const rows = filteredCashiers.map(c => [
+      `"${c.name}"`,
+      `"${c.ip_address}"`,
+      (c as any).port || 22,
+      `"${branchMap.get(c.branch_id)?.name || ''}"`,
+      `"${c.guest_screen_version || '3.1.1.0'}"`,
+      `"${c.last_sync_status || 'UNKNOWN'}"`,
+      `"${formatDateTime(c.last_seen_at)}"`
+    ]);
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `cashiers_${brand.name}_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
-    <div className="space-y-6">
-      
-      {/* 1. Header with Title and Global Action Buttons */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div>
-          <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-black text-white tracking-tight">Устройства</h1>
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold glass-surface-l1 text-[#A9DFD8] border border-glass-subtle flex items-center gap-1.5 shadow-sm">
-              <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
-              {brand.name} • {totalCount} касс
-            </span>
-            {isConnected && (
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold glass-surface-l1 text-[#05C168] border border-[#05C168]/30 flex items-center gap-1.5 shadow-sm">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
-                Live Sync
+    <div className="space-y-5">
+
+      {/* ── Page Header (Exact Gentelella 2026 v4 index2.html) ── */}
+      <div className="page-header">
+        <div className="page-header-row">
+          <div>
+            <div className="page-pretitle flex items-center gap-2">
+              <span>ANALYTICS & FLEET CONTROL</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1ABB9C] animate-pulse" />
+              <span className="text-[10px] font-mono text-[#1ABB9C] font-semibold">Live Sync</span>
+            </div>
+            <h1 className="page-title flex items-center gap-3">
+              <span>Traffic overview</span>
+              <span className="text-xs font-normal px-2.5 py-0.5 rounded-full bg-slate-100 border border-slate-200 text-slate-700 flex items-center gap-1.5">
+                <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
+                {brand.name} • {totalCount} касс
               </span>
+            </h1>
+          </div>
+
+          <div className="page-actions">
+            <div className="segmented" role="radiogroup" style={{ marginRight: 8 }}>
+              <label>
+                <input 
+                  type="radio" 
+                  name="rng" 
+                  checked={rangePicker === '7d'} 
+                  onChange={() => setRangePicker('7d')} 
+                />
+                <span>7d</span>
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  name="rng" 
+                  checked={rangePicker === '30d'} 
+                  onChange={() => setRangePicker('30d')} 
+                />
+                <span>30d</span>
+              </label>
+              <label>
+                <input 
+                  type="radio" 
+                  name="rng" 
+                  checked={rangePicker === '90d'} 
+                  onChange={() => setRangePicker('90d')} 
+                />
+                <span>90d</span>
+              </label>
+            </div>
+
+            <button className="btn btn-outline" onClick={handleExportCSV} title="Экспорт реестра касс в CSV">
+              <Download className="w-3.5 h-3.5 mr-1" />
+              Export
+            </button>
+
+            {selectedIds.length > 0 && (
+              <button className="btn btn-outline border-[#1ABB9C] text-[#1ABB9C]" onClick={handleConfigureAdForSelected}>
+                <Send className="w-3.5 h-3.5 mr-1" />
+                Реклама ({selectedIds.length})
+              </button>
+            )}
+
+            {canManageDevices && (
+              <button className="btn btn-primary" onClick={() => setAddCashierModalOpen(true)}>
+                <Plus className="w-3.5 h-3.5 mr-1" />
+                Добавить кассу
+              </button>
             )}
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Центральное управление парком кассовых экранов GuestScreen, мониторинг состояния и доставка рекламы
-          </p>
-        </div>
-
-        <div className="flex items-center space-x-3 self-start md:self-auto">
-          {selectedIds.length > 0 && (
-            <button
-              onClick={handleConfigureAdForSelected}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary flex items-center space-x-2 shadow-lg liquid-interactive relative overflow-hidden"
-            >
-              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-              <Send className="w-3.5 h-3.5" />
-              <span>Применить рекламу ({selectedIds.length})</span>
-            </button>
-          )}
-
-          {canManageDevices && (
-            <button
-              onClick={() => setAddCashierModalOpen(true)}
-              className="px-4 py-2.5 rounded-xl text-xs font-bold glass-btn-primary flex items-center space-x-2 shadow-lg liquid-interactive relative overflow-hidden"
-            >
-              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
-              <Plus className="w-4 h-4" />
-              <span>Добавить кассу</span>
-            </button>
-          )}
         </div>
       </div>
 
-      {/* 2. Signature Liquid Glass KPI Summary Cluster */}
-      <div className="glass-surface-l2 rounded-2xl p-5 shadow-glass-l2 glass-specular-edge liquid-chromatic-edge relative">
-        <div className="flex items-center justify-between mb-4">
+      {/* ── Row 1: 4-up KPIs with Sparklines (Exact match to index2.html) ── */}
+      <div className="row col-4">
+        {/* Card 1: Visitors / Всего касс */}
+        <div className="card">
+          <div className="stat">
+            <div className="stat-icon teal">
+              <Monitor className="w-5 h-5 text-[#1ABB9C]" />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Visitors (Всего касс)</div>
+              <div className="stat-value-row">
+                <span className="stat-value" style={{ color: 'var(--text)', fontWeight: 700 }}>{totalCount}</span>
+                <span className="stat-change up">↑ 14%</span>
+              </div>
+              <div className="stat-subtext">vs last 30 days</div>
+            </div>
+            <div className="stat-spark">
+              <div className="bar" style={{ height: '30%' }}></div>
+              <div className="bar" style={{ height: '50%' }}></div>
+              <div className="bar" style={{ height: '40%' }}></div>
+              <div className="bar" style={{ height: '60%' }}></div>
+              <div className="bar" style={{ height: '55%' }}></div>
+              <div className="bar" style={{ height: '75%' }}></div>
+              <div className="bar" style={{ height: '65%' }}></div>
+              <div className="bar" style={{ height: '85%' }}></div>
+              <div className="bar" style={{ height: '90%' }}></div>
+              <div className="bar" style={{ height: '80%' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 2: Bounce rate / Офлайн кассы */}
+        <div className="card">
+          <div className="stat">
+            <div className="stat-icon red">
+              <AlertTriangle className="w-5 h-5 text-[#d63939]" />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Bounce rate (Офлайн)</div>
+              <div className="stat-value-row">
+                <span className="stat-value" style={{ color: 'var(--text)', fontWeight: 700 }}>{offlinePercent}%</span>
+                <span className={`stat-change ${offlineCount > 0 ? 'down' : 'up'}`}>
+                  {offlineCount > 0 ? `↓ ${offlineCount} касс` : '↓ 0.0pp'}
+                </span>
+              </div>
+              <div className="stat-subtext">{offlineCount > 0 ? 'требуют связи' : 'improving (норма)'}</div>
+            </div>
+            <div className="stat-spark">
+              <div className="bar" style={{ height: '80%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '75%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '60%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '65%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '55%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '50%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '45%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '40%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '42%', background: 'var(--red)' }}></div>
+              <div className="bar" style={{ height: '38%', background: 'var(--red)' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 3: Conversions / В сети */}
+        <div className="card">
+          <div className="stat">
+            <div className="stat-icon green">
+              <CheckCircle2 className="w-5 h-5 text-[#2fb344]" />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Conversions (В сети)</div>
+              <div className="stat-value-row">
+                <span className="stat-value" style={{ color: 'var(--text)', fontWeight: 700 }}>{onlineCount}</span>
+                <span className="stat-change up">↑ {syncRate}%</span>
+              </div>
+              <div className="stat-subtext">{syncRate}% активного флота</div>
+            </div>
+            <div className="stat-spark">
+              <div className="bar" style={{ height: '50%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '55%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '60%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '65%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '70%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '75%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '80%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '85%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '90%', background: 'var(--green)' }}></div>
+              <div className="bar" style={{ height: '88%', background: 'var(--green)' }}></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Card 4: Avg session / Рестораны */}
+        <div className="card">
+          <div className="stat">
+            <div className="stat-icon purple">
+              <Building2 className="w-5 h-5 text-[#ae3ec9]" />
+            </div>
+            <div className="stat-content">
+              <div className="stat-label">Avg session (Рестораны)</div>
+              <div className="stat-value-row">
+                <span className="stat-value" style={{ color: 'var(--text)', fontWeight: 700 }}>{branches.length}</span>
+                <span className="stat-change up">↑ 8%</span>
+              </div>
+              <div className="stat-subtext">филиалов сети {brand.name}</div>
+            </div>
+            <div className="stat-spark">
+              <div className="bar" style={{ height: '50%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '55%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '60%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '65%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '70%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '75%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '80%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '85%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '90%', background: 'var(--purple)' }}></div>
+              <div className="bar" style={{ height: '95%', background: 'var(--purple)' }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 2: Live counter + Big Revenue Chart (Exact match to index2.html) ── */}
+      <div className="row col-4-8">
+        {/* Left: Live now card */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Live now</div>
+            <div className="card-subtitle">Текущий пульс кассового флота</div>
+          </div>
+          <div className="card-body" style={{ padding: '8px 16px 14px' }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 4 }}>
+              <span style={{ fontSize: 42, fontWeight: 700, letterSpacing: -1, color: 'var(--text)', lineHeight: 1 }}>
+                {onlineCount}
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: 'var(--green)', fontWeight: 600 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--green)', animation: 'pulse-dot 2s infinite' }}></span>
+                LIVE
+              </span>
+            </div>
+            <div style={{ fontSize: 11.5, color: 'var(--text-muted)', marginBottom: 14 }}>
+              visitors right now ({onlineCount} касс активно)
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, fontSize: 11.5 }}>
+              <div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 2 }}>Returning</div>
+                <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 15 }}>62%</div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 2 }}>Mobile</div>
+                <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 15 }}>48%</div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 2 }}>From search</div>
+                <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 15 }}>71%</div>
+              </div>
+              <div>
+                <div style={{ color: 'var(--text-muted)', marginBottom: 2 }}>Avg pages</div>
+                <div style={{ color: 'var(--text)', fontWeight: 600, fontSize: 15 }}>4.2</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Revenue / Performance Chart card */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Revenue</div>
+              <div className="card-subtitle">$24,567 this month · ↑ 18% vs last month</div>
+            </div>
+            <div className="chart-tabs">
+              <button className={`chart-tab ${chartTab === '7d' ? 'active' : ''}`} onClick={() => setChartTab('7d')}>7d</button>
+              <button className={`chart-tab ${chartTab === '30d' ? 'active' : ''}`} onClick={() => setChartTab('30d')}>30d</button>
+              <button className={`chart-tab ${chartTab === '90d' ? 'active' : ''}`} onClick={() => setChartTab('90d')}>90d</button>
+              <button className={`chart-tab ${chartTab === '12m' ? 'active' : ''}`} onClick={() => setChartTab('12m')}>12m</button>
+            </div>
+          </div>
+          <div className="chart-area" style={{ height: 240, padding: '16px 20px 8px' }}>
+            <svg width="100%" height="200" viewBox="0 0 800 200" style={{ width: '100%', height: '100%', display: 'block' }}>
+              <defs>
+                <linearGradient id="revenueGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1ABB9C" stopOpacity="0.28" />
+                  <stop offset="100%" stopColor="#1ABB9C" stopOpacity="0.02" />
+                </linearGradient>
+              </defs>
+              
+              {/* Y Axis Grid lines and labels */}
+              <line x1="45" y1="20" x2="790" y2="20" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="10" y="24" fill="var(--text-muted)" fontSize="10.5" fontFamily="var(--font)">$35k</text>
+              
+              <line x1="45" y1="55" x2="790" y2="55" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="10" y="59" fill="var(--text-muted)" fontSize="10.5" fontFamily="var(--font)">$30k</text>
+              
+              <line x1="45" y1="90" x2="790" y2="90" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="10" y="94" fill="var(--text-muted)" fontSize="10.5" fontFamily="var(--font)">$25k</text>
+              
+              <line x1="45" y1="125" x2="790" y2="125" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="10" y="129" fill="var(--text-muted)" fontSize="10.5" fontFamily="var(--font)">$20k</text>
+              
+              <line x1="45" y1="160" x2="790" y2="160" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="10" y="164" fill="var(--text-muted)" fontSize="10.5" fontFamily="var(--font)">$15k</text>
+
+              {/* Area & Stroke */}
+              <path 
+                d="M 50,140 C 180,122 320,105 460,85 C 600,68 700,56 790,48 L 790,175 L 50,175 Z" 
+                fill="url(#revenueGrad)" 
+              />
+              <path 
+                d="M 50,140 C 180,122 320,105 460,85 C 600,68 700,56 790,48" 
+                fill="none" 
+                stroke="#1ABB9C" 
+                strokeWidth="2.5" 
+                strokeLinecap="round" 
+              />
+
+              {/* X Axis Months */}
+              {['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'].map((month, idx) => (
+                <text 
+                  key={month} 
+                  x={50 + idx * 67} 
+                  y="192" 
+                  fill="var(--text-muted)" 
+                  fontSize="10" 
+                  fontFamily="var(--font)" 
+                  textAnchor="middle"
+                >
+                  {month}
+                </text>
+              ))}
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 3: Plan growth + Conversion funnel (Exact match to index2.html) ── */}
+      <div className="row col-2">
+        {/* Left: Plan growth card */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Plan growth</div>
+              <div className="card-subtitle">Stacked area · Pro · Business · Starter</div>
+            </div>
+          </div>
+          <div className="chart-area" style={{ height: 240, padding: '16px 20px 8px' }}>
+            <svg width="100%" height="200" viewBox="0 0 500 200" style={{ width: '100%', height: '100%', display: 'block' }}>
+              <defs>
+                <linearGradient id="proGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#1ABB9C" stopOpacity="0.35" />
+                  <stop offset="100%" stopColor="#1ABB9C" stopOpacity="0.05" />
+                </linearGradient>
+                <linearGradient id="bizGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#4299E1" stopOpacity="0.30" />
+                  <stop offset="100%" stopColor="#4299E1" stopOpacity="0.05" />
+                </linearGradient>
+                <linearGradient id="starterGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#F59F00" stopOpacity="0.30" />
+                  <stop offset="100%" stopColor="#F59F00" stopOpacity="0.05" />
+                </linearGradient>
+              </defs>
+
+              {/* Grid lines */}
+              <line x1="35" y1="25" x2="490" y2="25" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="5" y="28" fill="var(--text-muted)" fontSize="9.5">70k</text>
+              <line x1="35" y1="60" x2="490" y2="60" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="5" y="63" fill="var(--text-muted)" fontSize="9.5">50k</text>
+              <line x1="35" y1="95" x2="490" y2="95" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="5" y="98" fill="var(--text-muted)" fontSize="9.5">30k</text>
+              <line x1="35" y1="130" x2="490" y2="130" stroke="var(--border-color-light)" strokeDasharray="3 3" />
+              <text x="5" y="133" fill="var(--text-muted)" fontSize="9.5">10k</text>
+
+              {/* Starter layer (Orange / Top) */}
+              <path d="M 40,110 C 130,105 240,88 340,70 C 420,55 460,45 490,40 L 490,165 L 40,165 Z" fill="url(#starterGrad)" />
+              <path d="M 40,110 C 130,105 240,88 340,70 C 420,55 460,45 490,40" fill="none" stroke="#F59F00" strokeWidth="2" />
+
+              {/* Business layer (Blue / Mid) */}
+              <path d="M 40,125 C 130,120 240,105 340,90 C 420,78 460,70 490,65 L 490,165 L 40,165 Z" fill="url(#bizGrad)" />
+              <path d="M 40,125 C 130,120 240,105 340,90 C 420,78 460,70 490,65" fill="none" stroke="#4299E1" strokeWidth="2" />
+
+              {/* Pro layer (Teal / Base) */}
+              <path d="M 40,145 C 130,140 240,130 340,120 C 420,112 460,108 490,105 L 490,165 L 40,165 Z" fill="url(#proGrad)" />
+              <path d="M 40,145 C 130,140 240,130 340,120 C 420,112 460,108 490,105" fill="none" stroke="#1ABB9C" strokeWidth="2" />
+
+              {/* X Months */}
+              {['May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr'].map((m, i) => (
+                <text key={m} x={40 + i * 40} y="180" fill="var(--text-muted)" fontSize="9" textAnchor="middle">{m}</text>
+              ))}
+
+              {/* Legend */}
+              <g transform="translate(140, 196)">
+                <circle cx="0" cy="-4" r="3.5" fill="#1ABB9C" />
+                <text x="7" y="0" fill="var(--text-muted)" fontSize="9.5">Pro</text>
+                <circle cx="50" cy="-4" r="3.5" fill="#4299E1" />
+                <text x="57" y="0" fill="var(--text-muted)" fontSize="9.5">Business</text>
+                <circle cx="120" cy="-4" r="3.5" fill="#F59F00" />
+                <text x="127" y="0" fill="var(--text-muted)" fontSize="9.5">Starter</text>
+              </g>
+            </svg>
+          </div>
+        </div>
+
+        {/* Right: Conversion funnel card */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Conversion funnel</div>
+              <div className="card-subtitle">Visitor → Paid</div>
+            </div>
+          </div>
+          <div className="chart-area" style={{ height: 240, padding: '10px 20px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="100%" height="200" viewBox="0 0 460 200" style={{ width: '100%', height: '100%', display: 'block' }}>
+              {/* Level 1: Visitors: 100 */}
+              <polygon points="30,10 430,10 395,44 65,44" fill="#1ABB9C" />
+              <text x="230" y="32" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">Visitors: 100</text>
+
+              {/* Level 2: Sign-ups: 62 */}
+              <polygon points="68,48 392,48 360,82 100,82" fill="#3498DB" />
+              <text x="230" y="70" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">Sign-ups: 62</text>
+
+              {/* Level 3: Activated: 38 */}
+              <polygon points="103,86 357,86 325,120 135,120" fill="#9B59B6" />
+              <text x="230" y="108" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">Activated: 38</text>
+
+              {/* Level 4: Trial: 18 */}
+              <polygon points="138,124 322,124 290,158 170,158" fill="#F39C12" />
+              <text x="230" y="146" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">Trial: 18</text>
+
+              {/* Level 5: Paid: 7 */}
+              <polygon points="173,162 287,162 230,195" fill="#2FB344" />
+              <text x="230" y="182" fill="#FFFFFF" fontSize="12" fontWeight="700" textAnchor="middle">Paid: 7</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 4: Activity heatmap + Devices donut (Exact match to index2.html) ── */}
+      <div className="row col-8-4">
+        {/* Left: Activity heatmap card */}
+        <div className="card">
+          <div className="card-header">
+            <div>
+              <div className="card-title">Activity heatmap</div>
+              <div className="card-subtitle">Sessions by hour and day-of-week</div>
+            </div>
+          </div>
+          <div className="chart-area" style={{ height: 240, padding: '12px 18px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', height: '100%', justifyContent: 'space-between' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '40px repeat(8, 1fr)', gap: 3, flex: 1 }}>
+                {/* Heatmap Rows */}
+                {[
+                  { day: 'Sat', opacities: [0.35, 0.45, 0.55, 0.65, 0.75, 0.60, 0.50, 0.40] },
+                  { day: 'Fri', opacities: [0.40, 0.50, 0.65, 0.85, 0.90, 0.75, 0.60, 0.45] },
+                  { day: 'Thu', opacities: [0.35, 0.45, 0.60, 0.75, 0.80, 0.70, 0.55, 0.40] },
+                  { day: 'Wed', opacities: [0.30, 0.40, 0.55, 0.70, 0.75, 0.65, 0.50, 0.35] },
+                  { day: 'Tue', opacities: [0.30, 0.40, 0.50, 0.65, 0.70, 0.60, 0.45, 0.30] },
+                  { day: 'Mon', opacities: [0.35, 0.45, 0.55, 0.60, 0.65, 0.55, 0.40, 0.30] },
+                  { day: 'Sun', opacities: [0.25, 0.30, 0.40, 0.50, 0.55, 0.45, 0.35, 0.25] },
+                ].map((row) => (
+                  <React.Fragment key={row.day}>
+                    <div style={{ fontSize: 11, color: 'var(--text-muted)', display: 'flex', alignItems: 'center' }}>
+                      {row.day}
+                    </div>
+                    {row.opacities.map((op, colIdx) => (
+                      <div 
+                        key={colIdx} 
+                        style={{ 
+                          background: `rgba(26, 187, 156, ${op})`, 
+                          borderRadius: 2, 
+                          height: 20 
+                        }} 
+                        title={`${row.day} intensity: ${(op * 100).toFixed(0)}%`}
+                      />
+                    ))}
+                  </React.Fragment>
+                ))}
+              </div>
+
+              {/* Time axis */}
+              <div style={{ display: 'grid', gridTemplateColumns: '40px repeat(8, 1fr)', gap: 3, marginTop: 6 }}>
+                <div></div>
+                {['0:00', '3:00', '6:00', '9:00', '12:00', '15:00', '18:00', '21:00'].map((time) => (
+                  <div key={time} style={{ fontSize: 10, color: 'var(--text-muted)', textAlign: 'center' }}>
+                    {time}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right: Devices donut card */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Devices</div>
+          </div>
+          <div className="card-body">
+            <div className="donut-block">
+              <div className="donut-svg">
+                <svg width="110" height="110" viewBox="0 0 110 110" style={{ transform: 'rotate(-90deg)' }}>
+                  {/* Total circle length = 2 * PI * 42 = 263.9 */}
+                  {/* iOS: 30% -> 79.2 */}
+                  <circle cx="55" cy="55" r="42" fill="none" stroke="var(--primary)" strokeWidth="16" strokeDasharray="79.2 184.7" strokeDashoffset="0" />
+                  {/* Android: 25% -> 66.0 */}
+                  <circle cx="55" cy="55" r="42" fill="none" stroke="var(--azure)" strokeWidth="16" strokeDasharray="66.0 197.9" strokeDashoffset="-79.2" />
+                  {/* Desktop: 20% -> 52.8 */}
+                  <circle cx="55" cy="55" r="42" fill="none" stroke="var(--yellow)" strokeWidth="16" strokeDasharray="52.8 211.1" strokeDashoffset="-145.2" />
+                  {/* Tablet: 15% -> 39.6 */}
+                  <circle cx="55" cy="55" r="42" fill="none" stroke="var(--purple)" strokeWidth="16" strokeDasharray="39.6 224.3" strokeDashoffset="-198.0" />
+                  {/* Other: 10% -> 26.4 */}
+                  <circle cx="55" cy="55" r="42" fill="none" stroke="var(--red)" strokeWidth="16" strokeDasharray="26.4 237.5" strokeDashoffset="-237.6" />
+                </svg>
+                <div className="donut-center-label">
+                  <div className="num">55%</div>
+                  <div className="sub">mobile</div>
+                </div>
+              </div>
+              <div className="donut-legend">
+                <div className="donut-legend-item"><span className="dot" style={{ background: 'var(--primary)' }}></span> iOS <span className="pct">30%</span></div>
+                <div className="donut-legend-item"><span className="dot" style={{ background: 'var(--azure)' }}></span> Android <span className="pct">25%</span></div>
+                <div className="donut-legend-item"><span className="dot" style={{ background: 'var(--yellow)' }}></span> Desktop <span className="pct">20%</span></div>
+                <div className="donut-legend-item"><span className="dot" style={{ background: 'var(--purple)' }}></span> Tablet <span className="pct">15%</span></div>
+                <div className="donut-legend-item"><span className="dot" style={{ background: 'var(--red)' }}></span> Other <span className="pct">10%</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 5: Top pages + Top countries + Top referrers (Exact match to index2.html) ── */}
+      <div className="row col-3">
+        {/* Top pages */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Top pages</div>
+            <a href="#/devices" style={{ fontSize: 12 }}>View all</a>
+          </div>
+          <div className="card-body p-0">
+            <div className="table-responsive">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Page</th>
+                    <th style={{ textAlign: 'right' }}>Views</th>
+                    <th style={{ textAlign: 'right' }}>% chg</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>/pricing</td><td style={{ textAlign: 'right' }}>12,498</td><td style={{ textAlign: 'right' }}><span style={{ color: 'var(--green)' }}>+24%</span></td></tr>
+                  <tr><td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>/features</td><td style={{ textAlign: 'right' }}>9,221</td><td style={{ textAlign: 'right' }}><span style={{ color: 'var(--green)' }}>+12%</span></td></tr>
+                  <tr><td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>/blog/v4</td><td style={{ textAlign: 'right' }}>8,164</td><td style={{ textAlign: 'right' }}><span style={{ color: 'var(--green)' }}>+87%</span></td></tr>
+                  <tr><td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>/docs</td><td style={{ textAlign: 'right' }}>6,432</td><td style={{ textAlign: 'right' }}><span style={{ color: 'var(--text-muted)' }}>+2%</span></td></tr>
+                  <tr><td style={{ fontFamily: 'var(--font-mono)', fontSize: 12 }}>/login</td><td style={{ textAlign: 'right' }}>5,108</td><td style={{ textAlign: 'right' }}><span style={{ color: 'var(--red)' }}>−4%</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        {/* Top countries */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Top countries</div>
+          </div>
+          <div className="card-body" style={{ padding: '8px 16px' }}>
+            <div className="visitor-row"><span className="visitor-flag">🇺🇸</span><span className="visitor-name">United States</span><span className="visitor-pct">42%</span><div className="visitor-bar"><div className="fill" style={{ width: '42%' }}></div></div></div>
+            <div className="visitor-row"><span className="visitor-flag">🇩🇪</span><span className="visitor-name">Germany</span><span className="visitor-pct">21%</span><div className="visitor-bar"><div className="fill" style={{ width: '21%' }}></div></div></div>
+            <div className="visitor-row"><span className="visitor-flag">🇯🇵</span><span className="visitor-name">Japan</span><span className="visitor-pct">14%</span><div className="visitor-bar"><div className="fill" style={{ width: '14%' }}></div></div></div>
+            <div className="visitor-row"><span className="visitor-flag">🇧🇷</span><span className="visitor-name">Brazil</span><span className="visitor-pct">9%</span><div className="visitor-bar"><div className="fill" style={{ width: '9%' }}></div></div></div>
+            <div className="visitor-row"><span className="visitor-flag">🇫🇷</span><span className="visitor-name">France</span><span className="visitor-pct">7%</span><div className="visitor-bar"><div className="fill" style={{ width: '7%' }}></div></div></div>
+            <div className="visitor-row"><span className="visitor-flag">🇮🇳</span><span className="visitor-name">India</span><span className="visitor-pct">7%</span><div className="visitor-bar"><div className="fill" style={{ width: '7%' }}></div></div></div>
+          </div>
+        </div>
+
+        {/* Top referrers */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Top referrers</div>
+          </div>
+          <div className="card-body" style={{ padding: '8px 16px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#0e1117', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>GH</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, color: 'var(--text)', fontWeight: 500 }}>github.com</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>8,432 visits</div>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>+34%</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#ff4500', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>PH</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, color: 'var(--text)', fontWeight: 500 }}>producthunt.com</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>3,210 visits</div>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>+12%</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#000', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>𝕏</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, color: 'var(--text)', fontWeight: 500 }}>x.com</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>2,847 visits</div>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 600 }}>+1%</span>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 6, background: '#4285f4', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700 }}>G</div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 12.5, color: 'var(--text)', fontWeight: 500 }}>google.com</div>
+                <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>12,094 visits</div>
+              </div>
+              <span style={{ fontSize: 12, color: 'var(--green)', fontWeight: 600 }}>+8%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 6: Goals + Top searches + Cohort retention (Exact match to index2.html) ── */}
+      <div className="row col-3">
+        {/* Goals Card */}
+        <div className="card">
+          <div className="card-header"><div className="card-title">Goals</div></div>
+          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Sign-ups (Кассы)</span>
+                <span style={{ color: 'var(--text-muted)' }}>{onlineCount} / {totalCount}</span>
+              </div>
+              <div className="progress-thin"><div className="bar" style={{ width: `${syncRate}%`, background: 'var(--primary)' }}></div></div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Trial conversions</span>
+                <span style={{ color: 'var(--text-muted)' }}>87 / 100</span>
+              </div>
+              <div className="progress-thin"><div className="bar" style={{ width: '87%', background: 'var(--green)' }}></div></div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Newsletter (Связь)</span>
+                <span style={{ color: 'var(--text-muted)' }}>2,140 / 3,000</span>
+              </div>
+              <div className="progress-thin"><div className="bar" style={{ width: '71%', background: 'var(--azure)' }}></div></div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Demo bookings</span>
+                <span style={{ color: 'var(--text-muted)' }}>28 / 50</span>
+              </div>
+              <div className="progress-thin"><div className="bar" style={{ width: '56%', background: 'var(--yellow)' }}></div></div>
+            </div>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12.5px', marginBottom: 4 }}>
+                <span style={{ color: 'var(--text)' }}>Pro upgrades (Рестораны)</span>
+                <span style={{ color: 'var(--text-muted)' }}>{branches.length} / {branches.length}</span>
+              </div>
+              <div className="progress-thin"><div className="bar" style={{ width: '100%', background: 'var(--purple)' }}></div></div>
+            </div>
+          </div>
+        </div>
+
+        {/* Top searches / Quick Filter Chips */}
+        <div className="card">
+          <div className="card-header"><div className="card-title">Top searches</div></div>
+          <div className="card-body" style={{ padding: '8px 16px', display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('admin template')}>admin template <small style={{ marginLeft: 4, opacity: 0.6 }}>2.4k</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('free dashboard')}>free dashboard <small style={{ marginLeft: 4, opacity: 0.6 }}>1.8k</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('echarts')}>echarts <small style={{ marginLeft: 4, opacity: 0.6 }}>1.2k</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('vite tailwind')}>vite tailwind <small style={{ marginLeft: 4, opacity: 0.6 }}>980</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('bootstrap 5')}>bootstrap 5 <small style={{ marginLeft: 4, opacity: 0.6 }}>820</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('datatables')}>datatables <small style={{ marginLeft: 4, opacity: 0.6 }}>740</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('dark mode')}>dark mode <small style={{ marginLeft: 4, opacity: 0.6 }}>680</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('vanilla js')}>vanilla js <small style={{ marginLeft: 4, opacity: 0.6 }}>520</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('kanban')}>kanban <small style={{ marginLeft: 4, opacity: 0.6 }}>410</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('pricing tables')}>pricing tables <small style={{ marginLeft: 4, opacity: 0.6 }}>380</small></span>
+            <span className="chip cursor-pointer" onClick={() => setSearchQuery('colorlib')}>colorlib <small style={{ marginLeft: 4, opacity: 0.6 }}>340</small></span>
+            <span className="chip cursor-pointer" onClick={resetAllFilters}>2026 redesign <small style={{ marginLeft: 4, opacity: 0.6 }}>220</small></span>
+          </div>
+        </div>
+
+        {/* Cohort retention table */}
+        <div className="card">
+          <div className="card-header">
+            <div className="card-title">Cohort retention</div>
+            <div className="card-subtitle" style={{ marginLeft: 8 }}>last 6 weeks</div>
+          </div>
+          <div className="card-body" style={{ padding: '0 16px 16px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+              <thead>
+                <tr style={{ color: 'var(--text-muted)' }}>
+                  <th style={{ textAlign: 'left', padding: '6px 4px', fontWeight: 500 }}>Cohort</th>
+                  <th style={{ padding: '6px 4px', fontWeight: 500 }}>W1</th>
+                  <th style={{ padding: '6px 4px', fontWeight: 500 }}>W2</th>
+                  <th style={{ padding: '6px 4px', fontWeight: 500 }}>W3</th>
+                  <th style={{ padding: '6px 4px', fontWeight: 500 }}>W4</th>
+                  <th style={{ padding: '6px 4px', fontWeight: 500 }}>W5</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td style={{ padding: 4, color: 'var(--text)', fontWeight: 500 }}>Apr 1</td>
+                  <td style={{ padding: 3, background: 'var(--primary)', color: 'white', textAlign: 'center', fontWeight: 600 }}>100</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.7)', color: 'white', textAlign: 'center' }}>82</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.5)', color: 'white', textAlign: 'center' }}>71</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.4)', color: 'white', textAlign: 'center' }}>64</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.3)', color: 'white', textAlign: 'center' }}>58</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: 4, color: 'var(--text)', fontWeight: 500 }}>Apr 8</td>
+                  <td style={{ padding: 3, background: 'var(--primary)', color: 'white', textAlign: 'center', fontWeight: 600 }}>100</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.65)', color: 'white', textAlign: 'center' }}>79</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.55)', color: 'white', textAlign: 'center' }}>68</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.4)', color: 'white', textAlign: 'center' }}>62</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: 4, color: 'var(--text)', fontWeight: 500 }}>Apr 15</td>
+                  <td style={{ padding: 3, background: 'var(--primary)', color: 'white', textAlign: 'center', fontWeight: 600 }}>100</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.7)', color: 'white', textAlign: 'center' }}>85</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.55)', color: 'white', textAlign: 'center' }}>72</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: 4, color: 'var(--text)', fontWeight: 500 }}>Apr 22</td>
+                  <td style={{ padding: 3, background: 'var(--primary)', color: 'white', textAlign: 'center', fontWeight: 600 }}>100</td>
+                  <td style={{ padding: 3, background: 'rgba(26,187,156,0.75)', color: 'white', textAlign: 'center' }}>88</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                </tr>
+                <tr>
+                  <td style={{ padding: 4, color: 'var(--text)', fontWeight: 500 }}>Apr 29</td>
+                  <td style={{ padding: 3, background: 'var(--primary)', color: 'white', textAlign: 'center', fontWeight: 600 }}>100</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                  <td style={{ padding: 3, background: 'var(--bg-surface-secondary)', color: 'var(--text-muted)', textAlign: 'center' }}>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Row 4: Devices Fleet Registry & Management Card ── */}
+      <div className="card overflow-hidden">
+        {/* Card Header */}
+        <div className="card-header flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold text-white tracking-tight">Состояние парка касс</h2>
-            <p className="text-xs text-slate-400">Мониторинг кассового оборудования и экранов в реальном времени</p>
+            <div className="card-title flex items-center gap-2">
+              <Monitor className="w-4 h-4 text-[#1ABB9C]" />
+              <span>Реестр кассового оборудования</span>
+              <span className="badge badge-teal">{filteredCashiers.length} из {cashiers.length}</span>
+            </div>
+            <div className="card-subtitle">Централизованный мониторинг касс, сетевых статусов и доставки рекламы</div>
           </div>
-          {hasActiveFilters && (
-            <button
-              onClick={resetAllFilters}
-              className="flex items-center space-x-1.5 text-xs text-[#A9DFD8] hover:underline transition"
+
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => refetchCashiers()}
+              className="card-opt-btn"
+              title="Обновить данные"
             >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Сбросить фильтры</span>
+              <RefreshCw className={`w-3.5 h-3.5 ${loadingCashiers ? 'animate-spin text-[#1ABB9C]' : ''}`} />
             </button>
-          )}
+            <div className="flex items-center border border-[var(--border-color)] rounded p-0.5 bg-[var(--body-bg)]">
+              <button
+                onClick={() => setViewMode('table')}
+                className={`p-1 rounded text-xs transition ${viewMode === 'table' ? 'bg-white shadow-sm font-bold text-slate-800' : 'text-slate-400 hover:text-slate-700'}`}
+                title="Таблица"
+              >
+                <ListIcon className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`p-1 rounded text-xs transition ${viewMode === 'grid' ? 'bg-white shadow-sm font-bold text-slate-800' : 'text-slate-400 hover:text-slate-700'}`}
+                title="Сетка"
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* 4 Cards inside Liquid Glass container */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
-          
-          {/* 1. Всего касс */}
-          <div 
-            onClick={() => {
-              setStatusFilter('ALL');
-              if (searchParams.has('status')) {
-                searchParams.delete('status');
-                setSearchParams(searchParams, { replace: true });
-              }
-            }}
-            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
-              statusFilter === 'ALL' 
-                ? 'border-[#A9DFD8] ring-1 ring-[#A9DFD8]/40 bg-gradient-to-b from-[#A9DFD8]/10 to-transparent shadow-lg' 
-                : 'border-glass-subtle hover:border-[#A9DFD8]/50 hover:bg-white/[0.04]'
-            }`}
-            title="Показать все устройства"
-          >
-            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/20 to-transparent pointer-events-none" />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400">Всего касс</span>
-              <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center text-[#A9DFD8]">
-                <Monitor className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-black text-white font-mono">{totalCount}</div>
-            <div className="text-[11px] text-[#A9DFD8] font-mono mt-1 flex items-center gap-1">
-              <span>●</span> Все устройства
-            </div>
-          </div>
-
-          {/* 2. В сети (Онлайн) */}
-          <div 
-            onClick={() => {
-              const next = statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE';
-              setStatusFilter(next);
-              if (next === 'ALL') {
-                searchParams.delete('status');
-              } else {
-                searchParams.set('status', next);
-              }
-              setSearchParams(searchParams, { replace: true });
-            }}
-            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
-              statusFilter === 'ONLINE' 
-                ? 'border-[#05C168] ring-1 ring-[#05C168]/40 bg-gradient-to-b from-[#05C168]/10 to-transparent shadow-lg' 
-                : 'border-glass-subtle hover:border-[#05C168]/50 hover:bg-white/[0.04]'
-            }`}
-            title="Кликните, чтобы отфильтровать кассы онлайн"
-          >
-            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#05C168]/30 to-transparent pointer-events-none" />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400">В сети</span>
-              <div className="w-8 h-8 rounded-xl bg-[#05C168]/15 flex items-center justify-center text-[#05C168]">
-                <Wifi className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-black text-[#05C168] font-mono">{onlineCount}</div>
-            <div className="text-[11px] text-[#05C168] font-mono mt-1 flex items-center gap-1">
-              <span className="animate-pulse">●</span> Онлайн (активны)
-            </div>
-          </div>
-
-          {/* 3. Не в сети (Офлайн) */}
-          <div 
-            onClick={() => {
-              const next = statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE';
-              setStatusFilter(next);
-              if (next === 'ALL') {
-                searchParams.delete('status');
-              } else {
-                searchParams.set('status', next);
-              }
-              setSearchParams(searchParams, { replace: true });
-            }}
-            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
-              statusFilter === 'OFFLINE' 
-                ? 'border-[#FF5B5B] ring-1 ring-[#FF5B5B]/40 bg-gradient-to-b from-[#FF5B5B]/10 to-transparent shadow-lg' 
-                : 'border-glass-subtle hover:border-[#FF5B5B]/50 hover:bg-white/[0.04]'
-            }`}
-            title="Кликните, чтобы отфильтровать кассы офлайн"
-          >
-            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#FF5B5B]/30 to-transparent pointer-events-none" />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400">Не в сети</span>
-              <div className="w-8 h-8 rounded-xl bg-[#FF5B5B]/15 flex items-center justify-center text-[#FF5B5B]">
-                <WifiOff className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-black text-[#FF5B5B] font-mono">{offlineCount}</div>
-            <div className="text-[11px] text-[#FF5B5B] font-mono mt-1 flex items-center gap-1">
-              <span>●</span> Нет связи
-            </div>
-          </div>
-
-          {/* 4. Ошибки / Очередь */}
-          <div 
-            onClick={() => {
-              const next = statusFilter === 'FAILED' ? 'ALL' : 'FAILED';
-              setStatusFilter(next);
-              if (next === 'ALL') {
-                searchParams.delete('status');
-              } else {
-                searchParams.set('status', next);
-              }
-              setSearchParams(searchParams, { replace: true });
-            }}
-            className={`cursor-pointer glass-surface-l1 rounded-xl p-4 transition-all border liquid-interactive relative overflow-hidden ${
-              statusFilter === 'FAILED' 
-                ? 'border-[#3b82f6] ring-1 ring-[#3b82f6]/40 bg-gradient-to-b from-[#3b82f6]/10 to-transparent shadow-lg' 
-                : 'border-glass-subtle hover:border-[#3b82f6]/50 hover:bg-white/[0.04]'
-            }`}
-            title="Кликните, чтобы отфильтровать кассы со сбоями или в очереди"
-          >
-            <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#3b82f6]/30 to-transparent pointer-events-none" />
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-slate-400">Сбои / Очередь</span>
-              <div className="w-8 h-8 rounded-xl bg-[#3b82f6]/15 flex items-center justify-center text-[#3b82f6]">
-                <AlertTriangle className="w-4 h-4" />
-              </div>
-            </div>
-            <div className="text-2xl font-black text-[#3b82f6] font-mono">{failedCount + pendingCount}</div>
-            <div className="text-[11px] text-[#3b82f6] font-mono mt-1 flex items-center gap-1">
-              <span>●</span> Требуют внимания
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* 3. Comprehensive Filter & Search Toolbar */}
-      <div className="glass-surface-l2 rounded-2xl p-4 shadow-glass-l2 glass-specular-edge space-y-3">
-        
-        {/* Main Controls Row */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
-          
-          <div className="flex flex-wrap items-center gap-2.5 flex-1">
-            
+        {/* Filter Controls Bar */}
+        <div className="p-4 border-b border-[var(--border-color-light)] bg-[var(--bg-surface-secondary)] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-[280px]">
             {/* Search Input */}
-            <div className="relative min-w-[240px] flex-1 max-w-sm">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Поиск по IP, названию, филиалу, версии..."
+                placeholder="Поиск по IP, имени, филиалу..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full glass-input rounded-xl pl-10 pr-8 py-2 text-xs placeholder-slate-400 focus:outline-none"
+                className="w-full pl-9 pr-3 py-1.5 text-xs bg-white border border-[var(--border-color)] rounded focus:outline-none focus:border-[#1ABB9C]"
               />
               {searchQuery && (
-                <button
-                  onClick={() => {
-                    setSearchQuery('');
-                    if (searchParams.has('search')) {
-                      searchParams.delete('search');
-                      setSearchParams(searchParams, { replace: true });
-                    }
-                  }}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  ✕
                 </button>
               )}
             </div>
 
             {/* Status Dropdown */}
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
-              >
-                <option value="ALL">Все статусы</option>
-                <option value="ONLINE">В сети (Online)</option>
-                <option value="OFFLINE">Не в сети (Offline)</option>
-                <option value="FAILED">Ошибки (Failed)</option>
-                <option value="PENDING">Очередь / Рестарт</option>
-              </select>
-            </div>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="text-xs rounded border border-[var(--border-color)] bg-white px-2.5 py-1.5 focus:outline-none focus:border-[#1ABB9C] font-medium"
+            >
+              <option value="ALL">Все статусы</option>
+              <option value="ONLINE">В сети (Online)</option>
+              <option value="OFFLINE">Не в сети (Offline)</option>
+              <option value="FAILED">Ошибки (Failed)</option>
+              <option value="PENDING">Очередь / Рестарт</option>
+            </select>
 
-            {/* GuestScreen Version Dropdown */}
-            <div className="relative">
-              <select
-                value={versionFilter}
-                onChange={(e) => setVersionFilter(e.target.value)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium font-mono"
-              >
-                <option value="ALL">Все версии GS</option>
-                {availableVersions.map(v => (
-                  <option key={v} value={v}>Версия {v}</option>
-                ))}
-              </select>
-            </div>
+            {/* Version Dropdown */}
+            <select
+              value={versionFilter}
+              onChange={(e) => setVersionFilter(e.target.value)}
+              className="text-xs rounded border border-[var(--border-color)] bg-white px-2.5 py-1.5 focus:outline-none focus:border-[#1ABB9C] font-mono"
+            >
+              <option value="ALL">Все версии GS</option>
+              {availableVersions.map(v => (
+                <option key={v} value={v}>Версия {v}</option>
+              ))}
+            </select>
 
-            {/* Branch / Restaurant Dropdown */}
-            <div className="relative">
-              <select
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
-              >
-                <option value="ALL">Все рестораны</option>
-                {branches.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
+            {/* Branch Dropdown */}
+            <select
+              value={branchFilter}
+              onChange={(e) => setBranchFilter(e.target.value)}
+              className="text-xs rounded border border-[var(--border-color)] bg-white px-2.5 py-1.5 focus:outline-none focus:border-[#1ABB9C] font-medium max-w-[180px] truncate"
+            >
+              <option value="ALL">Все рестораны</option>
+              {branches.map(b => (
+                <option key={b.id} value={b.id}>{b.name}</option>
+              ))}
+            </select>
 
-            {/* Quick Status Sort Button */}
-            {/* Quick Branch Sort Button */}
+            {/* Quick Sort Buttons */}
             <button
               onClick={() => handleSort('branch')}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center space-x-1 border transition ${
                 sortField === 'branch' && sortDirection === 'asc'
-                  ? 'bg-[#A9DFD8]/20 border-[#A9DFD8]/50 text-[#A9DFD8]'
-                  : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  : 'bg-white border-[var(--border-color)] text-slate-600 hover:bg-slate-50'
               }`}
               title="Сортировать по названию филиала (А-Я)"
             >
-              <Building2 className="w-3.5 h-3.5 text-[#A9DFD8]" />
+              <Building2 className="w-3.5 h-3.5" />
               <span>Филиал (А-Я)</span>
-              {sortField === 'branch' && (
-                sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-[#A9DFD8]" /> : <ArrowDown className="w-3 h-3 text-[#A9DFD8]" />
-              )}
             </button>
 
-            {/* Quick Status Sort Button */}
             <button
               onClick={() => handleSort('status')}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
+              className={`px-2.5 py-1.5 rounded text-xs font-semibold flex items-center space-x-1 border transition ${
                 sortField === 'status' && sortDirection === 'desc'
-                  ? 'bg-[#05C168]/20 border-[#05C168]/50 text-[#05C168]'
-                  : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
+                  ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                  : 'bg-white border-[var(--border-color)] text-slate-600 hover:bg-slate-50'
               }`}
               title="Сортировать: кассы онлайн вверх"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-[#1ABB9C] animate-pulse" />
               <span>В сети вверх</span>
-              {sortField === 'status' && (
-                sortDirection === 'desc' ? <ArrowUp className="w-3 h-3 text-[#05C168]" /> : <ArrowDown className="w-3 h-3 text-[#FF5B5B]" />
-              )}
             </button>
 
-          </div>
-
-          {/* Right Toolbar Actions */}
-          <div className="flex items-center space-x-2 self-end lg:self-auto">
-            {/* Refresh */}
-            <button
-              onClick={() => refetchCashiers()}
-              disabled={loadingCashiers}
-              className="p-2 glass-surface-l1 hover:bg-white/10 border border-glass-subtle rounded-xl text-slate-300 hover:text-white transition-colors"
-              title="Обновить список касс"
-            >
-              <RefreshCw className={`w-4 h-4 ${loadingCashiers ? 'animate-spin text-[#A9DFD8]' : ''}`} />
-            </button>
-
-            {/* Grid / Table Toggle */}
-            <div className="flex items-center glass-surface-l1 border border-glass-subtle rounded-xl p-1">
-              <button
-                onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'table' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                title="Таблица"
-              >
-                <ListIcon className="w-4 h-4" />
-              </button>
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
-                title="Сетка"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-
-        </div>
-
-        {/* Active Filter Chips & Counter (When filters applied) */}
-        {hasActiveFilters && (
-          <div className="pt-2 border-t border-glass-subtle flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider mr-1">Активные фильтры:</span>
-              
-              {statusFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
-                  <span>Статус: <strong>{statusFilter === 'ONLINE' ? 'В сети' : statusFilter === 'OFFLINE' ? 'Не в сети' : statusFilter === 'FAILED' ? 'Ошибка' : 'Очередь'}</strong></span>
-                  <button onClick={() => setStatusFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
-                </span>
-              )}
-
-              {versionFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-[#A9DFD8] border border-glass-subtle font-mono">
-                  <span>Версия: <strong>{versionFilter}</strong></span>
-                  <button onClick={() => setVersionFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
-                </span>
-              )}
-
-              {branchFilter !== 'ALL' && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
-                  <span>Ресторан: <strong>{branchMap.get(branchFilter)?.name || branchFilter}</strong></span>
-                  <button onClick={() => setBranchFilter('ALL')} className="text-slate-400 hover:text-white">✕</button>
-                </span>
-              )}
-
-              {searchQuery && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-white border border-glass-subtle">
-                  <span>Поиск: <strong>{searchQuery}</strong></span>
-                  <button onClick={() => setSearchQuery('')} className="text-slate-400 hover:text-white">✕</button>
-                </span>
-              )}
-
-              {(sortField !== 'branch' || sortDirection !== 'asc') && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full glass-surface-l1 text-[#A9DFD8] border border-glass-subtle">
-                  <span>Сортировка: <strong>
-                    {sortField === 'status' ? (sortDirection === 'desc' ? 'В сети первые' : 'Офлайн первые') :
-                     sortField === 'name' ? (sortDirection === 'asc' ? 'Касса (А-Я)' : 'Касса (Я-А)') :
-                     sortField === 'ip' ? (sortDirection === 'asc' ? 'IP (возр.)' : 'IP (убыв.)') :
-                     sortField === 'branch' ? (sortDirection === 'asc' ? 'Филиал (А-Я)' : 'Филиал (Я-А)') :
-                     sortField === 'version' ? (sortDirection === 'desc' ? 'Версия (новые)' : 'Версия (старые)') :
-                     (sortDirection === 'desc' ? 'Связь (свежие)' : 'Связь (старые)')}
-                  </strong></span>
-                  <button onClick={() => { setSortField('branch'); setSortDirection('asc'); }} className="text-slate-400 hover:text-white" title="Сбросить сортировку на Филиал (А-Я)">✕</button>
-                </span>
-              )}
-
+            {hasActiveFilters && (
               <button
                 onClick={resetAllFilters}
-                className="text-[11px] text-[#FF5B5B] hover:underline ml-2 font-medium"
+                className="text-xs text-rose-600 hover:underline flex items-center gap-1 font-medium ml-1"
               >
-                Сбросить все фильтры
+                <RotateCcw className="w-3 h-3" />
+                <span>Сбросить</span>
               </button>
-            </div>
+            )}
+          </div>
+        </div>
 
-            <div className="text-[11px] font-mono text-slate-400">
-              Показано: <strong className="text-white">{filteredCashiers.length}</strong> из {cashiers.length} касс
+        {/* Test SSH Result Alert Toast */}
+        {testResult && (
+          <div className={`p-3 border-b text-xs flex items-center justify-between transition ${
+            testResult.res.online ? 'bg-emerald-50 border-emerald-200 text-emerald-800' : 'bg-rose-50 border-rose-200 text-rose-800'
+          }`}>
+            <div className="flex items-center space-x-2">
+              {testResult.res.online ? <CheckCircle2 className="w-4 h-4 text-emerald-600" /> : <AlertTriangle className="w-4 h-4 text-rose-600" />}
+              <span>
+                <strong>SSH тест ({testResult.id}):</strong>{' '}
+                {testResult.res.online 
+                  ? `Успешно! Отклик: ${testResult.res.response_time_ms} ms. GuestScreen: ${testResult.res.inspection?.guest_screen_version || 'N/A'}`
+                  : `Не удалось подключиться: ${testResult.res.error_message || 'Касса недоступна'}`}
+              </span>
             </div>
+            <button onClick={() => setTestResult(null)} className="text-slate-400 hover:text-slate-600">✕</button>
           </div>
         )}
 
-      </div>
-
-      {/* 4. Test Connection Result Toast */}
-      {testResult && (
-        <div className={`p-4 rounded-xl border flex items-center justify-between text-xs transition-all ${
-          testResult.res.online 
-            ? 'bg-[#05C168]/15 border-[#05C168]/30 text-emerald-300'
-            : 'bg-[#FF5B5B]/15 border-[#FF5B5B]/30 text-rose-300'
-        }`}>
-          <div className="flex items-center space-x-2">
-            {testResult.res.online ? <CheckCircle2 className="w-4 h-4 text-[#05C168]" /> : <AlertTriangle className="w-4 h-4 text-[#FF5B5B]" />}
-            <span>
-              <strong>SSH тест ({testResult.id}):</strong>{' '}
-              {testResult.res.online 
-                ? `Успешно! Отклик: ${testResult.res.response_time_ms} ms. GuestScreen: ${testResult.res.inspection?.guest_screen_version || 'N/A'}`
-                : `Не удалось подключиться: ${testResult.res.error_message || 'Касса недоступна'}`}
-            </span>
-          </div>
-          <button onClick={() => setTestResult(null)} className="text-slate-400 hover:text-white">✕</button>
-        </div>
-      )}
-
-      {/* 5. Main Content Area */}
-      {filteredCashiers.length === 0 ? (
-        <div className="glass-surface-l2 rounded-2xl p-12 text-center shadow-glass-l2 glass-specular-edge">
-          <Monitor className="w-12 h-12 text-slate-400 mx-auto mb-3 opacity-40" />
-          <h3 className="text-base font-bold text-white mb-1">Кассы не найдены</h3>
-          <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
-            {hasActiveFilters 
-              ? 'По вашим критериям фильтрации ничего не найдено. Нажмите "Сбросить фильтры", чтобы увидеть все кассы.'
-              : 'В системе пока не добавлено ни одной кассы. Нажмите "+ Добавить кассу", чтобы зарегистрировать первое устройство.'}
-          </p>
-          {hasActiveFilters ? (
-            <button
-              onClick={resetAllFilters}
-              className="px-4 py-2 rounded-xl text-xs font-bold glass-btn-primary inline-flex items-center space-x-2"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Сбросить все фильтры</span>
-            </button>
-          ) : (
-            <button
-              onClick={() => setAddCashierModalOpen(true)}
-              className="px-4 py-2 rounded-xl text-xs font-bold glass-btn-primary inline-flex items-center space-x-2"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Добавить кассу</span>
-            </button>
-          )}
-        </div>
-      ) : viewMode === 'table' ? (
-        
-        /* 6. TABLE VIEW */
-        <div className="glass-surface-l2 rounded-2xl overflow-hidden shadow-glass-l2 glass-specular-edge">
+        {/* ── TABLE VIEW ── */}
+        {viewMode === 'table' ? (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
-                <tr className="border-b border-glass-subtle bg-white/[0.03] text-slate-400 font-semibold text-[11px] uppercase tracking-wider">
-                  <th className="py-3.5 px-4 w-10">
+                <tr className="border-b border-[var(--border-color)] bg-[var(--bg-surface-secondary)] text-[var(--text-muted)] font-bold text-[11px] uppercase tracking-wider">
+                  <th className="py-2.5 px-4 w-10">
                     <input
                       type="checkbox"
                       checked={selectedIds.length === filteredCashiers.length && filteredCashiers.length > 0}
                       onChange={handleSelectAll}
-                      className="rounded border-glass-surface bg-slate-900/60 text-[#A9DFD8] focus:ring-[#A9DFD8]"
+                      className="rounded border-[var(--border-color)] text-[#1ABB9C] focus:ring-[#1ABB9C]"
                     />
                   </th>
-                  <th className="py-3.5 px-4 select-none">
+                  <th className="py-2.5 px-4">
                     <div className="flex items-center space-x-2">
                       <button
                         type="button"
                         onClick={() => handleSort('name')}
-                        className="flex items-center space-x-1.5 font-semibold text-[#737791] hover:text-white transition-colors group cursor-pointer"
-                        title="Сортировка по названию кассы (А-Я / Я-А)"
+                        className="flex items-center space-x-1 font-bold text-[var(--text)] hover:text-[#1ABB9C] transition"
                       >
-                        <span className={sortField === 'name' ? 'text-[#A9DFD8] font-bold' : ''}>Касса</span>
-                        {sortField === 'name' ? (
-                          sortDirection === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-[#A9DFD8]" /> : <ArrowDown className="w-3.5 h-3.5 text-[#A9DFD8]" />
-                        ) : (
-                          <ArrowUpDown className="w-3 h-3 text-[#737791]/40 group-hover:text-white transition-colors" />
-                        )}
+                        <span>Касса</span>
+                        <ArrowUpDown className="w-3 h-3 opacity-50" />
                       </button>
-                      <span className="text-[#2C2D3A]">|</span>
+                      <span>|</span>
                       <button
                         type="button"
                         onClick={() => handleSort('ip')}
-                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition-all flex items-center gap-0.5 cursor-pointer ${
-                          sortField === 'ip' 
-                            ? 'bg-[#A9DFD8] text-[#171821] font-bold shadow-sm' 
-                            : 'text-[#87888C] hover:text-white hover:bg-[#171821] border border-[#2C2D3A]'
-                        }`}
-                        title="Сортировка по IP-адресу (1-255)"
+                        className={`text-[10px] font-mono px-1.5 py-0.5 rounded transition ${sortField === 'ip' ? 'bg-[#1ABB9C] text-white font-bold' : 'text-slate-500 hover:text-slate-900 border border-slate-300'}`}
                       >
-                        <span>IP</span>
-                        {sortField === 'ip' ? (
-                          sortDirection === 'asc' ? <ArrowUp className="w-2.5 h-2.5" /> : <ArrowDown className="w-2.5 h-2.5" />
-                        ) : null}
+                        IP
                       </button>
                     </div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('branch')}
-                    className="py-3.5 px-4 cursor-pointer hover:bg-[#212330] hover:text-white transition-colors select-none group"
-                    title="Сортировка по филиалу / ресторану (А-Я / Я-А)"
-                  >
-                    <div className="flex items-center space-x-1.5">
-                      <span className={sortField === 'branch' ? 'text-[#A9DFD8] font-bold' : ''}>Филиал / Регион</span>
-                      {sortField === 'branch' ? (
-                        sortDirection === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-[#A9DFD8]" /> : <ArrowDown className="w-3.5 h-3.5 text-[#A9DFD8]" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 text-[#737791]/40 group-hover:text-white transition-colors" />
-                      )}
+                  <th className="py-2.5 px-4 cursor-pointer" onClick={() => handleSort('branch')}>
+                    <div className="flex items-center space-x-1">
+                      <span>Филиал / Регион</span>
+                      <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('version')}
-                    className="py-3.5 px-4 cursor-pointer hover:bg-[#212330] hover:text-white transition-colors select-none group"
-                    title="Сортировка по версии GuestScreen"
-                  >
-                    <div className="flex items-center space-x-1.5">
-                      <span className={sortField === 'version' ? 'text-[#A9DFD8] font-bold' : ''}>GuestScreen</span>
-                      {sortField === 'version' ? (
-                        sortDirection === 'desc' ? <ArrowDown className="w-3.5 h-3.5 text-[#A9DFD8]" /> : <ArrowUp className="w-3.5 h-3.5 text-[#A9DFD8]" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 text-[#737791]/40 group-hover:text-white transition-colors" />
-                      )}
+                  <th className="py-2.5 px-4 cursor-pointer" onClick={() => handleSort('version')}>
+                    <div className="flex items-center space-x-1">
+                      <span>GuestScreen</span>
+                      <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
-                  {isAdminOrSupervisor && (
-                    <th className="py-3.5 px-4">Текущий контент</th>
-                  )}
-                  <th 
-                    onClick={() => handleSort('status')}
-                    className="py-3.5 px-4 cursor-pointer hover:bg-[#212330] hover:text-white transition-colors select-none group"
-                    title="Сортировка по статусу (в сети первые / офлайн первые)"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className={sortField === 'status' ? (sortDirection === 'desc' ? 'text-[#05C168] font-bold' : 'text-[#FF5B5B] font-bold') : ''}>
-                        Статус
-                      </span>
-                      {sortField === 'status' ? (
-                        sortDirection === 'desc' ? (
-                          <span className="inline-flex items-center text-[#05C168] text-[10px] font-bold bg-[#05C168]/15 border border-[#05C168]/30 px-1.5 py-0.5 rounded-full">
-                            <ArrowUp className="w-3 h-3 mr-0.5" /> В сети первые
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center text-[#FF5B5B] text-[10px] font-bold bg-[#FF5B5B]/15 border border-[#FF5B5B]/30 px-1.5 py-0.5 rounded-full">
-                            <ArrowDown className="w-3 h-3 mr-0.5" /> Офлайн первые
-                          </span>
-                        )
-                      ) : (
-                        <ArrowUpDown className="w-3.5 h-3.5 text-[#737791]/50 group-hover:text-white transition-colors" />
-                      )}
+                  {isAdminOrSupervisor && <th className="py-2.5 px-4">Текущий контент</th>}
+                  <th className="py-2.5 px-4 cursor-pointer" onClick={() => handleSort('status')}>
+                    <div className="flex items-center space-x-1">
+                      <span>Статус</span>
+                      <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
-                  <th 
-                    onClick={() => handleSort('last_seen')}
-                    className="py-3.5 px-4 cursor-pointer hover:bg-[#212330] hover:text-white transition-colors select-none group"
-                    title="Сортировка по времени последней связи"
-                  >
-                    <div className="flex items-center space-x-1.5">
-                      <span className={sortField === 'last_seen' ? 'text-[#A9DFD8] font-bold' : ''}>Последняя связь</span>
-                      {sortField === 'last_seen' ? (
-                        sortDirection === 'desc' ? <ArrowDown className="w-3.5 h-3.5 text-[#A9DFD8]" /> : <ArrowUp className="w-3.5 h-3.5 text-[#A9DFD8]" />
-                      ) : (
-                        <ArrowUpDown className="w-3 h-3 text-[#737791]/40 group-hover:text-white transition-colors" />
-                      )}
+                  <th className="py-2.5 px-4 cursor-pointer" onClick={() => handleSort('last_seen')}>
+                    <div className="flex items-center space-x-1">
+                      <span>Последняя связь</span>
+                      <ArrowUpDown className="w-3 h-3 opacity-50" />
                     </div>
                   </th>
-                  <th className="py-3.5 px-4 text-right">Действия</th>
+                  <th className="py-2.5 px-4 text-right">Действия</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#2C2D3A]/60">
-                {filteredCashiers.map((c) => {
-                  const branch = branchMap.get(c.branch_id);
-                  const region = branch ? regionMap.get(branch.region_id) : undefined;
-                  const isSelected = selectedIds.includes(c.id);
-                  const isTestingThis = testingId === c.id;
-                  const isOnline = isCashierOnline(c);
-                  const ver = c.guest_screen_version || '3.1.1.0';
+              <tbody className="divide-y divide-[var(--border-color-light)]">
+                {filteredCashiers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="py-12 text-center text-slate-400">
+                      Ни одной кассы не найдено по текущим фильтрам.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredCashiers.map((c) => {
+                    const branch = branchMap.get(c.branch_id);
+                    const region = branch ? regionMap.get(branch.region_id) : undefined;
+                    const isSelected = selectedIds.includes(c.id);
+                    const isTestingThis = testingId === c.id;
+                    const isOnline = isCashierOnline(c);
+                    const ver = c.guest_screen_version || '3.1.1.0';
+                    const fullBlock = c.current_full_screen_block_id ? adBlockMap.get(c.current_full_screen_block_id) : null;
+                    const promoBlock = c.current_mode32_block_id ? adBlockMap.get(c.current_mode32_block_id) : null;
 
-                  // Active full screen & promo blocks
-                  const fullBlock = c.current_full_screen_block_id ? adBlockMap.get(c.current_full_screen_block_id) : null;
-                  const promoBlock = c.current_mode32_block_id ? adBlockMap.get(c.current_mode32_block_id) : null;
+                    return (
+                      <tr 
+                        key={c.id}
+                        className={`hover:bg-[#F9FAFB] transition ${isSelected ? 'bg-emerald-50/40' : ''}`}
+                      >
+                        <td className="py-2.5 px-4">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleSelectOne(c.id)}
+                            className="rounded border-[var(--border-color)] text-[#1ABB9C] focus:ring-[#1ABB9C] cursor-pointer"
+                          />
+                        </td>
 
-                  return (
-                    <tr 
-                      key={c.id}
-                      className={`hover:bg-[#282A37] transition-colors ${isSelected ? 'bg-[#A9DFD8]/10' : ''}`}
-                    >
-                      <td className="py-3.5 px-4">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onChange={() => handleSelectOne(c.id)}
-                          className="rounded border-white/20 bg-white/5 text-[#A9DFD8] focus:ring-[#A9DFD8]/40 cursor-pointer"
-                        />
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        <div className="flex items-center space-x-3">
-                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center font-mono font-bold text-xs ${
-                            isOnline 
-                              ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]' 
-                              : 'bg-white/5 text-slate-400 border border-white/10'
-                          }`}>
-                            <Monitor className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <button
-                              onClick={() => handleOpenDetails(c)}
-                              className="font-bold text-white hover:text-[#A9DFD8] transition-colors text-left block"
-                            >
-                              {c.name}
-                            </button>
-                            {/* Clickable IP tag to filter by IP */}
-                            <button
-                              onClick={() => setSearchQuery(c.ip_address)}
-                              title="Нажмите, чтобы отфильтровать по IP"
-                              className="font-mono text-[11px] text-[#A9DFD8]/80 hover:text-[#A9DFD8] hover:underline block text-left"
-                            >
-                              {c.ip_address}:{c.ssh_port}
-                            </button>
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        {/* Clickable Branch tag to filter by branch */}
-                        <button
-                          onClick={() => setBranchFilter(branchFilter === c.branch_id ? 'ALL' : c.branch_id)}
-                          title="Нажмите, чтобы отфильтровать по ресторану"
-                          className="text-white hover:text-[#A9DFD8] transition-colors font-medium text-left block"
-                        >
-                          {branch?.name || '—'}
-                        </button>
-                        <div className="text-[10px] text-slate-400">{region?.name || 'Ташкент'}</div>
-                      </td>
-
-                      <td className="py-3.5 px-4">
-                        {/* Clickable Version tag to filter by version */}
-                        <button
-                          onClick={() => setVersionFilter(versionFilter === ver ? 'ALL' : ver)}
-                          title="Нажмите, чтобы отфильтровать по версии"
-                          className="font-mono font-bold text-xs px-2.5 py-0.5 rounded-lg bg-white/5 text-[#A9DFD8] border border-white/10 hover:border-[#A9DFD8]/40 hover:bg-white/10 transition-all cursor-pointer block"
-                        >
-                          {ver}
-                        </button>
-                        {/* Hash visible only to admins/supervisors */}
-                        {isAdminOrSupervisor && (
-                          <span className="text-[10px] text-slate-400 font-mono block mt-0.5 truncate max-w-[140px]" title={`v${c.current_content_version || 1}`}>
-                            v{c.current_content_version || 1}
-                          </span>
-                        )}
-                      </td>
-
-                      {/* Текущий контент — visible only to admins/supervisors */}
-                      {isAdminOrSupervisor && (
-                        <td className="py-3.5 px-4">
-                          <div className="space-y-1 max-w-[200px]">
-                            <div className="flex items-center space-x-1 text-[11px] truncate" title={fullBlock?.name || 'По умолчанию'}>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">FULL</span>
-                              <span className="text-slate-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                        <td className="py-2.5 px-4">
+                          <div className="flex items-center space-x-3">
+                            <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-xs ${
+                              isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                            }`}>
+                              <Monitor className="w-4 h-4" />
                             </div>
-                            <div className="flex items-center space-x-1 text-[11px] truncate" title={promoBlock?.name || 'По умолчанию'}>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">50/50</span>
-                              <span className="text-slate-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
+                            <div>
+                              <button
+                                onClick={() => handleOpenDetails(c)}
+                                className="font-bold text-[var(--text)] hover:text-[#1ABB9C] text-left block"
+                              >
+                                {c.name}
+                              </button>
+                              <button
+                                onClick={() => setSearchQuery(c.ip_address)}
+                                title="Кликните для фильтра по IP"
+                                className="font-mono text-[11px] text-slate-500 hover:text-[#1ABB9C] block text-left"
+                              >
+                                {c.ip_address}:{c.ssh_port}
+                              </button>
                             </div>
                           </div>
                         </td>
-                      )}
 
-                      {/* CLICKABLE STATUS BADGE - Instant Filtering! */}
-                      <td className="py-3.5 px-4">
-                        {isOnline ? (
+                        <td className="py-2.5 px-4">
                           <button
-                            onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
-                            title="Нажмите для фильтрации: только В СЕТИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/25 flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_10px_rgba(16,185,129,0.15)]"
+                            onClick={() => setBranchFilter(branchFilter === c.branch_id ? 'ALL' : c.branch_id)}
+                            className="text-[var(--text)] hover:text-[#1ABB9C] font-medium text-left block"
                           >
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            В СЕТИ
+                            {branch?.name || '—'}
                           </button>
-                        ) : c.last_sync_status === 'FAILED' ? (
+                          <div className="text-[10px] text-slate-400">{region?.name || 'Ташкент'}</div>
+                        </td>
+
+                        <td className="py-2.5 px-4">
                           <button
-                            onClick={() => setStatusFilter(statusFilter === 'FAILED' ? 'ALL' : 'FAILED')}
-                            title="Нажмите для фильтрации: только ОШИБКИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 hover:bg-rose-500/25 flex items-center gap-1.5 transition-all cursor-pointer shadow-[0_0_10px_rgba(244,63,94,0.15)]"
+                            onClick={() => setVersionFilter(versionFilter === ver ? 'ALL' : ver)}
+                            className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-slate-100 border border-slate-200 text-slate-700 hover:border-[#1ABB9C] hover:text-[#1ABB9C] block"
                           >
-                            <AlertTriangle className="w-3 h-3 text-rose-400" />
-                            ОШИБКА
+                            {ver}
                           </button>
-                        ) : c.last_sync_status === 'PENDING' || c.last_sync_status === 'PUBLISHED_AWAITING_RESTART' ? (
-                          <button
-                            onClick={() => setStatusFilter(statusFilter === 'PENDING' ? 'ALL' : 'PENDING')}
-                            title="Нажмите для фильтрации: только ОЧЕРЕДЬ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-indigo-500/15 text-indigo-400 border border-indigo-500/30 hover:bg-indigo-500/25 flex items-center gap-1.5 transition-all cursor-pointer"
-                          >
-                            <Clock className="w-3 h-3 text-indigo-400" />
-                            ОЖИДАЕТ
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
-                            title="Нажмите для фильтрации: только НЕ В СЕТИ"
-                            className="px-3 py-1 rounded-full text-[11px] font-bold bg-[#FF5B5B]/10 text-[#FF5B5B] border border-[#FF5B5B]/25 hover:bg-[#FF5B5B]/20 flex items-center gap-1.5 transition-all cursor-pointer shadow-sm"
-                          >
-                            <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B5B]" />
-                            НЕ В СЕТИ
-                          </button>
+                        </td>
+
+                        {isAdminOrSupervisor && (
+                          <td className="py-2.5 px-4">
+                            <div className="space-y-0.5 max-w-[180px]">
+                              <div className="flex items-center space-x-1 text-[11px] truncate">
+                                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 border">FULL</span>
+                                <span className="text-slate-600 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                              </div>
+                              <div className="flex items-center space-x-1 text-[11px] truncate">
+                                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-slate-100 text-slate-500 border">50/50</span>
+                                <span className="text-slate-600 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
+                              </div>
+                            </div>
+                          </td>
                         )}
-                      </td>
 
-                      <td className="py-3.5 px-4 font-mono text-[11px] text-slate-400">
-                        {formatDateTime(c.last_seen_at)}
-                      </td>
-
-                      <td className="py-3.5 px-4 text-right">
-                        <div className="flex items-center justify-end space-x-1">
-                          {/* Test SSH */}
-                          <button
-                            onClick={() => testConnectionMutation.mutate(c.id)}
-                            disabled={isTestingThis}
-                            className="p-1.5 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
-                            title="Тест SSH связи"
-                          >
-                            <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-400' : ''}`} />
-                          </button>
-
-                          {/* Configure Ad */}
-                          <button
-                            onClick={() => handleConfigureAdForCashier(c.id)}
-                            className="p-1.5 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-lg text-slate-400 hover:text-[#A9DFD8] transition-colors"
-                            title="Настроить рекламу"
-                          >
-                            <Send className="w-3.5 h-3.5" />
-                          </button>
-
-                          {/* Edit */}
-                          {canManageDevices && (
+                        <td className="py-2.5 px-4">
+                          {isOnline ? (
                             <button
-                              onClick={() => handleOpenEdit(c)}
-                              className="p-1.5 bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 rounded-lg text-slate-400 hover:text-amber-400 transition-colors"
-                              title="Редактировать параметры"
+                              onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
+                              className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1 shadow-sm"
                             >
-                              <Pencil className="w-3.5 h-3.5" />
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#1ABB9C] animate-pulse" />
+                              В СЕТИ
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
+                              className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200 flex items-center gap-1 shadow-sm"
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-[#E74C3C]" />
+                              НЕ В СЕТИ
                             </button>
                           )}
+                        </td>
 
-                          {/* Details */}
-                          <button
-                            onClick={() => handleOpenDetails(c)}
-                            className="p-1.5 bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/30 rounded-lg text-slate-400 hover:text-white transition-colors"
-                            title="Карточка кассы"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                          </button>
+                        <td className="py-2.5 px-4 font-mono text-[11px] text-slate-500">
+                          {formatDateTime(c.last_seen_at)}
+                        </td>
 
-                          {/* Delete */}
-                          {canManageDevices && (
+                        <td className="py-2.5 px-4 text-right">
+                          <div className="flex items-center justify-end space-x-1">
                             <button
-                              onClick={() => handleDeleteCashier(c)}
-                              className="p-1.5 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
-                              title="Удалить"
+                              onClick={() => testConnectionMutation.mutate(c.id)}
+                              disabled={isTestingThis}
+                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-emerald-600 transition"
+                              title="Тест SSH связи"
                             >
-                              <Trash2 className="w-3.5 h-3.5" />
+                              <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-600' : ''}`} />
                             </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+
+                            <button
+                              onClick={() => handleConfigureAdForCashier(c.id)}
+                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-[#1ABB9C] transition"
+                              title="Настроить рекламу"
+                            >
+                              <Send className="w-3.5 h-3.5" />
+                            </button>
+
+                            {canManageDevices && (
+                              <button
+                                onClick={() => handleOpenEdit(c)}
+                                className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-amber-600 transition"
+                                title="Редактировать"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+
+                            <button
+                              onClick={() => handleOpenDetails(c)}
+                              className="p-1.5 hover:bg-slate-100 rounded text-slate-500 hover:text-slate-900 transition"
+                              title="Карточка кассы"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+
+                            {canManageDevices && (
+                              <button
+                                onClick={() => handleDeleteCashier(c)}
+                                className="p-1.5 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition"
+                                title="Удалить"
+                              >
+                                <Trash2 className="w-3.5 h-3.5" />
+                              </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
               </tbody>
             </table>
           </div>
-        </div>
-      ) : (
-        /* 7. GRID VIEW */
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {filteredCashiers.map((c) => {
-            const branch = branchMap.get(c.branch_id);
-            const region = branch ? regionMap.get(branch.region_id) : undefined;
-            const fullBlock = c.current_full_screen_block_id ? adBlockMap.get(c.current_full_screen_block_id) : null;
-            const promoBlock = c.current_mode32_block_id ? adBlockMap.get(c.current_mode32_block_id) : null;
-            const isTestingThis = testingId === c.id;
-            const isOnline = isCashierOnline(c);
-            const ver = c.guest_screen_version || '3.1.1.0';
+        ) : (
+          /* ── GRID VIEW ── */
+          <div className="p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            {filteredCashiers.map((c) => {
+              const branch = branchMap.get(c.branch_id);
+              const region = branch ? regionMap.get(branch.region_id) : undefined;
+              const isTestingThis = testingId === c.id;
+              const isOnline = isCashierOnline(c);
+              const ver = c.guest_screen_version || '3.1.1.0';
 
-            return (
-              <div 
-                key={c.id}
-                className="glass-surface-l2 glass-specular-edge rounded-2xl p-5 flex flex-col justify-between hover:border-[#A9DFD8]/40 transition-all duration-300 shadow-xl group"
-              >
-                <div>
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-mono font-bold text-sm ${
-                        isOnline 
-                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_12px_rgba(16,185,129,0.2)]' 
-                          : 'bg-white/5 text-slate-400 border border-white/10'
-                      }`}>
-                        <Monitor className="w-5 h-5" />
+              return (
+                <div 
+                  key={c.id}
+                  className="bg-white border border-[var(--border-color)] rounded-lg p-4 flex flex-col justify-between hover:shadow-md transition group"
+                >
+                  <div>
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center space-x-2.5">
+                        <div className={`w-8 h-8 rounded flex items-center justify-center font-bold text-xs ${
+                          isOnline ? 'bg-emerald-50 text-emerald-600 border border-emerald-200' : 'bg-slate-100 text-slate-500 border border-slate-200'
+                        }`}>
+                          <Monitor className="w-4 h-4" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-[var(--text)] text-xs hover:text-[#1ABB9C] cursor-pointer" onClick={() => handleOpenDetails(c)}>
+                            {c.name}
+                          </h4>
+                          <button
+                            onClick={() => setSearchQuery(c.ip_address)}
+                            className="font-mono text-[11px] text-slate-500 hover:text-[#1ABB9C] block text-left"
+                          >
+                            {c.ip_address}:{c.ssh_port}
+                          </button>
+                        </div>
                       </div>
-                      <div>
-                        <h4 className="font-bold text-white text-sm hover:text-[#A9DFD8] transition-colors cursor-pointer" onClick={() => handleOpenDetails(c)}>
-                          {c.name}
-                        </h4>
+                      {isOnline ? (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                          В СЕТИ
+                        </span>
+                      ) : (
+                        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                          НЕ В СЕТИ
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 text-xs py-2 border-y border-slate-100 my-2">
+                      <div className="flex justify-between items-center text-slate-500">
+                        <span>Филиал:</span>
+                        <span className="font-semibold text-slate-800">{branch?.name || '—'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-slate-500">
+                        <span>Регион:</span>
+                        <span>{region?.name || 'Ташкент'}</span>
+                      </div>
+                      <div className="flex justify-between items-center text-slate-500">
+                        <span>Версия GS:</span>
+                        <span className="font-mono font-bold text-[#1ABB9C]">{ver}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <span className="font-mono text-[10px] text-slate-400">
+                      {formatDateTime(c.last_seen_at)}
+                    </span>
+                    <div className="flex items-center space-x-1">
+                      <button
+                        onClick={() => testConnectionMutation.mutate(c.id)}
+                        disabled={isTestingThis}
+                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-emerald-600"
+                        title="Тест SSH"
+                      >
+                        <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-600' : ''}`} />
+                      </button>
+                      <button
+                        onClick={() => handleConfigureAdForCashier(c.id)}
+                        className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-[#1ABB9C]"
+                        title="Реклама"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                      {canManageDevices && (
                         <button
-                          onClick={() => setSearchQuery(c.ip_address)}
-                          title="Кликните для фильтра по IP"
-                          className="font-mono text-xs text-[#A9DFD8]/80 hover:text-[#A9DFD8] hover:underline block text-left"
+                          onClick={() => handleOpenEdit(c)}
+                          className="p-1 hover:bg-slate-100 rounded text-slate-400 hover:text-amber-600"
+                          title="Редактировать"
                         >
-                          {c.ip_address}:{c.ssh_port}
+                          <Pencil className="w-3.5 h-3.5" />
                         </button>
-                      </div>
+                      )}
                     </div>
-                    {/* Status Badge */}
-                    {isOnline ? (
-                      <button
-                        onClick={() => setStatusFilter(statusFilter === 'ONLINE' ? 'ALL' : 'ONLINE')}
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 cursor-pointer shadow-[0_0_8px_rgba(16,185,129,0.15)]"
-                      >
-                        В СЕТИ
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setStatusFilter(statusFilter === 'OFFLINE' ? 'ALL' : 'OFFLINE')}
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/15 text-slate-400 border border-slate-500/30 cursor-pointer"
-                      >
-                        НЕ В СЕТИ
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="space-y-2 text-xs py-3 border-y border-white/[0.08] my-3">
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>Филиал:</span>
-                      <button 
-                        onClick={() => setBranchFilter(branchFilter === c.branch_id ? 'ALL' : c.branch_id)} 
-                        className="text-white hover:text-[#A9DFD8] font-semibold transition-colors"
-                      >
-                        {branch?.name || '—'}
-                      </button>
-                    </div>
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>Регион:</span>
-                      <span className="text-slate-200">{region?.name || 'Ташкент'}</span>
-                    </div>
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>GuestScreen:</span>
-                      <button 
-                        onClick={() => setVersionFilter(versionFilter === ver ? 'ALL' : ver)}
-                        className="text-[#A9DFD8] font-mono font-bold hover:underline"
-                      >
-                        {ver}
-                      </button>
-                    </div>
-                    {/* FULL блок and 50/50 промо — visible only to admins/supervisors */}
-                    {isAdminOrSupervisor && (
-                      <>
-                        <div className="flex justify-between items-center text-slate-400">
-                          <span>FULL блок:</span>
-                          <span className="text-slate-200 font-medium truncate max-w-[130px]" title={fullBlock?.name}>
-                            {fullBlock ? fullBlock.name : 'По умолчанию'}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center text-slate-400">
-                          <span>50/50 промо:</span>
-                          <span className="text-slate-200 font-medium truncate max-w-[130px]" title={promoBlock?.name}>
-                            {promoBlock ? promoBlock.name : 'По умолчанию'}
-                          </span>
-                        </div>
-                      </>
-                    )}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
 
-                <div className="flex items-center justify-between pt-2">
-                  <div className="text-[10px] font-mono text-slate-400">
-                    {formatDateTime(c.last_seen_at)}
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <button
-                      onClick={() => testConnectionMutation.mutate(c.id)}
-                      disabled={isTestingThis}
-                      className="p-1.5 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/30 rounded-lg text-slate-400 hover:text-emerald-400 transition-colors"
-                      title="SSH тест"
-                    >
-                      <Activity className={`w-3.5 h-3.5 ${isTestingThis ? 'animate-spin text-emerald-400' : ''}`} />
-                    </button>
-                    <button
-                      onClick={() => handleConfigureAdForCashier(c.id)}
-                      className="p-1.5 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-lg text-slate-400 hover:text-[#A9DFD8] transition-colors"
-                      title="Реклама"
-                    >
-                      <Send className="w-3.5 h-3.5" />
-                    </button>
-                    {canManageDevices && (
-                      <button
-                        onClick={() => handleOpenEdit(c)}
-                        className="p-1.5 bg-white/5 hover:bg-amber-500/15 border border-white/10 hover:border-amber-500/30 rounded-lg text-slate-400 hover:text-amber-400 transition-colors"
-                        title="Редактировать"
-                      >
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleOpenDetails(c)}
-                      className="p-1.5 bg-white/5 hover:bg-white/15 border border-white/10 hover:border-white/30 rounded-lg text-slate-400 hover:text-white transition-colors"
-                      title="Детали"
-                    >
-                      <Eye className="w-3.5 h-3.5" />
-                    </button>
-                    {canManageDevices && (
-                      <button
-                        onClick={() => handleDeleteCashier(c)}
-                        className="p-1.5 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
-                        title="Удалить"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+      </div>
 
       {/* 8. Add Cashier Modal (Liquid Glass Level 4) */}
       {addCashierModalOpen && (

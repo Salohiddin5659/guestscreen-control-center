@@ -1,54 +1,68 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { 
-  Monitor, 
+import {
+  LayoutDashboard,
+  Monitor,
   Building2,
-  Image as ImageIcon, 
-  Film, 
-  Layers, 
-  FileText, 
-  LogOut, 
-  Radio, 
+  Image,
+  Film,
+  Send,
   Users as UsersIcon,
+  FileText,
   Settings as SettingsIcon,
+  BookOpen,
+  Menu,
   Search,
+  Moon,
+  Sun,
   Bell,
   ChevronDown,
-  AlertTriangle,
+  ChevronRight,
+  MoreVertical,
+  LogOut,
   CheckCircle2,
-  X,
-  ExternalLink,
-  ShieldCheck,
+  AlertTriangle,
   RotateCcw,
-  Menu,
-  Maximize2,
-  BookOpen,
-  HelpCircle,
-  Activity,
+  Sparkles,
   Server
 } from 'lucide-react';
-import { removeAuthToken, topologyApi, usersApi, getCurrentUserFromStorage, apiRequest, authApi } from '../../api/client';
-import { useLiveFleet } from '../../api/useLiveFleet';
+import { 
+  authApi, 
+  topologyApi, 
+  usersApi, 
+  apiRequest, 
+  getCurrentUserFromStorage 
+} from '../../api/client';
 import { getBrand } from '../../utils/brand';
 
 export const AppLayout: React.FC = () => {
   const brand = getBrand();
-  const navigate = useNavigate();
   const location = useLocation();
-  const { isConnected } = useLiveFleet();
+  const navigate = useNavigate();
 
-  // Sidebar toggle state (Gentelella nav-md vs nav-sm)
-  const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
-    return localStorage.getItem('gs_sidebar_collapsed') === 'true';
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (localStorage.getItem('gs_theme') as 'light' | 'dark') || 'light';
   });
 
-  const toggleSidebar = () => {
-    setIsCollapsed(prev => {
-      const next = !prev;
-      localStorage.setItem('gs_sidebar_collapsed', String(next));
-      return next;
-    });
+  const [dashboardsOpen, setDashboardsOpen] = useState(true);
+  const [adsOpen, setAdsOpen] = useState(true);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [globalSearch, setGlobalSearch] = useState('');
+
+  const notifRef = useRef<HTMLDivElement>(null);
+  const userMenuRef = useRef<HTMLDivElement>(null);
+
+  // Apply theme to document
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('gs_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === 'light' ? 'dark' : 'light'));
   };
 
   // Dynamic user data
@@ -70,19 +84,7 @@ export const AppLayout: React.FC = () => {
     return 'Пользователь';
   };
 
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [notificationsCleared, setNotificationsCleared] = useState<boolean>(() => {
-    return localStorage.getItem('gs_notifications_cleared') === 'true';
-  });
-  const [unreadCount, setUnreadCount] = useState<number | null>(() => {
-    return localStorage.getItem('gs_notifications_cleared') === 'true' ? 0 : null;
-  });
-  
-  const notifRef = useRef<HTMLDivElement>(null);
-  const userMenuRef = useRef<HTMLDivElement>(null);
-
-  // Fetch cashiers for top header status counters
+  // Queries for live metrics
   const { data: cashiers = [] } = useQuery({
     queryKey: ['cashiers'],
     queryFn: () => topologyApi.listCashiers(),
@@ -100,7 +102,6 @@ export const AppLayout: React.FC = () => {
     enabled: isAdminOrSupervisor,
   });
 
-  // Fetch recent audit logs for notification feed
   const { data: recentLogs = [] } = useQuery({
     queryKey: ['recent-audit-logs'],
     queryFn: () => apiRequest('/audit-logs?limit=4').catch(() => []),
@@ -110,16 +111,21 @@ export const AppLayout: React.FC = () => {
   const onlineCount = cashiers.filter(c => c.last_sync_status === 'SUCCESS' || c.last_sync_status === 'ONLINE').length;
   const offlineCashiers = cashiers.filter(c => c.last_sync_status === 'OFFLINE' || c.last_sync_status === 'UNKNOWN');
   const offlineCount = offlineCashiers.length;
-  const syncRate = cashiers.length > 0 ? Math.round((onlineCount / cashiers.length) * 100) : 100;
 
-  // Initialize unread count if not cleared
+  const [notificationsCleared, setNotificationsCleared] = useState<boolean>(() => {
+    return localStorage.getItem('gs_notifications_cleared') === 'true';
+  });
+  const [unreadCount, setUnreadCount] = useState<number>(() => {
+    return localStorage.getItem('gs_notifications_cleared') === 'true' ? 0 : 2;
+  });
+
   useEffect(() => {
-    if (!notificationsCleared && unreadCount === null && (offlineCount > 0 || recentLogs.length > 0)) {
+    if (!notificationsCleared) {
       setUnreadCount(offlineCount + Math.min(recentLogs.length, 2));
     }
-  }, [offlineCount, recentLogs, unreadCount, notificationsCleared]);
+  }, [offlineCount, recentLogs, notificationsCleared]);
 
-  const handleClearAllNotifications = () => {
+  const handleClearNotifications = () => {
     setNotificationsCleared(true);
     setUnreadCount(0);
     localStorage.setItem('gs_notifications_cleared', 'true');
@@ -131,486 +137,514 @@ export const AppLayout: React.FC = () => {
     localStorage.removeItem('gs_notifications_cleared');
   };
 
-  // Close dropdowns on outside click
+  // Outside click close
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
         setNotificationsOpen(false);
       }
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target as Node)) {
         setUserMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Keyboard shortcut ⌘K / Ctrl+K
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        const searchInput = document.querySelector<HTMLInputElement>('.search-box input');
+        searchInput?.focus();
+      }
     };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const handleLogout = () => {
     authApi.logout();
   };
 
-  const toggleFullScreen = () => {
-    if (!document.fullscreenElement) {
-      document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen().catch(() => {});
-      }
+  // Breadcrumbs text
+  const getBreadcrumbs = () => {
+    const path = location.pathname;
+    if (path === '/' || path === '/devices') {
+      return ['Home', 'Dashboards', 'Analytics'];
     }
+    if (path === '/restaurants') {
+      return ['Home', 'Dashboards', 'Restaurants'];
+    }
+    if (path === '/media') {
+      return ['Home', 'Content', 'Media Assets'];
+    }
+    if (path === '/playlists') {
+      return ['Home', 'Content', 'Playlists'];
+    }
+    if (path === '/distribution') {
+      return ['Home', 'Content', 'Distribution'];
+    }
+    if (path === '/users') {
+      return ['Home', 'Admin', 'User Management'];
+    }
+    if (path === '/audit') {
+      return ['Home', 'Admin', 'Audit Logs'];
+    }
+    if (path === '/settings') {
+      return ['Home', 'Admin', 'Settings'];
+    }
+    if (path === '/wiki') {
+      return ['Home', 'Help Center', 'Knowledge Base'];
+    }
+    return ['Home', 'Dashboard'];
   };
 
-  interface NavItem {
-    to: string;
-    label: string;
-    icon: any;
-    badge?: number;
-  }
-  interface NavSection {
-    title: string;
-    items: NavItem[];
-  }
-
-  const navSections: NavSection[] = [
-    {
-      title: 'УПРАВЛЕНИЕ КАССАМИ',
-      items: [
-        { to: '/devices', label: 'Устройства', icon: Monitor, badge: cashiers.length },
-        { to: '/restaurants', label: 'Рестораны', icon: Building2, badge: branches.length },
-      ]
-    },
-    {
-      title: 'РЕКЛАМА И КОНТЕНТ',
-      items: [
-        { to: '/media', label: 'Медиатека', icon: ImageIcon },
-        { to: '/playlists', label: 'Рекламные шаблоны', icon: Film },
-        { to: '/content', label: 'Распределение', icon: Layers },
-      ]
-    },
-    {
-      title: 'БЕЗОПАСНОСТЬ И СИСТЕМА',
-      items: [
-        ...(isAdminOrSupervisor ? [{ to: '/users', label: 'Пользователи', icon: UsersIcon, badge: users.length }] : []),
-        { to: '/audit', label: 'Журнал аудита', icon: FileText },
-        ...(isAdminOrSupervisor ? [{ to: '/settings', label: 'Настройки', icon: SettingsIcon }] : []),
-        { to: '/wiki', label: 'База знаний', icon: BookOpen },
-      ]
-    }
-  ];
+  const crumbs = getBreadcrumbs();
 
   return (
-    <div className="flex h-screen bg-[#F7F7F7] text-[#2A3F54] font-sans overflow-hidden">
+    <div className={`shell ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} data-shell="admin">
       
       {/* =========================================================================
-          GENTELELLA SIDEBAR (.left_col)
+          GENTELELLA 2026 V4 SIDEBAR (.sidebar)
           ========================================================================= */}
-      <aside 
-        className={`bg-[#2A3F54] flex flex-col z-30 transition-all duration-300 ease-in-out select-none relative ${
-          isCollapsed ? 'w-[70px]' : 'w-[240px]'
-        }`}
-      >
-        {/* Brand Header (.site_title) */}
-        <div className="h-[60px] bg-[#2A3F54] border-b border-[#374c60] flex items-center px-4 overflow-hidden">
-          <NavLink 
-            to="/" 
-            className="flex items-center gap-3 w-full text-white text-decoration-none group"
-            title="GuestScreen Control Center - На главную"
-          >
-            <div className="w-9 h-9 rounded-full bg-white/10 p-1.5 flex items-center justify-center flex-shrink-0 border border-white/20 shadow-sm group-hover:scale-105 transition-transform">
-              <img src={brand.emblem} alt={brand.name} className="w-full h-full object-contain" />
-            </div>
-            {!isCollapsed && (
-              <div className="flex flex-col min-w-0">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-extrabold text-[15px] tracking-tight text-white truncate">
-                    GuestScreen
-                  </span>
-                  <span className="w-2 h-2 rounded-full bg-[#1ABB9C] inline-block" />
-                </div>
-                <span className="text-[10px] text-[#A7B5C2] uppercase tracking-wider font-semibold truncate">
-                  {brand.name}
-                </span>
-              </div>
-            )}
-          </NavLink>
+      <aside className={`sidebar ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`} aria-label="Primary navigation">
+        
+        {/* Brand Header */}
+        <div className="sidebar-brand">
+          <div className="brand-icon">
+            <img src={brand.emblem} className="w-4 h-4 rounded object-contain" alt="" />
+          </div>
+          <div className="brand-name">
+            GuestScreen <small>v4</small>
+          </div>
         </div>
 
-        {/* Profile Quick Info (.profile.clearfix) */}
-        {!isCollapsed && (
-          <div className="p-4 border-b border-[#374c60] flex items-center gap-3">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-[#3E5367] border-2 border-white/20 flex items-center justify-center text-white font-bold text-sm shadow-md">
-                {user.username.substring(0, 2).toUpperCase()}
-              </div>
-              <span className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-[#1ABB9C] border-2 border-[#2A3F54]" />
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[11px] text-[#A7B5C2] font-medium leading-none">Welcome,</span>
-              <h2 className="text-sm font-bold text-white mt-1 leading-tight truncate">
-                {user.full_name || user.username}
-              </h2>
-              <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-[#1ABB9C]/20 text-[#1ABB9C] border border-[#1ABB9C]/30 w-fit">
-                {getRoleLabel(user.role)}
-              </span>
-            </div>
-          </div>
-        )}
+        {/* Sidebar Navigation */}
+        <nav className="sidebar-nav">
+          
+          {/* GENERAL GROUP */}
+          <div className="nav-group">
+            <div className="nav-label">General</div>
 
-        {/* Sidebar Menu (.sidebar-menu) */}
-        <div className="flex-1 overflow-y-auto sidebar-scrollbar py-2">
-          {navSections.map((section, idx) => (
-            <div key={idx} className="mb-3">
-              {!isCollapsed && (
-                <div className="px-4 py-1.5 text-[10px] font-bold text-[#A7B5C2] uppercase tracking-wider">
-                  {section.title}
+            {/* Dashboards Tree */}
+            <div className={`nav-tree ${dashboardsOpen ? 'open has-active' : ''}`}>
+              <button 
+                type="button" 
+                className="nav-link nav-toggle" 
+                onClick={() => setDashboardsOpen(!dashboardsOpen)}
+                aria-expanded={dashboardsOpen}
+              >
+                <LayoutDashboard className="icon w-[18px] h-[18px]" />
+                <span className="nav-text">Dashboards</span>
+                <span className="badge badge-teal">{cashiers.length}</span>
+                <ChevronDown className={`nav-chev w-3 h-3 transition-transform ${dashboardsOpen ? 'rotate-180' : ''}`} />
+              </button>
+              
+              {dashboardsOpen && (
+                <div className="nav-sub">
+                  <div className="nav-sub-inner">
+                    <NavLink 
+                      to="/devices" 
+                      className={({ isActive }) => `nav-sublink ${isActive ? 'active' : ''}`}
+                    >
+                      <span>Operations</span>
+                      <span className="badge badge-teal">{cashiers.length}</span>
+                    </NavLink>
+                    <NavLink 
+                      to="/devices" 
+                      className="nav-sublink"
+                    >
+                      <span>Analytics</span>
+                    </NavLink>
+                    <NavLink 
+                      to="/restaurants" 
+                      className={({ isActive }) => `nav-sublink ${isActive ? 'active' : ''}`}
+                    >
+                      <span>Restaurants</span>
+                      <span className="badge badge-blue">{branches.length}</span>
+                    </NavLink>
+                  </div>
                 </div>
               )}
-              <div className="space-y-0.5">
-                {section.items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    className={({ isActive }) => `
-                      flex items-center px-4 py-2.5 text-xs font-semibold transition-all relative group
-                      ${isActive 
-                        ? 'bg-[#3E5367] text-white border-r-4 border-[#1ABB9C]' 
-                        : 'text-[#C5CCD4] hover:bg-[#334a5e] hover:text-white'
-                      }
-                      ${isCollapsed ? 'justify-center px-0' : 'gap-3'}
-                    `}
-                    title={isCollapsed ? item.label : undefined}
-                  >
-                    <item.icon className={`w-4 h-4 flex-shrink-0 transition-transform group-hover:scale-110 ${isCollapsed ? 'w-5 h-5' : ''}`} />
-                    {!isCollapsed && (
-                      <span className="truncate flex-1">
-                        {item.label}
-                      </span>
-                    )}
-                    {!isCollapsed && item.badge !== undefined && (
-                      <span className="ml-auto px-1.5 py-0.5 text-[10px] font-bold rounded-full bg-[#1ABB9C] text-white">
-                        {item.badge}
-                      </span>
-                    )}
-                  </NavLink>
-                ))}
-              </div>
             </div>
-          ))}
+
+            {/* Content & Ads Tree */}
+            <div className={`nav-tree ${adsOpen ? 'open' : ''}`}>
+              <button 
+                type="button" 
+                className="nav-link nav-toggle" 
+                onClick={() => setAdsOpen(!adsOpen)}
+                aria-expanded={adsOpen}
+              >
+                <Film className="icon w-[18px] h-[18px]" />
+                <span className="nav-text">Content & Ads</span>
+                <ChevronDown className={`nav-chev w-3 h-3 transition-transform ${adsOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {adsOpen && (
+                <div className="nav-sub">
+                  <div className="nav-sub-inner">
+                    <NavLink 
+                      to="/media" 
+                      className={({ isActive }) => `nav-sublink ${isActive ? 'active' : ''}`}
+                    >
+                      <span>Media Assets</span>
+                    </NavLink>
+                    <NavLink 
+                      to="/playlists" 
+                      className={({ isActive }) => `nav-sublink ${isActive ? 'active' : ''}`}
+                    >
+                      <span>Ad Templates</span>
+                    </NavLink>
+                    <NavLink 
+                      to="/distribution" 
+                      className={({ isActive }) => `nav-sublink ${isActive ? 'active' : ''}`}
+                    >
+                      <span>Distribution</span>
+                    </NavLink>
+                  </div>
+                </div>
+              )}
+            </div>
+
+          </div>
+
+          {/* ADMIN GROUP */}
+          <div className="nav-group">
+            <div className="nav-label">Admin</div>
+
+            {isAdminOrSupervisor && (
+              <NavLink 
+                to="/users" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              >
+                <UsersIcon className="icon w-[18px] h-[18px]" />
+                <span className="nav-text">User management</span>
+                {users.length > 0 && <span className="badge badge-blue">{users.length}</span>}
+              </NavLink>
+            )}
+
+            <NavLink 
+              to="/audit" 
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <FileText className="icon w-[18px] h-[18px]" />
+              <span className="nav-text">Audit logs</span>
+            </NavLink>
+
+            {isAdminOrSupervisor && (
+              <NavLink 
+                to="/settings" 
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+              >
+                <SettingsIcon className="icon w-[18px] h-[18px]" />
+                <span className="nav-text">Settings</span>
+              </NavLink>
+            )}
+
+            <NavLink 
+              to="/wiki" 
+              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+            >
+              <BookOpen className="icon w-[18px] h-[18px]" />
+              <span className="nav-text">Help center</span>
+              <span className="badge badge-teal">Wiki</span>
+            </NavLink>
+
+          </div>
+
+        </nav>
+
+        {/* Sidebar Footer User Info */}
+        <div className="sidebar-footer">
+          <div className="sidebar-user">
+            <div className="avatar">
+              {user.username.substring(0, 1).toUpperCase()}
+              <span className="online"></span>
+            </div>
+            <div className="sidebar-user-info">
+              <div className="name">{user.full_name || user.username}</div>
+              <div className="role">{getRoleLabel(user.role)} • {brand.port}</div>
+            </div>
+            <button 
+              className="more-btn" 
+              onClick={() => setUserMenuOpen(!userMenuOpen)} 
+              aria-label="More options"
+            >
+              <MoreVertical className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
 
-        {/* Sidebar Footer (.sidebar-footer) */}
-        <div className="h-[44px] bg-[#1E2833] border-t border-[#374c60] flex items-center justify-around px-2 text-[#A7B5C2]">
-          <button 
-            onClick={() => navigate('/settings')}
-            className="p-2 hover:text-[#1ABB9C] hover:bg-[#2A3F54] rounded transition"
-            title="Настройки системы"
-          >
-            <SettingsIcon className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={toggleFullScreen}
-            className="p-2 hover:text-[#1ABB9C] hover:bg-[#2A3F54] rounded transition"
-            title="Полноэкранный режим"
-          >
-            <Maximize2 className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={() => navigate('/wiki')}
-            className="p-2 hover:text-[#1ABB9C] hover:bg-[#2A3F54] rounded transition"
-            title="База знаний и инструкция"
-          >
-            <HelpCircle className="w-4 h-4" />
-          </button>
-          <button 
-            onClick={handleLogout}
-            className="p-2 hover:text-[#E74C3C] hover:bg-[#2A3F54] rounded transition"
-            title="Выход из системы"
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        </div>
       </aside>
 
       {/* =========================================================================
-          MAIN CONTAINER (TOP NAV + CONTENT)
+          GENTELELLA 2026 V4 TOPBAR (.topbar)
           ========================================================================= */}
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <header className="topbar">
         
-        {/* Top Navigation Bar (.top_nav) */}
-        <header className="h-[60px] bg-[#EDEDED] border-b border-[#D9DEE4] flex items-center justify-between px-4 z-20 shadow-sm">
+        {/* Topbar Left: Toggle + Breadcrumbs */}
+        <div className="topbar-left">
+          <button 
+            className="sidebar-toggle" 
+            type="button" 
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            aria-label="Toggle sidebar"
+          >
+            <Menu className="w-5 h-5" />
+          </button>
+
+          <nav className="breadcrumb" aria-label="Breadcrumb">
+            {crumbs.map((crumb, idx) => {
+              const isLast = idx === crumbs.length - 1;
+              return (
+                <React.Fragment key={idx}>
+                  {idx > 0 && <span className="sep" aria-hidden="true">›</span>}
+                  {isLast ? (
+                    <span className="current" aria-current="page">{crumb}</span>
+                  ) : (
+                    <span>{crumb}</span>
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Topbar Center: Universal Search */}
+        <div className="search-box">
+          <Search className="s-icon w-3.5 h-3.5" />
+          <input 
+            type="text" 
+            placeholder="Search pages or run a command…" 
+            aria-label="Search"
+            value={globalSearch}
+            onChange={(e) => setGlobalSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && globalSearch) {
+                navigate(`/devices?search=${encodeURIComponent(globalSearch)}`);
+              }
+            }}
+          />
+          <kbd>⌘K</kbd>
+        </div>
+
+        {/* Topbar Right: Actions, Tenant, Theme, Notifications, Avatar */}
+        <div className="topbar-right">
           
-          {/* Left: Hamburger Toggle & Breadcrumb */}
-          <div className="flex items-center gap-3">
-            <button
-              onClick={toggleSidebar}
-              className="p-2 text-[#73879C] hover:text-[#2A3F54] hover:bg-[#D9DEE4] rounded transition cursor-pointer"
-              title="Переключить меню"
+          {/* Docs Button */}
+          <a 
+            className="tb-btn tb-docs" 
+            href="/wiki" 
+            title="Documentation"
+          >
+            <BookOpen className="w-3.5 h-3.5" />
+            <span>Docs</span>
+          </a>
+
+          {/* Tenant Pill */}
+          <div className="tb-tenant-pill hidden sm:inline-flex">
+            <img src={brand.emblem} alt="" className="w-3.5 h-3.5 rounded object-contain" />
+            <span>{brand.name} • {brand.port}</span>
+          </div>
+
+          {/* Theme Toggle */}
+          <button 
+            className="tb-btn theme-toggle" 
+            type="button" 
+            onClick={toggleTheme} 
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            {theme === 'dark' ? (
+              <Sun className="w-4 h-4 text-amber-400" />
+            ) : (
+              <Moon className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Notifications Dropdown */}
+          <div className="relative" ref={notifRef}>
+            <button 
+              className="tb-btn tb-notifications" 
+              type="button" 
+              onClick={() => setNotificationsOpen(!notificationsOpen)}
+              title="Notifications"
             >
-              <Menu className="w-5 h-5" />
+              <Bell className="w-4 h-4" />
+              {unreadCount > 0 && <span className="dot"></span>}
             </button>
 
-            {/* Server Brand Live Pill */}
-            <div className="flex items-center gap-2 px-3 py-1 bg-white border border-[#D9DEE4] rounded text-xs font-semibold text-[#2A3F54] shadow-sm">
-              <span className="w-2 h-2 rounded-full bg-[#1ABB9C] animate-pulse" />
-              <span>{brand.name}</span>
-              <span className="text-[#999999]">•</span>
-              <span className="text-[11px] font-mono text-[#73879C]">{brand.port}</span>
-            </div>
-          </div>
-
-          {/* Right: Fleet Stats Badges, Notifications, User Menu */}
-          <div className="flex items-center gap-3">
-            
-            {/* Quick Stats Badges */}
-            <div className="hidden lg:flex items-center gap-2 mr-2">
-              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-white border border-[#D9DEE4] text-[#73879C]">
-                Всего: <strong className="text-[#2A3F54]">{cashiers.length}</strong>
-              </span>
-              <span className="px-2 py-0.5 rounded text-xs font-semibold bg-[#1ABB9C]/10 border border-[#1ABB9C]/30 text-[#1ABB9C]">
-                В сети: <strong>{onlineCount}</strong>
-              </span>
-              {offlineCount > 0 && (
-                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-[#E74C3C]/10 border border-[#E74C3C]/30 text-[#E74C3C]">
-                  Офлайн: <strong>{offlineCount}</strong>
-                </span>
-              )}
-            </div>
-
-            {/* Notification Bell */}
-            <div className="relative" ref={notifRef}>
-              <button
-                onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="relative p-2 text-[#73879C] hover:text-[#2A3F54] hover:bg-[#D9DEE4] rounded transition cursor-pointer"
-                title="Уведомления и инциденты"
+            {notificationsOpen && (
+              <div 
+                style={{ position: 'absolute' }}
+                className="right-0 top-full mt-2 w-80 bg-white border border-[#E6E7EB] rounded-lg shadow-xl z-50 overflow-hidden text-xs"
               >
-                <Bell className="w-5 h-5" />
-                {(unreadCount ?? 0) > 0 && (
-                  <span className="absolute top-1 right-1 w-4 h-4 bg-[#E74C3C] text-white text-[10px] font-bold rounded-full flex items-center justify-center shadow">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-
-              {/* Notifications Dropdown */}
-              {notificationsOpen && (
-                <div 
-                  style={{ position: 'absolute' }}
-                  className="right-0 top-full mt-2 w-80 bg-white border border-[#E6E9ED] rounded shadow-xl z-50 overflow-hidden"
-                >
-                  <div className="p-3 bg-[#F7F7F7] border-b border-[#E6E9ED] flex items-center justify-between">
-                    <span className="text-xs font-bold text-[#2A3F54] uppercase tracking-wider">
-                      Уведомления флота
-                    </span>
-                    <button
-                      onClick={handleClearAllNotifications}
-                      className="text-[11px] text-[#1ABB9C] hover:underline cursor-pointer font-medium"
-                    >
-                      Прочитать все
-                    </button>
+                <div className="p-3 bg-[#F9FAFB] border-b border-[#E6E7EB] flex items-center justify-between">
+                  <div className="flex items-center gap-1.5 font-bold text-[#1E2633]">
+                    <Bell className="w-3.5 h-3.5 text-[#1ABB9C]" />
+                    <span>Уведомления системы</span>
                   </div>
-                  <div className="max-h-72 overflow-y-auto divide-y divide-[#E6E9ED]">
-                    {offlineCashiers.length > 0 ? (
-                      offlineCashiers.map(c => (
-                        <div 
-                          key={c.id} 
-                          onClick={() => {
-                            setNotificationsOpen(false);
-                            navigate(`/devices?search=${encodeURIComponent(c.ip_address)}`);
-                          }}
-                          className="p-3 hover:bg-[#F9FAFB] cursor-pointer transition flex items-start gap-2.5"
-                        >
-                          <AlertTriangle className="w-4 h-4 text-[#E74C3C] flex-shrink-0 mt-0.5" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-[#2A3F54] truncate">{c.name}</p>
-                            <p className="text-[11px] font-mono text-[#73879C]">{c.ip_address}</p>
-                            <span className="text-[10px] font-semibold text-[#E74C3C]">Не выходит на связь</span>
-                          </div>
+                  {unreadCount > 0 ? (
+                    <button 
+                      onClick={handleClearNotifications}
+                      className="text-[11px] text-[#1ABB9C] hover:underline font-semibold"
+                    >
+                      Очистить все
+                    </button>
+                  ) : (
+                    <button 
+                      onClick={handleRestoreNotifications}
+                      className="text-[11px] text-slate-500 hover:underline"
+                    >
+                      Восстановить
+                    </button>
+                  )}
+                </div>
+
+                <div className="max-h-72 overflow-y-auto divide-y divide-[#EFF0F3]">
+                  {offlineCashiers.length > 0 && (
+                    <div className="p-3 bg-rose-50/50 hover:bg-rose-50 transition">
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 text-rose-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                          <p className="font-bold text-rose-800">
+                            {offlineCashiers.length} {offlineCashiers.length === 1 ? 'касса не в сети' : 'касс не в сети'}
+                          </p>
+                          <p className="text-[11px] text-rose-600 mt-0.5">
+                            Проверьте сетевой коннект POS-моноблоков GuestScreen
+                          </p>
+                          <button
+                            onClick={() => {
+                              setNotificationsOpen(false);
+                              navigate('/devices?status=OFFLINE');
+                            }}
+                            className="mt-1.5 text-[11px] font-bold text-rose-700 hover:underline"
+                          >
+                            Показать офлайн кассы →
+                          </button>
                         </div>
-                      ))
-                    ) : (
-                      <div className="p-6 text-center text-xs text-[#73879C]">
-                        <CheckCircle2 className="w-6 h-6 text-[#1ABB9C] mx-auto mb-2" />
-                        Все кассы подключены и работают стабильно.
                       </div>
-                    )}
-                  </div>
-                  <div className="p-2 bg-[#F7F7F7] border-t border-[#E6E9ED] text-center">
-                    <button
-                      onClick={() => {
-                        setNotificationsOpen(false);
-                        navigate('/devices');
-                      }}
-                      className="text-xs text-[#1ABB9C] font-semibold hover:underline"
-                    >
-                      Открыть все кассы ({cashiers.length}) →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* User Profile Menu */}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                onClick={() => setUserMenuOpen(!userMenuOpen)}
-                className="flex items-center gap-2 p-1.5 pr-2.5 rounded hover:bg-[#D9DEE4] transition cursor-pointer"
-              >
-                <div className="w-7 h-7 rounded-full bg-[#2A3F54] text-white font-bold text-xs flex items-center justify-center">
-                  {user.username.substring(0, 2).toUpperCase()}
-                </div>
-                <span className="hidden md:inline text-xs font-bold text-[#2A3F54]">
-                  {user.username}
-                </span>
-                <ChevronDown className="w-3.5 h-3.5 text-[#73879C]" />
-              </button>
-
-              {/* User Menu Dropdown */}
-              {userMenuOpen && (
-                <div 
-                  style={{ position: 'absolute' }}
-                  className="right-0 top-full mt-2 w-56 bg-white border border-[#E6E9ED] rounded shadow-xl z-50 py-1"
-                >
-                  <div className="px-4 py-2 border-b border-[#E6E9ED]">
-                    <p className="text-xs font-bold text-[#2A3F54] truncate">{user.full_name || user.username}</p>
-                    <p className="text-[11px] font-mono text-[#73879C] truncate">@{user.username}</p>
-                    <span className="inline-block mt-1 text-[10px] font-bold text-[#1ABB9C]">
-                      {getRoleLabel(user.role)}
-                    </span>
-                  </div>
-                  {isAdminOrSupervisor && (
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        navigate('/users');
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-[#2A3F54] hover:bg-[#F7F7F7] text-left transition"
-                    >
-                      <UsersIcon className="w-4 h-4 text-[#73879C]" />
-                      <span>Пользователи системы</span>
-                    </button>
+                    </div>
                   )}
-                  {isAdminOrSupervisor && (
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        navigate('/settings');
-                      }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-[#2A3F54] hover:bg-[#F7F7F7] text-left transition"
-                    >
-                      <SettingsIcon className="w-4 h-4 text-[#73879C]" />
-                      <span>Параметры сервера</span>
-                    </button>
-                  )}
-                  <button
+
+                  {recentLogs.slice(0, 3).map((log: any) => (
+                    <div key={log.id} className="p-2.5 hover:bg-[#F9FAFB] transition">
+                      <div className="flex items-center justify-between text-[11px] text-[#7E8896]">
+                        <span className="font-medium text-[#1E2633]">{log.action}</span>
+                        <span>{new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                      </div>
+                      <p className="text-[11px] text-[#626D7D] truncate mt-0.5">{log.details || log.entity_type}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-2 bg-[#F9FAFB] border-t border-[#E6E7EB] text-center">
+                  <button 
                     onClick={() => {
-                      setUserMenuOpen(false);
+                      setNotificationsOpen(false);
                       navigate('/audit');
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs text-[#2A3F54] hover:bg-[#F7F7F7] text-left transition"
+                    className="text-[11px] font-bold text-[#1ABB9C] hover:underline"
                   >
-                    <FileText className="w-4 h-4 text-[#73879C]" />
-                    <span>Журнал аудита</span>
+                    Открыть весь журнал аудита
                   </button>
-                  <div className="border-t border-[#E6E9ED] my-1" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* User Avatar Dropdown */}
+          <div className="relative" ref={userMenuRef}>
+            <button 
+              className="tb-avatar" 
+              type="button" 
+              onClick={() => setUserMenuOpen(!userMenuOpen)} 
+              aria-label="Account menu"
+            >
+              {user.username.substring(0, 1).toUpperCase()}
+            </button>
+
+            {userMenuOpen && (
+              <div 
+                style={{ position: 'absolute' }}
+                className="right-0 top-full mt-2 w-56 bg-white border border-[#E6E7EB] rounded-lg shadow-xl z-50 py-1 text-xs"
+              >
+                <div className="px-4 py-2 border-b border-[#E6E7EB]">
+                  <p className="font-bold text-[#1E2633] truncate">{user.full_name || user.username}</p>
+                  <p className="text-[11px] font-mono text-[#7E8896] truncate">@{user.username}</p>
+                  <span className="inline-block mt-1 text-[10px] font-bold text-[#1ABB9C]">
+                    {getRoleLabel(user.role)}
+                  </span>
+                </div>
+                {isAdminOrSupervisor && (
                   <button
                     onClick={() => {
                       setUserMenuOpen(false);
-                      handleLogout();
+                      navigate('/users');
                     }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-[#E74C3C] hover:bg-[#FDF2F2] text-left transition"
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-[#1E2633] hover:bg-[#F5F7FB] text-left transition"
                   >
-                    <LogOut className="w-4 h-4" />
-                    <span>Выйти (Logout)</span>
+                    <UsersIcon className="w-4 h-4 text-[#7E8896]" />
+                    <span>Пользователи</span>
                   </button>
-                </div>
-              )}
-            </div>
-
-          </div>
-        </header>
-
-        {/* =========================================================================
-            CONTENT WRAPPER (.right_col)
-            ========================================================================= */}
-        <main className="right_col flex-1 overflow-y-auto p-4 md:p-6 bg-[#F7F7F7]">
-          
-          {/* Gentelella Top Metric Tiles (.tile_count) */}
-          <div className="tile_count mb-5">
-            
-            <div className="tile_stats_count">
-              <span className="count_top">
-                <Monitor className="w-3.5 h-3.5 text-[#3498DB]" /> Всего касс
-              </span>
-              <div className="count">{cashiers.length}</div>
-              <span className="count_bottom">
-                <span className="green">● {onlineCount}</span> активных
-              </span>
-            </div>
-
-            <div className="tile_stats_count">
-              <span className="count_top">
-                <Activity className="w-3.5 h-3.5 text-[#1ABB9C]" /> В сети (Онлайн)
-              </span>
-              <div className="count green">{onlineCount}</div>
-              <span className="count_bottom">
-                <span className="green font-bold">{syncRate}%</span> флота
-              </span>
-            </div>
-
-            <div className="tile_stats_count">
-              <span className="count_top">
-                <AlertTriangle className="w-3.5 h-3.5 text-[#E74C3C]" /> Ошибки / Офлайн
-              </span>
-              <div className={`count ${offlineCount > 0 ? 'red' : 'text-[#73879C]'}`}>
-                {offlineCount}
-              </div>
-              <span className="count_bottom">
-                {offlineCount > 0 ? (
-                  <span className="red font-semibold">Требует внимания</span>
-                ) : (
-                  <span className="green">Все в норме</span>
                 )}
-              </span>
-            </div>
-
-            <div className="tile_stats_count">
-              <span className="count_top">
-                <Building2 className="w-3.5 h-3.5 text-[#9B59B6]" /> Рестораны
-              </span>
-              <div className="count blue">{branches.length}</div>
-              <span className="count_bottom">
-                <span className="blue">{brand.name}</span> сеть
-              </span>
-            </div>
-
-            <div className="tile_stats_count">
-              <span className="count_top">
-                <Server className="w-3.5 h-3.5 text-[#F39C12]" /> Серверное ядро
-              </span>
-              <div className="count text-sm font-bold text-[#2A3F54] flex items-center gap-1.5 h-8">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1ABB9C] animate-pulse" />
-                <span>Port {brand.port}</span>
+                {isAdminOrSupervisor && (
+                  <button
+                    onClick={() => {
+                      setUserMenuOpen(false);
+                      navigate('/settings');
+                    }}
+                    className="w-full flex items-center gap-2.5 px-4 py-2 text-[#1E2633] hover:bg-[#F5F7FB] text-left transition"
+                  >
+                    <SettingsIcon className="w-4 h-4 text-[#7E8896]" />
+                    <span>Параметры</span>
+                  </button>
+                )}
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    navigate('/audit');
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 text-[#1E2633] hover:bg-[#F5F7FB] text-left transition"
+                >
+                  <FileText className="w-4 h-4 text-[#7E8896]" />
+                  <span>Журнал аудита</span>
+                </button>
+                <div className="border-t border-[#E6E7EB] my-1" />
+                <button
+                  onClick={() => {
+                    setUserMenuOpen(false);
+                    handleLogout();
+                  }}
+                  className="w-full flex items-center gap-2.5 px-4 py-2 font-bold text-[#D63939] hover:bg-[#FDF2F2] text-left transition"
+                >
+                  <LogOut className="w-4 h-4" />
+                  <span>Выйти (Sign out)</span>
+                </button>
               </div>
-              <span className="count_bottom">
-                <span className="green font-medium">FastAPI & PostgreSQL</span>
-              </span>
-            </div>
-
+            )}
           </div>
 
-          {/* Child Page Content */}
+        </div>
+
+      </header>
+
+      {/* =========================================================================
+          GENTELELLA 2026 V4 MAIN CONTENT (.main)
+          ========================================================================= */}
+      <main className="main" id="main-content">
+        <div className="page-wrapper">
           <Outlet />
 
-          {/* Gentelella Footer */}
-          <footer className="mt-8 pt-4 border-t border-[#E6E9ED] text-center text-xs text-[#73879C]">
-            <p>
-              <strong>GuestScreen Control Center</strong> · Colorlib Gentelella UI Architecture · {brand.name} © 2026
-            </p>
+          {/* Footer */}
+          <footer className="footer">
+            <span>Gentelella — free admin dashboard template by <a href="https://colorlib.com" target="_blank" rel="noopener">Colorlib</a></span>
+            <span>v4.1.1 · MIT · GuestScreen Control Center ({brand.name})</span>
           </footer>
-        </main>
-
-      </div>
+        </div>
+      </main>
 
     </div>
   );
