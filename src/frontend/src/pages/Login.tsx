@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock, User as UserIcon, AlertCircle, Loader2, Monitor } from 'lucide-react';
+import { Lock, User as UserIcon, AlertCircle, Loader2 } from 'lucide-react';
 import { authApi, setAuthToken, getAuthToken, removeAuthToken } from '../api/client';
 import { getBrand } from '../utils/brand';
 
@@ -13,7 +13,7 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    document.title = `${brand.name} | Вход в систему`;
+    document.title = `${brand.name} | Вход в систему (Gentelella)`;
     const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
     if (link) {
       link.href = brand.favicon;
@@ -49,90 +49,96 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--color-bg-base)' }}>
-      {/* Spatial background layers */}
-      <div className="fixed inset-0 pointer-events-none">
-        <div className="absolute inset-0" style={{ background: 'var(--color-bg-base)' }} />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: 'radial-gradient(circle, rgba(100,220,200,0.4) 0%, transparent 70%)' }} />
-        <div className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full blur-3xl opacity-15" style={{ background: 'radial-gradient(circle, rgba(80,160,255,0.35) 0%, transparent 70%)' }} />
-      </div>
-
-      <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="glass-surface-l4 glass-specular-edge liquid-chromatic-edge rounded-3xl w-full max-w-md p-8 shadow-2xl animate-scale-up relative">
-          <div className="text-center mb-8">
-            <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner flex items-center justify-center">
-                <img src={brand.logo} alt={brand.name} className="h-12 max-w-[200px] object-contain" />
-              </div>
+    <div className="min-h-screen bg-[#F7F7F7] flex flex-col justify-center items-center p-4 text-[#2A3F54]">
+      
+      {/* Gentelella Login Card */}
+      <div className="w-full max-w-md bg-white border border-[#E6E9ED] rounded-[3px] shadow-sm p-8">
+        
+        {/* Brand Logo & Title */}
+        <div className="text-center mb-6">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-full bg-[#2A3F54] p-3 flex items-center justify-center shadow-md">
+              <img src={brand.emblem} alt={brand.name} className="w-full h-full object-contain" />
             </div>
-            <h1 className="text-xl font-black text-white tracking-tight">GuestScreen Control Center</h1>
-            <p className="text-xs text-slate-400 mt-1">{brand.networkSubtitle}</p>
+          </div>
+          <h1 className="text-xl font-bold text-[#2A3F54] tracking-tight">
+            GuestScreen Control Center
+          </h1>
+          <p className="text-xs text-[#73879C] mt-1 font-medium">
+            {brand.name} · Панель администрирования
+          </p>
+        </div>
+
+        {error && (
+          <div className="mb-5 p-3.5 bg-[#FDF2F2] border border-[#F8B4B4] rounded text-[#E74C3C] text-xs flex items-center gap-2.5">
+            <AlertCircle className="w-4 h-4 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-xs font-bold text-[#73879C] uppercase tracking-wider mb-1.5">
+              Имя пользователя
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#999999]">
+                <UserIcon className="w-4 h-4" />
+              </span>
+              <input
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D2D6DE] rounded text-[#2A3F54] focus:outline-none focus:border-[#1ABB9C] focus:ring-1 focus:ring-[#1ABB9C] transition"
+                placeholder="admin"
+              />
+            </div>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-rose-500/10 border border-rose-500/30 rounded-xl flex items-center space-x-3 text-rose-400 text-xs">
-              <AlertCircle className="w-5 h-5 flex-shrink-0 text-rose-400" />
-              <span>{error}</span>
+          <div>
+            <label className="block text-xs font-bold text-[#73879C] uppercase tracking-wider mb-1.5">
+              Пароль
+            </label>
+            <div className="relative">
+              <span className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-[#999999]">
+                <Lock className="w-4 h-4" />
+              </span>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full pl-9 pr-3 py-2 text-sm bg-white border border-[#D2D6DE] rounded text-[#2A3F54] focus:outline-none focus:border-[#1ABB9C] focus:ring-1 focus:ring-[#1ABB9C] transition"
+                placeholder="••••••••"
+              />
             </div>
-          )}
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Имя пользователя (Логин)
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <UserIcon className="w-4 h-4" />
-                </div>
-                <input
-                  type="text"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  placeholder="admin"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Пароль
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
-                  <Lock className="w-4 h-4" />
-                </div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="glass-input w-full pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-none"
-                  placeholder="••••••••"
-                />
-              </div>
-            </div>
-
+          <div className="pt-2">
             <button
               type="submit"
               disabled={loading}
-              className="glass-btn-primary liquid-interactive w-full py-3 px-4 rounded-xl text-xs font-bold flex items-center justify-center space-x-2 disabled:opacity-50 relative overflow-hidden shadow-lg"
+              className="w-full py-2.5 px-4 bg-[#1ABB9C] hover:bg-[#169F85] text-white font-bold text-sm rounded shadow-sm transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-70"
             >
-              <span className="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-white/50 to-transparent pointer-events-none" />
               {loading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  <span>Вход в систему...</span>
+                  <span>Авторизация...</span>
                 </>
               ) : (
-                <span>Войти в систему</span>
+                <span>Войти в систему (Log In)</span>
               )}
             </button>
-          </form>
+          </div>
+        </form>
+
+        <div className="mt-8 pt-4 border-t border-[#E6E9ED] text-center text-[11px] text-[#73879C]">
+          <p>© 2026 Colorlib Gentelella UI · {brand.name} GuestScreen</p>
         </div>
+
       </div>
+
     </div>
   );
 };
