@@ -15,6 +15,7 @@ import { UsersView } from './pages/UsersView';
 import { SettingsPage } from './pages/Settings';
 import { WikiView } from './pages/WikiView';
 import { getAuthToken, getCurrentUserFromStorage } from './api/client';
+import { getBrand } from './utils/brand';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -44,6 +45,15 @@ const RequireAdminOrSupervisor: React.FC<{ children: React.ReactNode }> = ({ chi
 };
 
 export const App: React.FC = () => {
+  React.useEffect(() => {
+    const brand = getBrand();
+    document.title = `${brand.name} | GuestScreen Control Center`;
+    const faviconLink = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+    if (faviconLink) {
+      faviconLink.href = brand.favicon;
+    }
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>

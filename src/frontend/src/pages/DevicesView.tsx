@@ -42,8 +42,10 @@ import { useLiveFleet } from '../api/useLiveFleet';
 import { DeviceDetailModal } from '../components/devices/DeviceDetailModal';
 import { AdConfigModal } from '../components/config/AdConfigModal';
 import { DeploymentProgressModal } from '../components/deployment/DeploymentProgressModal';
+import { getBrand } from '../utils/brand';
 
 export const DevicesView: React.FC = () => {
+  const brand = getBrand();
   const queryClient = useQueryClient();
   const { isConnected } = useLiveFleet();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -52,6 +54,8 @@ export const DevicesView: React.FC = () => {
   const canManageDevices = Boolean(
     currentUser?.role && ['ADMINISTRATOR', 'ADMIN', 'SUPERVISOR'].includes(currentUser.role.toUpperCase())
   );
+  // Alias for readability: only admins/supervisors see technical details (hashes, block IDs, etc.)
+  const isAdminOrSupervisor = canManageDevices;
 
   // View mode
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table');
@@ -474,8 +478,8 @@ export const DevicesView: React.FC = () => {
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-black text-white tracking-tight">Устройства</h1>
             <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold glass-surface-l1 text-[#A9DFD8] border border-glass-subtle flex items-center gap-1.5 shadow-sm">
-              <img src="/oqtepa_emblem.svg" className="w-3.5 h-3.5 rounded object-contain" alt="" />
-              Oqtepa Lavash • {totalCount} касс
+              <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
+              {brand.name} • {totalCount} касс
             </span>
             {isConnected && (
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold glass-surface-l1 text-[#05C168] border border-[#05C168]/30 flex items-center gap-1.5 shadow-sm">
@@ -999,7 +1003,9 @@ export const DevicesView: React.FC = () => {
                       )}
                     </div>
                   </th>
-                  <th className="py-3.5 px-4">Текущий контент</th>
+                  {isAdminOrSupervisor && (
+                    <th className="py-3.5 px-4">Текущий контент</th>
+                  )}
                   <th 
                     onClick={() => handleSort('status')}
                     className="py-3.5 px-4 cursor-pointer hover:bg-[#212330] hover:text-white transition-colors select-none group"
@@ -1117,23 +1123,29 @@ export const DevicesView: React.FC = () => {
                         >
                           {ver}
                         </button>
-                        <span className="text-[10px] text-slate-400 font-mono block mt-0.5">
-                          v{c.current_content_version || 1}
-                        </span>
+                        {/* Hash visible only to admins/supervisors */}
+                        {isAdminOrSupervisor && (
+                          <span className="text-[10px] text-slate-400 font-mono block mt-0.5 truncate max-w-[140px]" title={`v${c.current_content_version || 1}`}>
+                            v{c.current_content_version || 1}
+                          </span>
+                        )}
                       </td>
 
-                      <td className="py-3.5 px-4">
-                        <div className="space-y-1 max-w-[200px]">
-                          <div className="flex items-center space-x-1 text-[11px] truncate" title={fullBlock?.name || 'По умолчанию'}>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">FULL</span>
-                            <span className="text-slate-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                      {/* Текущий контент — visible only to admins/supervisors */}
+                      {isAdminOrSupervisor && (
+                        <td className="py-3.5 px-4">
+                          <div className="space-y-1 max-w-[200px]">
+                            <div className="flex items-center space-x-1 text-[11px] truncate" title={fullBlock?.name || 'По умолчанию'}>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">FULL</span>
+                              <span className="text-slate-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                            </div>
+                            <div className="flex items-center space-x-1 text-[11px] truncate" title={promoBlock?.name || 'По умолчанию'}>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">50/50</span>
+                              <span className="text-slate-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
+                            </div>
                           </div>
-                          <div className="flex items-center space-x-1 text-[11px] truncate" title={promoBlock?.name || 'По умолчанию'}>
-                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">50/50</span>
-                            <span className="text-slate-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
-                          </div>
-                        </div>
-                      </td>
+                        </td>
+                      )}
 
                       {/* CLICKABLE STATUS BADGE - Instant Filtering! */}
                       <td className="py-3.5 px-4">
@@ -1321,18 +1333,23 @@ export const DevicesView: React.FC = () => {
                         {ver}
                       </button>
                     </div>
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>FULL блок:</span>
-                      <span className="text-slate-200 font-medium truncate max-w-[130px]" title={fullBlock?.name}>
-                        {fullBlock ? fullBlock.name : 'По умолчанию'}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center text-slate-400">
-                      <span>50/50 промо:</span>
-                      <span className="text-slate-200 font-medium truncate max-w-[130px]" title={promoBlock?.name}>
-                        {promoBlock ? promoBlock.name : 'По умолчанию'}
-                      </span>
-                    </div>
+                    {/* FULL блок and 50/50 промо — visible only to admins/supervisors */}
+                    {isAdminOrSupervisor && (
+                      <>
+                        <div className="flex justify-between items-center text-slate-400">
+                          <span>FULL блок:</span>
+                          <span className="text-slate-200 font-medium truncate max-w-[130px]" title={fullBlock?.name}>
+                            {fullBlock ? fullBlock.name : 'По умолчанию'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center text-slate-400">
+                          <span>50/50 промо:</span>
+                          <span className="text-slate-200 font-medium truncate max-w-[130px]" title={promoBlock?.name}>
+                            {promoBlock ? promoBlock.name : 'По умолчанию'}
+                          </span>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

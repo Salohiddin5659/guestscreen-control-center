@@ -13,8 +13,10 @@ import {
   Zap,
   CheckCircle2
 } from 'lucide-react';
+import { getBrand } from '../utils/brand';
 
 export const WikiView: React.FC = () => {
+  const brand = getBrand();
   const [activeTab, setActiveTab] = useState<'overview' | 'screens' | 'admin' | 'operator' | 'backup' | 'faq'>('overview');
   const [copiedSnippet, setCopiedSnippet] = useState<string | null>(null);
 
@@ -55,22 +57,28 @@ docker restart guestscreen_fastapi_server`;
       {/* Top Standalone Header */}
       <header className="sticky top-0 z-50 glass-surface-l3 border-b border-glass-elevated px-6 py-3.5 backdrop-blur-xl">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <a 
+            href="/devices" 
+            className="flex items-center space-x-3 hover:opacity-90 transition group cursor-pointer"
+            title="Перейти к кассам"
+          >
             <img 
-              src="/oqtepa_emblem.svg" 
-              alt="Oqtepa Lavash" 
-              className="w-9 h-9 rounded-xl shadow-lg shadow-[#C81E28]/25 object-contain ring-1 ring-white/10" 
+              src={brand.emblem} 
+              alt={brand.name} 
+              className="w-9 h-9 rounded-xl shadow-lg object-contain ring-1 ring-white/10 group-hover:scale-105 transition-transform" 
             />
             <div>
               <div className="flex items-center space-x-2">
-                <span className="font-extrabold text-sm tracking-tight text-white uppercase">Oqtepa Lavash</span>
+                <span className="font-extrabold text-sm tracking-tight text-white uppercase group-hover:text-[#A9DFD8] transition-colors">
+                  {brand.name}
+                </span>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-glass-cyan text-[#A9DFD8] font-mono border border-[#A9DFD8]/30">
                   Wiki v3.2
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 font-medium">GuestScreen Control Center • База знаний</span>
             </div>
-          </div>
+          </a>
           
           <div className="flex items-center space-x-4">
             <a

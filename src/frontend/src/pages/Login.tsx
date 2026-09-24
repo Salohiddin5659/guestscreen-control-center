@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User as UserIcon, AlertCircle, Loader2, Monitor } from 'lucide-react';
 import { authApi, setAuthToken, getAuthToken, removeAuthToken } from '../api/client';
+import { getBrand } from '../utils/brand';
 
 export const Login: React.FC = () => {
+  const brand = getBrand();
   const navigate = useNavigate();
   const [username, setUsername] = useState('admin');
   const [password, setPassword] = useState('');
@@ -11,6 +13,12 @@ export const Login: React.FC = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    document.title = `${brand.name} | Вход в систему`;
+    const link: HTMLLinkElement | null = document.querySelector("link[rel*='icon']");
+    if (link) {
+      link.href = brand.favicon;
+    }
+
     const token = getAuthToken();
     if (token) {
       authApi.me().then(() => {
@@ -19,7 +27,7 @@ export const Login: React.FC = () => {
         removeAuthToken();
       });
     }
-  }, []);
+  }, [brand]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,12 +61,12 @@ export const Login: React.FC = () => {
         <div className="glass-surface-l4 glass-specular-edge liquid-chromatic-edge rounded-3xl w-full max-w-md p-8 shadow-2xl animate-scale-up relative">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner">
-                <img src="/logo_oqtepa_white.svg" alt="Oqtepa Lavash" className="h-12 object-contain" />
+              <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 shadow-inner flex items-center justify-center">
+                <img src={brand.logo} alt={brand.name} className="h-12 max-w-[200px] object-contain" />
               </div>
             </div>
             <h1 className="text-xl font-black text-white tracking-tight">GuestScreen Control Center</h1>
-            <p className="text-xs text-slate-400 mt-1">Центральное управление экранами и кассами сети Oqtepa Lavash</p>
+            <p className="text-xs text-slate-400 mt-1">{brand.networkSubtitle}</p>
           </div>
 
           {error && (

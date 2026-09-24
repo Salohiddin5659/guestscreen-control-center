@@ -24,8 +24,10 @@ import {
 } from 'lucide-react';
 import { removeAuthToken, topologyApi, usersApi, getCurrentUserFromStorage, apiRequest, authApi } from '../../api/client';
 import { useLiveFleet } from '../../api/useLiveFleet';
+import { getBrand } from '../../utils/brand';
 
 export const AppLayout: React.FC = () => {
+  const brand = getBrand();
   const navigate = useNavigate();
   const location = useLocation();
   const { isConnected } = useLiveFleet();
@@ -56,7 +58,7 @@ export const AppLayout: React.FC = () => {
       return {
         title: 'Управление кассами',
         category: 'Оборудование',
-        subtitle: 'Централизованный мониторинг кассового флота',
+        subtitle: brand.devicesSubtitle,
         icon: Monitor,
       };
     }
@@ -64,7 +66,7 @@ export const AppLayout: React.FC = () => {
       return {
         title: 'Рестораны и филиалы',
         category: 'Топология',
-        subtitle: 'Управление сетью заведений Oqtepa Lavash',
+        subtitle: brand.restaurantsSubtitle,
         icon: Building2,
       };
     }
@@ -119,7 +121,7 @@ export const AppLayout: React.FC = () => {
     return {
       title: 'Панель управления',
       category: 'GuestScreen',
-      subtitle: 'Управление экранами касс Oqtepa Lavash',
+      subtitle: `Управление экранами касс ${brand.name}`,
       icon: Monitor,
     };
   };
@@ -253,23 +255,29 @@ export const AppLayout: React.FC = () => {
       <aside className="w-64 glass-surface-l3 border-r border-glass-elevated flex flex-col justify-between flex-shrink-0 z-20 glass-specular-edge">
         
         <div className="flex flex-col h-full">
-          {/* Brand Header with Official Oqtepa Lavash Emblem */}
-          <div className="px-5 py-4 flex items-center space-x-3 border-b border-glass-subtle">
+          {/* Brand Header with Dynamic Emblem - Click returns to Main / Devices */}
+          <NavLink 
+            to="/" 
+            className="px-5 py-4 flex items-center space-x-3 border-b border-glass-subtle hover:bg-white/[0.04] transition-colors cursor-pointer group select-none"
+            title="Перейти к кассам (Главная)"
+          >
             <img 
-              src="/oqtepa_emblem.svg" 
-              alt="Oqtepa Lavash" 
-              className="w-10 h-10 rounded-xl shadow-lg shadow-[#C81E28]/25 flex-shrink-0 object-contain ring-1 ring-white/10" 
+              src={brand.emblem} 
+              alt={brand.name} 
+              className="w-10 h-10 rounded-xl shadow-lg flex-shrink-0 object-contain ring-1 ring-white/10 group-hover:scale-105 transition-transform" 
             />
             <div className="min-w-0">
               <div className="flex items-center space-x-1.5">
-                <h1 className="font-extrabold text-sm tracking-tight text-white uppercase truncate">Oqtepa Lavash</h1>
+                <h1 className="font-extrabold text-sm tracking-tight text-white uppercase truncate group-hover:text-[#A9DFD8] transition-colors">
+                  {brand.name}
+                </h1>
                 <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-glass-cyan text-[#A9DFD8] font-mono border border-[#A9DFD8]/30">
                   v3.1
                 </span>
               </div>
               <span className="text-[11px] text-slate-400 font-medium block truncate">GuestScreen • Кассы</span>
             </div>
-          </div>
+          </NavLink>
 
           {/* Navigation Links */}
           <nav className="p-3.5 space-y-5 overflow-y-auto flex-1">
@@ -662,10 +670,17 @@ export const AppLayout: React.FC = () => {
                     </div>
 
                     <div className="mt-3 pt-2.5 border-t border-glass-subtle flex items-center justify-between text-[10px] font-mono text-slate-400">
-                      <span className="flex items-center gap-1 text-white/90">
-                        <img src="/oqtepa_emblem.svg" className="w-3.5 h-3.5 rounded object-contain" alt="" />
-                        Oqtepa Lavash
-                      </span>
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          navigate('/');
+                        }}
+                        className="flex items-center gap-1.5 text-white/90 hover:text-[#A9DFD8] transition cursor-pointer"
+                        title="Перейти к кассам"
+                      >
+                        <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
+                        <span>{brand.name}</span>
+                      </button>
                       <span>ID: {user.id ? `${user.id.substring(0, 6)}...` : 'admin'}</span>
                     </div>
                   </div>

@@ -19,8 +19,10 @@ import {
   ShieldCheck
 } from 'lucide-react';
 import { topologyApi, Branch, Region, Cashier, getCurrentUserFromStorage } from '../api/client';
+import { getBrand } from '../utils/brand';
 
 export const RestaurantsView: React.FC = () => {
+  const brand = getBrand();
   const queryClient = useQueryClient();
 
   const currentUser = getCurrentUserFromStorage();
@@ -229,8 +231,8 @@ export const RestaurantsView: React.FC = () => {
               <span>Рестораны и регионы</span>
             </h1>
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold glass-surface-l1 glass-specular-edge text-[#A9DFD8] border border-white/10 flex items-center gap-1.5 shadow-sm">
-              <img src="/oqtepa_emblem.svg" className="w-3.5 h-3.5 rounded object-contain" alt="" />
-              Oqtepa Lavash • {branches.length} ресторанов
+              <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
+              {brand.name} • {branches.length} ресторанов
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
@@ -375,7 +377,7 @@ export const RestaurantsView: React.FC = () => {
                   {/* Top Badges & Actions */}
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <div className="flex items-center space-x-1.5 flex-wrap">
-                      <img src="/oqtepa_emblem.svg" className="w-4 h-4 rounded object-contain" alt="" />
+                      <img src={brand.emblem} className="w-4 h-4 rounded object-contain shadow-sm" alt={brand.name} />
                       <span className="px-2 py-0.5 rounded text-[10px] font-bold font-mono bg-white/5 text-[#A9DFD8] border border-white/10">
                         {branch.code}
                       </span>
