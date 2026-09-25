@@ -29,9 +29,6 @@ ENV PYTHONUNBUFFERED=1
 
 # Copy application source tree
 COPY src/ /app/src/
-COPY deploy/scripts/ /app/scripts/
-
-RUN chmod +x /app/scripts/*.sh 2>/dev/null || true
 
 EXPOSE 8000
 

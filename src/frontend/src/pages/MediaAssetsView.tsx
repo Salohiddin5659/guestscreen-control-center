@@ -1,21 +1,22 @@
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Image as ImageIcon, 
-  Film, 
-  UploadCloud, 
-  Trash2, 
-  Search, 
-  Copy, 
-  Check, 
-  Eye, 
-  X, 
-  Layers, 
-  AlertTriangle,
-  CheckCircle2,
-  Loader2
-} from 'lucide-react';
+  RiImage2Line as ImageIcon, 
+  RiMovie2Line as Film, 
+  RiUploadCloud2Line as UploadCloud, 
+  RiDeleteBinLine as Trash2, 
+  RiSearch2Line as Search, 
+  RiFileCopyLine as Copy, 
+  RiCheckLine as Check, 
+  RiEyeLine as Eye, 
+  RiCloseLine as X, 
+  RiStackLine as Layers, 
+  RiAlertLine as AlertTriangle,
+  RiCheckboxCircleLine as CheckCircle2,
+  RiLoader4Line as Loader2
+} from 'react-icons/ri';
 import { mediaApi, MediaAsset, MediaUsageResponse } from '../api/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MediaCardThumbnail: React.FC<{
   asset: MediaAsset;
@@ -266,38 +267,56 @@ export const MediaAssetsView: React.FC = () => {
 
       {/* Toolbar: Search and Filter Tabs */}
       <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-4 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-xl">
-        <div className="relative min-w-[280px]">
-          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+        <div className="relative min-w-[300px] flex-1 max-w-md">
+          <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none z-10" />
           <input
             type="text"
             placeholder="Поиск по названию файла или SHA-256..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="glass-input pl-10 pr-3.5 py-2 text-xs"
+            className="glass-input w-full !pl-10 pr-8"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
-        {/* Filter Buttons */}
-        <div className="flex items-center bg-white/5 p-1 rounded-xl text-xs overflow-x-auto border border-white/10">
+        {/* Filter Buttons with sliding active pill */}
+        <div className="flex items-center bg-[#0b111e] p-1 rounded-xl text-xs overflow-x-auto border border-[#1e293b] space-x-1">
           {[
             { id: 'ALL', label: 'Все файлы' },
             { id: 'IMAGE', label: 'Изображения' },
             { id: 'VIDEO', label: 'Видео' },
             { id: 'FULL', label: 'FULL SCREEN (4:3)' },
             { id: 'PROMO', label: '50/50 PROMO (2:3)' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setFilterType(tab.id as any)}
-              className={`px-3.5 py-1.5 rounded-lg font-medium transition-all whitespace-nowrap ${
-                filterType === tab.id 
-                  ? 'glass-active-capsule font-bold shadow-sm' 
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+          ].map((tab) => {
+            const isActive = filterType === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setFilterType(tab.id as any)}
+                className={`relative px-3.5 py-1.5 rounded-lg font-medium transition-colors whitespace-nowrap cursor-pointer z-10 ${
+                  isActive 
+                    ? 'text-white font-bold' 
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <motion.div
+                    layoutId="mediaFilterPill"
+                    className="absolute inset-0 bg-blue-600 rounded-lg -z-10 shadow-sm shadow-blue-600/30"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
+                <span>{tab.label}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
 

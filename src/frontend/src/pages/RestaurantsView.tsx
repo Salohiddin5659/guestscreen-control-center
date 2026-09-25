@@ -1,25 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Building2, 
-  Store, 
-  MapPin, 
-  Plus, 
-  Search, 
-  Edit2, 
-  Trash2, 
-  Monitor, 
-  CheckCircle2, 
-  AlertTriangle, 
-  X, 
-  Wifi, 
-  WifiOff,
-  Layers,
-  ChevronRight,
-  ShieldCheck
-} from 'lucide-react';
+  RiBuilding2Line as Building2, 
+  RiStore2Line as Store, 
+  RiMapPin2Line as MapPin, 
+  RiAddLine as Plus, 
+  RiSearch2Line as Search, 
+  RiEditLine as Edit2, 
+  RiDeleteBinLine as Trash2, 
+  RiComputerLine as Monitor, 
+  RiCheckboxCircleLine as CheckCircle2, 
+  RiAlertLine as AlertTriangle, 
+  RiCloseLine as X, 
+  RiWifiLine as Wifi, 
+  RiWifiOffLine as WifiOff,
+  RiStackLine as Layers,
+  RiArrowRightSLine as ChevronRight,
+  RiShieldCheckLine as ShieldCheck
+} from 'react-icons/ri';
 import { topologyApi, Branch, Region, Cashier, getCurrentUserFromStorage } from '../api/client';
+import { CustomDropdown } from '../components/ui/CustomDropdown';
 import { getBrand } from '../utils/brand';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const RestaurantsView: React.FC = () => {
   const brand = getBrand();
@@ -268,19 +270,29 @@ export const RestaurantsView: React.FC = () => {
         )}
       </div>
 
-      {/* Region Tabs */}
-      <div className="flex items-center space-x-2 overflow-x-auto pb-1 border-b border-white/10">
+      {/* Region Tabs with sliding active pill */}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1.5 border-b border-[#1e293b]">
         <button
+          type="button"
           onClick={() => setSelectedRegionId('ALL')}
-          className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-2 shadow-sm ${
+          className={`relative px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center space-x-2 cursor-pointer z-10 flex-shrink-0 ${
             selectedRegionId === 'ALL'
-              ? 'glass-active-capsule font-bold shadow-md'
-              : 'glass-surface-l1 text-slate-400 hover:text-white border border-white/10'
+              ? 'text-white font-bold shadow-md'
+              : 'text-slate-400 hover:text-white bg-[#111928] border border-[#1e293b]'
           }`}
         >
+          {selectedRegionId === 'ALL' && (
+            <motion.div
+              layoutId="restaurantsRegionPill"
+              className="absolute inset-0 bg-[#2563EB] rounded-xl -z-10 shadow-sm shadow-blue-600/30"
+              transition={{ type: "spring", stiffness: 380, damping: 30 }}
+            />
+          )}
           <Layers className="w-3.5 h-3.5" />
           <span>Все регионы</span>
-          <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono font-bold">
+          <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+            selectedRegionId === 'ALL' ? 'bg-black/25 text-white' : 'bg-black/40 text-slate-300'
+          }`}>
             {branches.length}
           </span>
         </button>
@@ -289,27 +301,43 @@ export const RestaurantsView: React.FC = () => {
           const count = branches.filter(b => b.region_id === reg.id).length;
           const isSelected = selectedRegionId === reg.id;
           return (
-            <div key={reg.id} className="flex items-center group">
-              <button
-                onClick={() => setSelectedRegionId(reg.id)}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center space-x-2 shadow-sm ${
-                  isSelected
-                    ? 'glass-active-capsule font-bold shadow-md'
-                    : 'glass-surface-l1 text-slate-400 hover:text-white border border-white/10'
-                }`}
-              >
-                <MapPin className="w-3.5 h-3.5 opacity-70" />
-                <span>{reg.name}</span>
-                <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-black/20 font-mono font-bold">
-                  {count}
-                </span>
-              </button>
+            <div
+              key={reg.id}
+              onClick={() => setSelectedRegionId(reg.id)}
+              className={`relative px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors flex items-center space-x-2 cursor-pointer z-10 flex-shrink-0 select-none ${
+                isSelected
+                  ? 'text-white font-bold shadow-md'
+                  : 'text-slate-400 hover:text-white bg-[#111928] border border-[#1e293b]'
+              }`}
+            >
+              {isSelected && (
+                <motion.div
+                  layoutId="restaurantsRegionPill"
+                  className="absolute inset-0 bg-[#2563EB] rounded-xl -z-10 shadow-sm shadow-blue-600/30"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              <MapPin className="w-3.5 h-3.5 opacity-70" />
+              <span>{reg.name}</span>
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-mono font-bold ${
+                isSelected ? 'bg-black/25 text-white' : 'bg-black/40 text-slate-300'
+              }`}>
+                {count}
+              </span>
 
-              {/* Region quick edit icon */}
+              {/* Region quick edit icon seamlessly integrated inside tab */}
               {canManageBranches && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); openEditRegion(reg); }}
-                  className="ml-1 p-1 text-slate-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity rounded"
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    openEditRegion(reg);
+                  }}
+                  className={`ml-1 -mr-1 p-1 rounded-md transition-all cursor-pointer ${
+                    isSelected 
+                      ? 'text-white/70 hover:text-white hover:bg-white/20' 
+                      : 'text-slate-500 hover:text-white hover:bg-white/10'
+                  }`}
                   title={`Редактировать регион "${reg.name}"`}
                 >
                   <Edit2 className="w-3 h-3" />
@@ -323,14 +351,22 @@ export const RestaurantsView: React.FC = () => {
       {/* Filter & Search Bar */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-3 glass-surface-l2 glass-specular-edge p-3.5 rounded-2xl shadow-xl">
         <div className="relative w-full sm:w-80">
-          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+          <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none z-10" />
           <input
             type="text"
             placeholder="Поиск по ресторану, коду или адресу..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="glass-input pl-10 pr-3.5 py-2 text-xs"
+            className="glass-input w-full !pl-10 pr-8"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          )}
         </div>
 
         <div className="flex items-center space-x-3 text-xs text-slate-400 font-mono self-end sm:self-auto">
@@ -464,8 +500,14 @@ export const RestaurantsView: React.FC = () => {
 
       {/* MODAL: Добавить / Изменить ресторан (Liquid Glass Level 4) */}
       {(addRestaurantOpen || editRestaurant) && (
-        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
+        <div 
+          onClick={() => { setAddRestaurantOpen(false); setEditRestaurant(null); }}
+          className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up cursor-default"
+          >
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">
                 <Store className="w-4 h-4 text-[#A9DFD8]" />
@@ -528,16 +570,13 @@ export const RestaurantsView: React.FC = () => {
 
               <div>
                 <label className="text-slate-300 block mb-1 font-bold">Регион (Область) *</label>
-                <select
+                <CustomDropdown
                   value={restRegionId}
-                  onChange={(e) => setRestRegionId(e.target.value)}
-                  className="glass-input text-xs font-medium"
-                  required
-                >
-                  {regions.map(r => (
-                    <option key={r.id} value={r.id} className="bg-slate-900 text-white">{r.name} ({r.code})</option>
-                  ))}
-                </select>
+                  onChange={(val) => setRestRegionId(val)}
+                  options={regions.map((r) => ({ value: r.id, label: `${r.name} (${r.code})` }))}
+                  className="w-full"
+                  menuClassName="w-full"
+                />
               </div>
 
               <div>
@@ -586,8 +625,14 @@ export const RestaurantsView: React.FC = () => {
 
       {/* MODAL: Добавить / Изменить регион (Liquid Glass Level 4) */}
       {(addRegionOpen || editRegion) && (
-        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up">
+        <div 
+          onClick={() => { setAddRegionOpen(false); setEditRegion(null); }}
+          className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-md overflow-hidden shadow-2xl animate-scale-up cursor-default"
+          >
             <div className="p-5 border-b border-white/10 flex items-center justify-between">
               <h3 className="font-bold text-white text-sm flex items-center space-x-2">
                 <MapPin className="w-4 h-4 text-[#A9DFD8]" />

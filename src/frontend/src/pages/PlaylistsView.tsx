@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import { 
-  Film, 
-  Plus, 
-  Trash2, 
-  Copy, 
-  Send, 
-  Monitor, 
-  Columns, 
-  Layers,
-  Pencil
-} from 'lucide-react';
+  RiMovie2Line, 
+  RiAddLine, 
+  RiDeleteBinLine, 
+  RiFileCopyLine, 
+  RiSendPlane2Line, 
+  RiTv2Line, 
+  RiLayoutColumnLine, 
+  RiStackLine,
+  RiEditLine
+} from 'react-icons/ri';
 import { 
   advertisingApi, 
   topologyApi, 
@@ -100,8 +101,11 @@ export const PlaylistsView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center space-x-3">
-            <h1 className="text-2xl font-black text-white tracking-tight">Рекламные шаблоны и плейлисты</h1>
-            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold glass-surface-l1 glass-specular-edge text-[#A9DFD8] border border-white/10 shadow-sm">
+            <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
+              <RiMovie2Line className="w-6 h-6 text-cyan-400" />
+              Рекламные шаблоны и плейлисты
+            </h1>
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#162033] text-cyan-400 border border-[#1e293b] shadow-sm">
               {blocks.length} блоков
             </span>
           </div>
@@ -110,60 +114,65 @@ export const PlaylistsView: React.FC = () => {
           </p>
         </div>
 
-        <button
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => setAdConfigOpen(true)}
-          className="glass-btn-primary text-xs flex items-center space-x-2 self-start sm:self-auto shadow-lg shadow-[#A9DFD8]/20"
+          className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#2563EB] hover:bg-[#1d4ed8] text-white flex items-center space-x-2 self-start sm:self-auto shadow-lg shadow-blue-600/25 transition-all cursor-pointer"
         >
-          <Plus className="w-4 h-4" />
-          <span>+ Создать рекламный блок</span>
-        </button>
+          <RiAddLine className="w-4 h-4 text-white font-bold" />
+          <span>Создать рекламный блок</span>
+        </motion.button>
       </div>
 
-      {/* Area Filter Tabs */}
-      <div className="flex items-center space-x-2 glass-surface-l1 glass-specular-edge border border-white/10 p-1.5 rounded-2xl w-fit text-xs shadow-lg">
-        <button
-          onClick={() => setAreaFilter('ALL')}
-          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all ${
-            areaFilter === 'ALL' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          Все форматы
-        </button>
-        <button
-          onClick={() => setAreaFilter('FULL_SCREEN')}
-          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all flex items-center space-x-1.5 ${
-            areaFilter === 'FULL_SCREEN' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Monitor className="w-3.5 h-3.5" />
-          <span>FULL SCREEN (4:3)</span>
-        </button>
-        <button
-          onClick={() => setAreaFilter('MODE32_PROMO')}
-          className={`px-3.5 py-1.5 rounded-xl font-medium transition-all flex items-center space-x-1.5 ${
-            areaFilter === 'MODE32_PROMO' ? 'glass-active-capsule font-bold shadow-sm' : 'text-slate-400 hover:text-white'
-          }`}
-        >
-          <Columns className="w-3.5 h-3.5" />
-          <span>50/50 PROMO (2:3)</span>
-        </button>
+      {/* Area Filter Tabs with sliding active pill */}
+      <div className="flex items-center space-x-1.5 bg-[#111928] border border-[#1e293b] p-1.5 rounded-2xl w-fit text-xs shadow-lg">
+        {[
+          { id: 'ALL', label: 'Все форматы' },
+          { id: 'FULL_SCREEN', label: 'FULL SCREEN (4:3)', icon: RiTv2Line },
+          { id: 'MODE32_PROMO', label: '50/50 PROMO (2:3)', icon: RiLayoutColumnLine }
+        ].map((tab) => {
+          const isActive = areaFilter === tab.id;
+          const Icon = tab.icon;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setAreaFilter(tab.id as any)}
+              className={`relative px-3.5 py-1.5 rounded-xl font-medium transition-colors cursor-pointer flex items-center space-x-1.5 z-10 ${
+                isActive ? 'text-white font-bold' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {isActive && (
+                <motion.div
+                  layoutId="playlistsFilterPill"
+                  className="absolute inset-0 bg-blue-600 rounded-xl -z-10 shadow-sm shadow-blue-600/30"
+                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                />
+              )}
+              {Icon && <Icon className="w-3.5 h-3.5" />}
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Main Grid: List on Left, Detail & Preview on Right */}
       {blocks.length === 0 ? (
-        <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-12 text-center shadow-xl">
-          <Layers className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
+        <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-12 text-center shadow-xl">
+          <RiStackLine className="w-12 h-12 text-slate-500 mx-auto mb-3 opacity-40" />
           <h3 className="text-base font-bold text-white mb-1">Шаблоны пока не созданы</h3>
           <p className="text-xs text-slate-400 max-w-sm mx-auto mb-4">
             Создайте первый рекламный блок или динамическое слайдшоу для показа на экранах покупателей.
           </p>
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setAdConfigOpen(true)}
-            className="glass-btn-primary text-xs inline-flex items-center space-x-2"
+            className="px-4 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white inline-flex items-center space-x-2 shadow-lg shadow-blue-600/25 border border-blue-400/30"
           >
-            <Plus className="w-4 h-4" />
+            <RiAddLine className="w-4 h-4 text-white" />
             <span>Создать блок</span>
-          </button>
+          </motion.button>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -178,20 +187,27 @@ export const PlaylistsView: React.FC = () => {
                 <div
                   key={b.id}
                   onClick={() => setSelectedBlockId(b.id)}
-                  className={`cursor-pointer rounded-2xl p-4 transition-all duration-300 shadow-lg ${
+                  className={`relative cursor-pointer rounded-2xl p-4 transition-all duration-200 shadow-md ${
                     isSelected 
-                      ? 'glass-surface-l2 border border-[#A9DFD8]/60 ring-1 ring-[#A9DFD8]/30 scale-[1.01]' 
-                      : 'glass-surface-l1 glass-specular-edge border border-white/10 hover:border-[#A9DFD8]/40 hover:bg-white/[0.04]'
+                      ? 'bg-[#162033]' 
+                      : 'bg-[#111928] border border-[#1e293b] hover:border-[#2a3c5a] hover:bg-[#131d2e]'
                   }`}
                 >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeBlockBorder"
+                      className="absolute inset-0 border-2 border-cyan-500 rounded-2xl -z-10 shadow-md shadow-cyan-500/10 pointer-events-none"
+                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                    />
+                  )}
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${
                         isFull 
-                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.15)]' 
-                          : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30 shadow-[0_0_10px_rgba(169,223,216,0.15)]'
+                          ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' 
+                          : 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
                       }`}>
-                        {isFull ? <Monitor className="w-4 h-4" /> : <Columns className="w-4 h-4" />}
+                        {isFull ? <RiTv2Line className="w-4 h-4" /> : <RiLayoutColumnLine className="w-4 h-4" />}
                       </div>
                       <div>
                         <h4 className="font-bold text-white text-xs">{b.name}</h4>
@@ -202,13 +218,13 @@ export const PlaylistsView: React.FC = () => {
                     </div>
 
                     <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold font-mono ${
-                      isFull ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-[#A9DFD8]/15 text-[#A9DFD8] border border-[#A9DFD8]/30'
+                      isFull ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' : 'bg-cyan-500/15 text-cyan-400 border border-cyan-500/30'
                     }`}>
                       {isFull ? '1024×768' : '512×768'}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2.5 border-t border-white/[0.08] mt-2">
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2.5 border-t border-[#1e293b] mt-2">
                     <span>Слайдов: <strong className="text-white font-semibold font-mono">{b.items_count}</strong></span>
                     <span className="text-[10px] text-slate-400 font-mono">
                       {new Date(b.created_at).toLocaleDateString('ru-RU')}
@@ -222,10 +238,10 @@ export const PlaylistsView: React.FC = () => {
           {/* Right Column: Active Block Detail & Preview */}
           <div className="lg:col-span-2">
             {blockDetail ? (
-              <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-6 space-y-6 shadow-xl">
+              <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-6 space-y-6 shadow-xl">
                 
                 {/* Header of detail */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-white/10 pb-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[#1e293b] pb-4">
                   <div>
                     <div className="flex items-center space-x-3">
                       <h2 className="text-lg font-bold text-white">{blockDetail.name}</h2>
@@ -241,18 +257,18 @@ export const PlaylistsView: React.FC = () => {
                         setEditingBlock(blockDetail);
                         setAdConfigOpen(true);
                       }}
-                      className="p-2 bg-white/5 hover:bg-[#A9DFD8]/15 border border-white/10 hover:border-[#A9DFD8]/30 rounded-xl text-slate-300 hover:text-[#A9DFD8] transition-colors"
+                      className="p-2 bg-[#162033] hover:bg-cyan-500/15 border border-[#1e293b] hover:border-cyan-500/30 rounded-xl text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
                       title="Редактировать шаблон"
                     >
-                      <Pencil className="w-4 h-4" />
+                      <RiEditLine className="w-4 h-4" />
                     </button>
 
                     <button
                       onClick={() => duplicateMutation.mutate(blockDetail.id)}
-                      className="p-2 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-xl text-slate-300 hover:text-white transition-colors"
+                      className="p-2 bg-[#162033] hover:bg-white/10 border border-[#1e293b] hover:border-white/20 rounded-xl text-slate-300 hover:text-white transition-colors cursor-pointer"
                       title="Дублировать шаблон"
                     >
-                      <Copy className="w-4 h-4" />
+                      <RiFileCopyLine className="w-4 h-4" />
                     </button>
 
                     <button
@@ -261,22 +277,24 @@ export const PlaylistsView: React.FC = () => {
                           deleteMutation.mutate(blockDetail.id);
                         }
                       }}
-                      className="p-2 bg-white/5 hover:bg-rose-500/15 border border-white/10 hover:border-rose-500/30 rounded-xl text-slate-400 hover:text-rose-400 transition-colors"
+                      className="p-2 bg-[#162033] hover:bg-rose-500/15 border border-[#1e293b] hover:border-rose-500/30 rounded-xl text-slate-400 hover:text-rose-400 transition-colors cursor-pointer"
                       title="Удалить"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <RiDeleteBinLine className="w-4 h-4" />
                     </button>
 
-                    <button
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => {
                         setEditingBlock(blockDetail || null);
                         setAdConfigOpen(true);
                       }}
-                      className="glass-btn-primary text-xs flex items-center space-x-1.5 shadow-md shadow-[#A9DFD8]/20"
+                      className="px-4 py-2 rounded-xl text-xs font-bold bg-[#2563EB] hover:bg-[#1d4ed8] text-white flex items-center space-x-1.5 shadow-md shadow-blue-600/25 cursor-pointer"
                     >
-                      <Send className="w-3.5 h-3.5" />
+                      <RiSendPlane2Line className="w-4 h-4 text-white" />
                       <span>Развернуть на кассы</span>
-                    </button>
+                    </motion.button>
                   </div>
                 </div>
 
@@ -290,14 +308,14 @@ export const PlaylistsView: React.FC = () => {
                   </div>
 
                   {blockDetail.items.length === 0 ? (
-                    <div className="p-8 bg-white/5 border border-white/10 rounded-2xl text-center text-slate-400 text-xs">
+                    <div className="p-8 bg-[#0b111e] border border-[#1e293b] rounded-xl text-center text-slate-400 text-xs">
                       В блоке нет добавленных слайдов
                     </div>
                   ) : (
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {blockDetail.items.map((it) => (
-                        <div key={it.id} className="bg-white/5 border border-white/10 rounded-2xl p-3 space-y-2 hover:border-[#A9DFD8]/40 transition-all">
-                          <div className="aspect-[4/3] bg-white/5 rounded-xl overflow-hidden flex items-center justify-center relative border border-white/10">
+                        <div key={it.id} className="bg-[#0b111e] border border-[#1e293b] rounded-xl p-3 space-y-2 hover:border-cyan-500/40 transition-all">
+                          <div className="aspect-[4/3] bg-[#162033] rounded-lg overflow-hidden flex items-center justify-center relative border border-[#1e293b]">
                             {it.media ? (
                               <img
                                 src={mediaApi.getThumbnailUrl(it.media.id)}
@@ -311,9 +329,9 @@ export const PlaylistsView: React.FC = () => {
                                 }}
                               />
                             ) : (
-                              <Film className="w-6 h-6 text-slate-500" />
+                              <RiMovie2Line className="w-6 h-6 text-slate-500" />
                             )}
-                            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/60 text-[#A9DFD8] border border-white/15 backdrop-blur-md">
+                            <div className="absolute top-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-black/70 text-cyan-400 border border-white/10 backdrop-blur-md">
                               {it.duration_seconds} сек
                             </div>
                           </div>
@@ -334,7 +352,7 @@ export const PlaylistsView: React.FC = () => {
 
               </div>
             ) : (
-              <div className="glass-surface-l2 glass-specular-edge rounded-3xl p-12 text-center text-slate-400 text-xs shadow-xl">
+              <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-12 text-center text-slate-400 text-xs shadow-xl">
                 Выберите рекламный блок слева для просмотра деталей
               </div>
             )}

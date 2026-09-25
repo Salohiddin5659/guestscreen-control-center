@@ -2,32 +2,32 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  Monitor, 
-  Search, 
-  Filter, 
-  LayoutGrid, 
-  List as ListIcon, 
-  Plus, 
-  RefreshCw, 
-  Send, 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle, 
-  Trash2, 
-  Eye, 
-  Activity, 
-  Wifi, 
-  WifiOff, 
-  Radio, 
-  Pencil, 
-  X,
-  RotateCcw,
-  SlidersHorizontal,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
-  Building2
-} from 'lucide-react';
+  RiComputerLine as Monitor, 
+  RiSearch2Line as Search, 
+  RiFilter3Line as Filter, 
+  RiGridFill as LayoutGrid, 
+  RiListCheck2 as ListIcon, 
+  RiAddLine as Plus, 
+  RiRefreshLine as RefreshCw, 
+  RiSendPlane2Line as Send, 
+  RiCheckboxCircleLine as CheckCircle2, 
+  RiTimeLine as Clock, 
+  RiAlertLine as AlertTriangle, 
+  RiDeleteBinLine as Trash2, 
+  RiEyeLine as Eye, 
+  RiPulseLine as Activity, 
+  RiWifiLine as Wifi, 
+  RiWifiOffLine as WifiOff, 
+  RiBroadcastLine as Radio, 
+  RiEditLine as Pencil, 
+  RiCloseLine as X,
+  RiRestartLine as RotateCcw,
+  RiEqualizerLine as SlidersHorizontal,
+  RiArrowUpDownLine as ArrowUpDown,
+  RiArrowUpLine as ArrowUp,
+  RiArrowDownLine as ArrowDown,
+  RiBuilding2Line as Building2
+} from 'react-icons/ri';
 import { 
   topologyApi, 
   advertisingApi, 
@@ -42,7 +42,9 @@ import { useLiveFleet } from '../api/useLiveFleet';
 import { DeviceDetailModal } from '../components/devices/DeviceDetailModal';
 import { AdConfigModal } from '../components/config/AdConfigModal';
 import { DeploymentProgressModal } from '../components/deployment/DeploymentProgressModal';
+import { CustomDropdown } from '../components/ui/CustomDropdown';
 import { getBrand } from '../utils/brand';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const DevicesView: React.FC = () => {
   const brand = getBrand();
@@ -683,7 +685,7 @@ export const DevicesView: React.FC = () => {
                 placeholder="Поиск по IP, названию, филиалу, версии..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full glass-input rounded-xl pl-10 pr-8 py-2 text-xs placeholder-slate-400 focus:outline-none"
+                className="w-full glass-input pl-10 pr-8"
               />
               {searchQuery && (
                 <button
@@ -702,80 +704,73 @@ export const DevicesView: React.FC = () => {
             </div>
 
             {/* Status Dropdown */}
-            <div className="relative">
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
-              >
-                <option value="ALL">Все статусы</option>
-                <option value="ONLINE">В сети (Online)</option>
-                <option value="OFFLINE">Не в сети (Offline)</option>
-                <option value="FAILED">Ошибки (Failed)</option>
-                <option value="PENDING">Очередь / Рестарт</option>
-              </select>
-            </div>
+            <CustomDropdown
+              value={statusFilter}
+              onChange={(val) => setStatusFilter(val as any)}
+              options={[
+                { value: 'ALL', label: 'Все статусы' },
+                { value: 'ONLINE', label: 'В сети (Online)', badge: String(cashiers.filter(c => c.last_sync_status === 'SUCCESS' || c.last_sync_status === 'ONLINE').length) },
+                { value: 'OFFLINE', label: 'Не в сети (Offline)', badge: String(cashiers.filter(c => c.last_sync_status === 'OFFLINE' || c.last_sync_status === 'UNKNOWN').length) },
+                { value: 'FAILED', label: 'Ошибки (Failed)' },
+                { value: 'PENDING', label: 'Очередь / Рестарт' }
+              ]}
+              className="rounded-xl"
+            />
 
             {/* GuestScreen Version Dropdown */}
-            <div className="relative">
-              <select
-                value={versionFilter}
-                onChange={(e) => setVersionFilter(e.target.value)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium font-mono"
-              >
-                <option value="ALL">Все версии GS</option>
-                {availableVersions.map(v => (
-                  <option key={v} value={v}>Версия {v}</option>
-                ))}
-              </select>
-            </div>
+            <CustomDropdown
+              value={versionFilter}
+              onChange={(val) => setVersionFilter(val)}
+              options={[
+                { value: 'ALL', label: 'Все версии GS' },
+                ...availableVersions.map(v => ({ value: v, label: `Версия ${v}` }))
+              ]}
+              className="rounded-xl font-mono"
+            />
 
             {/* Branch / Restaurant Dropdown */}
-            <div className="relative">
-              <select
-                value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
-                className="glass-input text-xs rounded-xl px-3 py-2 pr-8 focus:outline-none cursor-pointer font-medium"
-              >
-                <option value="ALL">Все рестораны</option>
-                {branches.map(b => (
-                  <option key={b.id} value={b.id}>{b.name}</option>
-                ))}
-              </select>
-            </div>
+            <CustomDropdown
+              value={branchFilter}
+              onChange={(val) => setBranchFilter(val)}
+              options={[
+                { value: 'ALL', label: 'Все рестораны' },
+                ...branches.map(b => ({ value: b.id, label: b.name }))
+              ]}
+              className="rounded-xl"
+            />
 
             {/* Quick Status Sort Button */}
             {/* Quick Branch Sort Button */}
             <button
               onClick={() => handleSort('branch')}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
+              className={`min-h-[40px] px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all border cursor-pointer ${
                 sortField === 'branch' && sortDirection === 'asc'
-                  ? 'bg-[#A9DFD8]/20 border-[#A9DFD8]/50 text-[#A9DFD8]'
+                  ? 'bg-blue-600/20 border-blue-500/50 text-blue-400'
                   : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
               }`}
               title="Сортировать по названию филиала (А-Я)"
             >
-              <Building2 className="w-3.5 h-3.5 text-[#A9DFD8]" />
+              <Building2 className="w-4 h-4 text-blue-400" />
               <span>Филиал (А-Я)</span>
               {sortField === 'branch' && (
-                sortDirection === 'asc' ? <ArrowUp className="w-3 h-3 text-[#A9DFD8]" /> : <ArrowDown className="w-3 h-3 text-[#A9DFD8]" />
+                sortDirection === 'asc' ? <ArrowUp className="w-3.5 h-3.5 text-blue-400" /> : <ArrowDown className="w-3.5 h-3.5 text-blue-400" />
               )}
             </button>
 
             {/* Quick Status Sort Button */}
             <button
               onClick={() => handleSort('status')}
-              className={`px-3 py-2 rounded-xl text-xs font-semibold flex items-center space-x-1.5 transition-all border cursor-pointer ${
+              className={`min-h-[40px] px-3.5 py-2.5 rounded-lg text-xs font-semibold flex items-center space-x-2 transition-all border cursor-pointer ${
                 sortField === 'status' && sortDirection === 'desc'
                   ? 'bg-[#05C168]/20 border-[#05C168]/50 text-[#05C168]'
                   : 'glass-surface-l1 border-glass-subtle text-slate-300 hover:text-white hover:bg-white/10'
               }`}
               title="Сортировать: кассы онлайн вверх"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
+              <span className="w-2 h-2 rounded-full bg-[#05C168] animate-pulse" />
               <span>В сети вверх</span>
               {sortField === 'status' && (
-                sortDirection === 'desc' ? <ArrowUp className="w-3 h-3 text-[#05C168]" /> : <ArrowDown className="w-3 h-3 text-[#FF5B5B]" />
+                sortDirection === 'desc' ? <ArrowUp className="w-3.5 h-3.5 text-[#05C168]" /> : <ArrowDown className="w-3.5 h-3.5 text-[#FF5B5B]" />
               )}
             </button>
 
@@ -787,26 +782,40 @@ export const DevicesView: React.FC = () => {
             <button
               onClick={() => refetchCashiers()}
               disabled={loadingCashiers}
-              className="p-2 glass-surface-l1 hover:bg-white/10 border border-glass-subtle rounded-xl text-slate-300 hover:text-white transition-colors"
+              className="h-10 px-3.5 glass-surface-l1 hover:bg-white/10 border border-glass-subtle rounded-lg text-slate-300 hover:text-white transition-colors flex items-center justify-center cursor-pointer"
               title="Обновить список касс"
             >
-              <RefreshCw className={`w-4 h-4 ${loadingCashiers ? 'animate-spin text-[#A9DFD8]' : ''}`} />
+              <RefreshCw className={`w-4 h-4 ${loadingCashiers ? 'animate-spin text-blue-400' : ''}`} />
             </button>
 
-            {/* Grid / Table Toggle */}
-            <div className="flex items-center glass-surface-l1 border border-glass-subtle rounded-xl p-1">
+            {/* Grid / Table Toggle with sliding active pill */}
+            <div className="flex items-center h-10 bg-[#0b111e] border border-[#1e293b] rounded-lg p-1">
               <button
                 onClick={() => setViewMode('table')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'table' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                className={`relative h-full px-3 flex items-center justify-center rounded-md transition-colors cursor-pointer z-10 ${viewMode === 'table' ? 'text-white font-bold' : 'text-slate-400 hover:text-white'}`}
                 title="Таблица"
               >
+                {viewMode === 'table' && (
+                  <motion.div
+                    layoutId="devicesViewModePill"
+                    className="absolute inset-0 bg-blue-600 rounded-md -z-10 shadow-sm shadow-blue-600/30"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
                 <ListIcon className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-1.5 rounded-lg transition-colors ${viewMode === 'grid' ? 'glass-active-capsule text-white font-bold shadow-sm' : 'text-slate-400 hover:text-white'}`}
+                className={`relative h-full px-3 flex items-center justify-center rounded-md transition-colors cursor-pointer z-10 ${viewMode === 'grid' ? 'text-white font-bold' : 'text-slate-400 hover:text-white'}`}
                 title="Сетка"
               >
+                {viewMode === 'grid' && (
+                  <motion.div
+                    layoutId="devicesViewModePill"
+                    className="absolute inset-0 bg-blue-600 rounded-md -z-10 shadow-sm shadow-blue-600/30"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
+                )}
                 <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
@@ -1265,9 +1274,14 @@ export const DevicesView: React.FC = () => {
             const ver = c.guest_screen_version || '3.1.1.0';
 
             return (
-              <div 
+              <motion.div 
                 key={c.id}
-                className="glass-surface-l2 glass-specular-edge rounded-2xl p-5 flex flex-col justify-between hover:border-[#A9DFD8]/40 transition-all duration-300 shadow-xl group"
+                layout
+                initial={{ opacity: 0, scale: 0.97 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ y: -3 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="bg-[#131c31] border border-[#27354f] hover:border-cyan-500/40 rounded-2xl p-5 flex flex-col justify-between transition-colors shadow-lg group"
               >
                 <div>
                   <div className="flex items-start justify-between mb-3">
@@ -1400,7 +1414,7 @@ export const DevicesView: React.FC = () => {
                     )}
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -1408,8 +1422,14 @@ export const DevicesView: React.FC = () => {
 
       {/* 8. Add Cashier Modal (Liquid Glass Level 4) */}
       {addCashierModalOpen && (
-        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
+        <div 
+          onClick={() => setAddCashierModalOpen(false)}
+          className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up cursor-default"
+          >
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-9 h-9 rounded-xl bg-[#A9DFD8]/20 text-[#A9DFD8] flex items-center justify-center font-bold border border-[#A9DFD8]/30">
@@ -1483,15 +1503,13 @@ export const DevicesView: React.FC = () => {
 
                 <div className="col-span-2">
                   <label className="text-slate-300 font-semibold block mb-1">Ресторан / Филиал *</label>
-                  <select
+                  <CustomDropdown
                     value={newBranchId}
-                    onChange={(e) => setNewBranchId(e.target.value)}
-                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white cursor-pointer focus:outline-none"
-                  >
-                    {branches.map((b) => (
-                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">{b.name}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setNewBranchId(val)}
+                    options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                    className="w-full"
+                    menuClassName="w-full"
+                  />
                 </div>
 
                 <div>
@@ -1540,8 +1558,14 @@ export const DevicesView: React.FC = () => {
 
       {/* 9. Edit Cashier Modal (Liquid Glass Level 4) */}
       {editingCashier && (
-        <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-          <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up">
+        <div 
+          onClick={() => setEditingCashier(null)}
+          className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl animate-scale-up cursor-default"
+          >
             <div className="p-6 border-b border-white/10 flex items-center justify-between">
               <div className="flex items-center space-x-3">
                 <div className="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center font-bold border border-amber-500/30">
@@ -1599,15 +1623,13 @@ export const DevicesView: React.FC = () => {
 
                 <div className="col-span-2">
                   <label className="text-slate-300 font-semibold block mb-1">Ресторан / Филиал *</label>
-                  <select
+                  <CustomDropdown
                     value={editBranchId}
-                    onChange={(e) => setEditBranchId(e.target.value)}
-                    className="glass-input w-full px-3.5 py-2.5 text-xs text-white cursor-pointer focus:outline-none"
-                  >
-                    {branches.map((b) => (
-                      <option key={b.id} value={b.id} className="bg-slate-900 text-white">{b.name}</option>
-                    ))}
-                  </select>
+                    onChange={(val) => setEditBranchId(val)}
+                    options={branches.map((b) => ({ value: b.id, label: b.name }))}
+                    className="w-full"
+                    menuClassName="w-full"
+                  />
                 </div>
 
                 <div>

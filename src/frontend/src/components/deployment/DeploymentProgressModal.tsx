@@ -1,18 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  CheckCircle2, 
-  Clock, 
-  AlertTriangle, 
-  X, 
-  Loader2, 
-  Monitor, 
-  RefreshCw,
-  RotateCcw,
-  WifiOff,
-  Check
-} from 'lucide-react';
+  RiCheckboxCircleLine, 
+  RiTimeLine, 
+  RiAlertLine, 
+  RiCloseLine, 
+  RiLoader4Line, 
+  RiComputerLine, 
+  RiRefreshLine,
+  RiRestartLine,
+  RiWifiOffLine,
+  RiCheckLine
+} from 'react-icons/ri';
 import { publicationsApi, PublicationBatchDetail, PublicationJob } from '../../api/client';
 
 interface DeploymentProgressModalProps {
@@ -105,22 +106,22 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
       case 'SUCCESS':
         return (
           <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center gap-1.5 inline-flex">
-            <Check className="w-3.5 h-3.5 text-emerald-400" />
+            <RiCheckLine className="w-3.5 h-3.5 text-emerald-400" />
             Успешно
           </span>
         );
       case 'RUNNING':
       case 'PENDING':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/15 text-teal-300 border border-teal-500/30 flex items-center gap-1.5 inline-flex">
-            <Loader2 className="w-3.5 h-3.5 text-teal-300 animate-spin" />
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30 flex items-center gap-1.5 inline-flex">
+            <RiLoader4Line className="w-3.5 h-3.5 text-cyan-400 animate-spin" />
             Выполняется
           </span>
         );
       case 'OFFLINE':
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-white/5 text-slate-400 border border-white/10 flex items-center gap-1.5 inline-flex">
-            <WifiOff className="w-3.5 h-3.5 text-slate-500" />
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#162033] text-slate-400 border border-[#1e293b] flex items-center gap-1.5 inline-flex">
+            <RiWifiOffLine className="w-3.5 h-3.5 text-slate-500" />
             Оффлайн
           </span>
         );
@@ -128,7 +129,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         return (
           <div className="flex flex-col items-end">
             <span className="px-3 py-1 rounded-full text-xs font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30 flex items-center gap-1.5 inline-flex">
-              <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+              <RiAlertLine className="w-3.5 h-3.5 text-rose-400" />
               Ошибка
             </span>
             {job.error_message && (
@@ -140,7 +141,7 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         );
       default:
         return (
-          <span className="px-3 py-1 rounded-full text-xs font-bold glass-surface-l2 text-slate-300">
+          <span className="px-3 py-1 rounded-full text-xs font-bold bg-[#162033] text-slate-300">
             {job.status}
           </span>
         );
@@ -148,21 +149,31 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
   };
 
   return createPortal(
-    <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm cursor-pointer"
+    >
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ duration: 0.2 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#111928] border border-[#1e293b] rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] cursor-default"
+      >
         
         {/* Header */}
-        <div className="p-5 border-b border-white/10 flex items-center justify-between">
+        <div className="p-5 border-b border-[#1e293b] flex items-center justify-between">
           <div className="flex items-center space-x-3">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
               isFinished 
                 ? (failed > 0 ? 'bg-amber-500/10 text-amber-400' : 'bg-emerald-500/10 text-emerald-400') 
-                : 'bg-teal-500/10 text-teal-300'
+                : 'bg-cyan-500/10 text-cyan-400'
             }`}>
               {isFinished ? (
-                failed > 0 ? <AlertTriangle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />
+                failed > 0 ? <RiAlertLine className="w-5 h-5" /> : <RiCheckboxCircleLine className="w-5 h-5" />
               ) : (
-                <Loader2 className="w-5 h-5 animate-spin" />
+                <RiLoader4Line className="w-5 h-5 animate-spin" />
               )}
             </div>
             <div>
@@ -181,19 +192,19 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
             </div>
           </div>
 
-          <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 transition-colors">
-            <X className="w-5 h-5" />
+          <button onClick={onClose} className="p-1.5 rounded-xl text-slate-400 hover:text-white bg-[#162033] hover:bg-[#1e2b44] transition-colors cursor-pointer">
+            <RiCloseLine className="w-5 h-5" />
           </button>
         </div>
 
         {/* Progress Bar & Summary Stats */}
-        <div className="p-6 border-b border-white/[0.08] bg-black/20 space-y-4">
+        <div className="p-6 border-b border-[#1e293b] bg-[#0b111e] space-y-4">
           <div className="space-y-1.5">
             <div className="flex justify-between text-xs font-semibold">
               <span className="text-slate-300">Общий прогресс</span>
-              <span className="text-white font-mono">{percent}%</span>
+              <span className="text-cyan-400 font-mono font-bold">{percent}%</span>
             </div>
-            <div className="w-full h-2.5 bg-white/[0.08] rounded-full overflow-hidden flex">
+            <div className="w-full h-2.5 bg-[#162033] rounded-full overflow-hidden flex border border-[#1e293b]">
               <div 
                 style={{ width: `${(success / total) * 100}%` }}
                 className="bg-emerald-500 transition-all duration-500"
@@ -215,19 +226,19 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
 
           {/* Counts row */}
           <div className="grid grid-cols-4 gap-2 text-center text-xs">
-            <div className="glass-surface-l2 border border-white/10 p-2.5 rounded-xl">
+            <div className="bg-[#111928] border border-[#1e293b] p-2.5 rounded-xl">
               <span className="text-slate-400 block text-[10px]">Всего касс</span>
               <span className="font-mono font-bold text-white text-sm">{total}</span>
             </div>
-            <div className="glass-surface-l2 border border-emerald-500/20 p-2.5 rounded-xl">
+            <div className="bg-[#111928] border border-emerald-500/20 p-2.5 rounded-xl">
               <span className="text-emerald-400 block text-[10px]">Успешно</span>
               <span className="font-mono font-bold text-emerald-400 text-sm">{success}</span>
             </div>
-            <div className="glass-surface-l2 border border-rose-500/20 p-2.5 rounded-xl">
+            <div className="bg-[#111928] border border-rose-500/20 p-2.5 rounded-xl">
               <span className="text-rose-400 block text-[10px]">Ошибок</span>
               <span className="font-mono font-bold text-rose-400 text-sm">{failed}</span>
             </div>
-            <div className="glass-surface-l2 border border-white/10 p-2.5 rounded-xl">
+            <div className="bg-[#111928] border border-[#1e293b] p-2.5 rounded-xl">
               <span className="text-slate-400 block text-[10px]">Оффлайн</span>
               <span className="font-mono font-bold text-slate-300 text-sm">{offline}</span>
             </div>
@@ -245,26 +256,26 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
                   retryMutation.mutate();
                 }}
                 disabled={retrying}
-                className="px-3 py-1.5 rounded-lg text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 flex items-center space-x-1.5 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 rounded-xl text-xs font-bold text-white bg-rose-600 hover:bg-rose-500 flex items-center space-x-1.5 transition-colors disabled:opacity-50 cursor-pointer"
               >
-                <RotateCcw className={`w-3.5 h-3.5 ${retrying ? 'animate-spin' : ''}`} />
+                <RiRestartLine className={`w-3.5 h-3.5 ${retrying ? 'animate-spin' : ''}`} />
                 <span>Повторить для неудавшихся ({failed})</span>
               </button>
             )}
           </div>
 
-          <div className="border border-white/10 rounded-xl overflow-hidden">
+          <div className="border border-[#1e293b] rounded-xl overflow-hidden">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-black/20 border-b border-white/[0.08] text-slate-400 font-semibold text-[11px]">
+                <tr className="bg-[#162033] border-b border-[#1e293b] text-slate-400 font-semibold text-[11px]">
                   <th className="py-2.5 px-4">Касса</th>
                   <th className="py-2.5 px-4">IP адрес</th>
                   <th className="py-2.5 px-4 text-right">Статус</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-white/[0.05]">
+              <tbody className="divide-y divide-[#1e293b]">
                 {jobs.map((job) => (
-                  <tr key={job.id} className="hover:bg-white/[0.03] transition-colors">
+                  <tr key={job.id} className="hover:bg-white/[0.02] transition-colors">
                     <td className="py-3 px-4 font-bold text-white">
                       {job.cashier_name}
                     </td>
@@ -282,21 +293,21 @@ export const DeploymentProgressModal: React.FC<DeploymentProgressModalProps> = (
         </div>
 
         {/* Footer */}
-        <div className="p-4 border-t border-white/[0.08] bg-black/20 flex items-center justify-between text-xs">
+        <div className="p-4 border-t border-[#1e293b] bg-[#0b111e] flex items-center justify-between text-xs">
           <span className="text-slate-400">
-            Статус: <strong className={isFinished ? (failed > 0 ? 'text-amber-400' : 'text-emerald-400') : 'text-teal-300'}>
+            Статус: <strong className={isFinished ? (failed > 0 ? 'text-amber-400' : 'text-emerald-400') : 'text-cyan-400'}>
               {isFinished ? (failed > 0 ? 'Завершено с ошибками' : 'Успешно') : 'Выполняется'}
             </strong>
           </span>
           <button
             onClick={onClose}
-            className="glass-btn-secondary px-5 py-2 rounded-xl font-bold"
+            className="px-5 py-2 rounded-xl font-bold bg-[#162033] hover:bg-[#1e2b44] text-slate-200 transition-all cursor-pointer"
           >
             Закрыть
           </button>
         </div>
 
-      </div>
+      </motion.div>
     </div>,
     document.body
   );

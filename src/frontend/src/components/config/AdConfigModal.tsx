@@ -1,29 +1,30 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  X, 
-  Monitor, 
-  Columns, 
-  Image as ImageIcon, 
-  Film, 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
-  ChevronRight, 
-  Layers, 
-  Send,
-  Loader2,
-  ShieldCheck,
-  Info,
-  ArrowUp,
-  ArrowDown,
-  Trash2,
-  Play,
-  Pause,
-  Plus,
-  Save
-} from 'lucide-react';
+  RiCloseLine as X, 
+  RiComputerLine as Monitor, 
+  RiLayoutColumnLine as Columns, 
+  RiImage2Line as ImageIcon, 
+  RiMovie2Line as Film, 
+  RiTimeLine as Clock, 
+  RiCheckboxCircleLine as CheckCircle2, 
+  RiAlertLine as AlertTriangle, 
+  RiArrowRightSLine as ChevronRight, 
+  RiStackLine as Layers, 
+  RiSendPlane2Line as Send,
+  RiLoader4Line as Loader2,
+  RiShieldCheckLine as ShieldCheck,
+  RiInformationLine as Info,
+  RiArrowUpLine as ArrowUp,
+  RiArrowDownLine as ArrowDown,
+  RiDeleteBinLine as Trash2,
+  RiPlayLine as Play,
+  RiPauseLine as Pause,
+  RiAddLine as Plus,
+  RiSave3Line as Save
+} from 'react-icons/ri';
 import { 
   mediaApi, 
   advertisingApi, 
@@ -35,6 +36,7 @@ import {
   PlaylistItemInput,
   AdvertisingBlockDetail
 } from '../../api/client';
+import { CustomDropdown } from '../ui/CustomDropdown';
 
 interface AdConfigModalProps {
   initialCashierIds?: string[];
@@ -372,8 +374,14 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
   };
 
   return createPortal(
-    <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-scale-up">
+    <div 
+      onClick={onClose}
+      className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md cursor-pointer"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()}
+        className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-4xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh] animate-scale-up cursor-default"
+      >
         
         {/* Header */}
         <div className="p-5 border-b border-white/10 flex items-center justify-between">
@@ -393,14 +401,21 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
 
           <div className="flex items-center space-x-3">
             {/* Step Navigation Tabs */}
-            <div className="flex glass-surface-l2 border border-white/10 rounded-xl p-1 text-xs">
+            <div className="flex glass-surface-l2 border border-white/10 rounded-xl p-1 text-xs relative">
               <button
                 type="button"
                 onClick={() => setStep(1)}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                  step === 1 ? 'bg-teal-500 text-white font-bold' : 'text-slate-400 hover:text-white'
+                className={`relative px-3.5 py-1.5 rounded-lg font-medium transition-colors z-10 ${
+                  step === 1 ? 'text-white font-bold' : 'text-slate-400 hover:text-white'
                 }`}
               >
+                {step === 1 && (
+                  <motion.div
+                    layoutId="adConfigStepPill"
+                    className="absolute inset-0 bg-blue-600 rounded-lg -z-10 shadow-sm shadow-blue-600/30"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
                 1. Шаблон и слайды
               </button>
               <button
@@ -417,10 +432,17 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                   setDeployError(null);
                   setStep(2);
                 }}
-                className={`px-3 py-1.5 rounded-lg font-medium transition-colors ${
-                  step === 2 ? 'bg-emerald-600 text-white font-bold' : 'text-slate-400 hover:text-white'
+                className={`relative px-3.5 py-1.5 rounded-lg font-medium transition-colors z-10 ${
+                  step === 2 ? 'text-white font-bold' : 'text-slate-400 hover:text-white'
                 }`}
               >
+                {step === 2 && (
+                  <motion.div
+                    layoutId="adConfigStepPill"
+                    className="absolute inset-0 bg-emerald-600 rounded-lg -z-10 shadow-sm shadow-emerald-600/20"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
                 2. Развернуть на кассы ({targetCount})
               </button>
             </div>
@@ -469,18 +491,20 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
 
                 <div className="flex items-center space-x-2">
                   <label className="text-slate-400 text-xs whitespace-nowrap">Шаблон:</label>
-                  <select
+                  <CustomDropdown
                     value={currentBlock?.id || ''}
-                    onChange={(e) => handleSelectExistingTemplate(e.target.value)}
-                    className="glass-input px-3 py-1.5 text-xs text-white focus:outline-none max-w-[280px]"
-                  >
-                    <option value="">+ Создать новый шаблон с нуля</option>
-                    {availableBlocks.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.name} ({b.area === 'FULL_SCREEN' ? 'Full Screen' : '50/50'})
-                      </option>
-                    ))}
-                  </select>
+                    onChange={(val) => handleSelectExistingTemplate(val)}
+                    options={[
+                      { value: '', label: '+ Создать новый шаблон с нуля' },
+                      ...availableBlocks.map((b) => ({
+                        value: b.id,
+                        label: b.name,
+                        badge: b.area === 'FULL_SCREEN' ? '4:3' : '50/50'
+                      }))
+                    ]}
+                    className="max-w-[280px]"
+                    menuClassName="w-72"
+                  />
                 </div>
               </div>
               
@@ -674,7 +698,7 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                                   max={60}
                                   value={item.duration}
                                   onChange={(e) => handleChangeDuration(idx, Number(e.target.value))}
-                                  className="w-8 bg-transparent text-center font-mono text-white text-xs focus:outline-none"
+                                  className="w-8 !bg-transparent !p-0 !min-h-0 !border-0 text-center font-mono text-white text-xs focus:outline-none"
                                 />
                                 <span className="text-slate-500 text-[10px]">с</span>
                               </div>
@@ -845,30 +869,26 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                 {scopeType === 'BRANCH' && (
                   <div className="pt-2">
                     <label className="text-slate-300 block mb-1 font-semibold">Выберите филиал</label>
-                    <select
+                    <CustomDropdown
                       value={selectedBranchId}
-                      onChange={(e) => setSelectedBranchId(e.target.value)}
-                      className="glass-input w-full p-2.5 text-white"
-                    >
-                      {branches.map(b => (
-                        <option key={b.id} value={b.id}>{b.name} ({b.code})</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedBranchId(val)}
+                      options={branches.map(b => ({ value: b.id, label: `${b.name} (${b.code})` }))}
+                      className="w-full"
+                      menuClassName="w-full"
+                    />
                   </div>
                 )}
 
                 {scopeType === 'REGION' && (
                   <div className="pt-2">
                     <label className="text-slate-300 block mb-1 font-semibold">Выберите регион</label>
-                    <select
+                    <CustomDropdown
                       value={selectedRegionId}
-                      onChange={(e) => setSelectedRegionId(e.target.value)}
-                      className="glass-input w-full p-2.5 text-white"
-                    >
-                      {regions.map(r => (
-                        <option key={r.id} value={r.id}>{r.name} ({r.code})</option>
-                      ))}
-                    </select>
+                      onChange={(val) => setSelectedRegionId(val)}
+                      options={regions.map(r => ({ value: r.id, label: `${r.name} (${r.code})` }))}
+                      className="w-full"
+                      menuClassName="w-full"
+                    />
                   </div>
                 )}
 

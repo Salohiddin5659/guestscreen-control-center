@@ -2,29 +2,43 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Outlet, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { 
-  Monitor, 
-  Building2,
-  Image as ImageIcon, 
-  Film, 
-  Layers, 
-  FileText, 
-  LogOut, 
-  Radio, 
-  Users as UsersIcon,
-  Settings as SettingsIcon,
-  Search,
-  Bell,
-  ChevronDown,
-  AlertTriangle,
-  CheckCircle2,
-  X,
-  ExternalLink,
-  ShieldCheck,
-  RotateCcw
-} from 'lucide-react';
+  RiComputerLine,
+  RiStore2Line,
+  RiImage2Line,
+  RiPlayList2Line,
+  RiBroadcastLine as Radio,
+  RiFileList3Line as FileText,
+  RiShieldUserLine as UsersIcon,
+  RiSettings4Line as SettingsIcon,
+  RiNotification3Line as Bell,
+  RiLogoutBoxRLine as LogOut,
+  RiSignalTowerLine,
+  RiSearch2Line,
+  RiCloseLine as X,
+  RiExternalLinkLine as ExternalLink,
+  RiRestartLine as RotateCcw,
+  RiArrowDownSLine as ChevronDown,
+  RiCheckboxCircleLine as CheckCircle2,
+  RiAlertLine as AlertTriangle,
+  RiMenuFoldLine,
+  RiMenuUnfoldLine
+} from 'react-icons/ri';
+import { 
+  HiOutlineComputerDesktop,
+  HiOutlineBuildingStorefront,
+  HiOutlinePhoto,
+  HiOutlineFilm,
+  HiOutlineRadio,
+  HiOutlineDocumentText,
+  HiOutlineUsers,
+  HiOutlineCog6Tooth,
+  HiOutlineBell,
+  HiOutlineSignal
+} from 'react-icons/hi2';
 import { removeAuthToken, topologyApi, usersApi, getCurrentUserFromStorage, apiRequest, authApi } from '../../api/client';
 import { useLiveFleet } from '../../api/useLiveFleet';
 import { getBrand } from '../../utils/brand';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const AppLayout: React.FC = () => {
   const brand = getBrand();
@@ -59,7 +73,7 @@ export const AppLayout: React.FC = () => {
         title: 'Управление кассами',
         category: 'Оборудование',
         subtitle: brand.devicesSubtitle,
-        icon: Monitor,
+        icon: HiOutlineComputerDesktop,
       };
     }
     if (path.startsWith('/restaurants')) {
@@ -67,7 +81,7 @@ export const AppLayout: React.FC = () => {
         title: 'Рестораны и филиалы',
         category: 'Топология',
         subtitle: brand.restaurantsSubtitle,
-        icon: Building2,
+        icon: HiOutlineBuildingStorefront,
       };
     }
     if (path.startsWith('/media')) {
@@ -75,7 +89,7 @@ export const AppLayout: React.FC = () => {
         title: 'Медиатека контента',
         category: 'Реклама',
         subtitle: 'Баннеры, видео и промо-материалы',
-        icon: ImageIcon,
+        icon: HiOutlinePhoto,
       };
     }
     if (path.startsWith('/playlists')) {
@@ -83,7 +97,7 @@ export const AppLayout: React.FC = () => {
         title: 'Рекламные шаблоны',
         category: 'Плейлисты',
         subtitle: 'Конфигурация полноэкранной рекламы и 50/50',
-        icon: Film,
+        icon: HiOutlineFilm,
       };
     }
     if (path.startsWith('/content')) {
@@ -91,7 +105,7 @@ export const AppLayout: React.FC = () => {
         title: 'Распределение контента',
         category: 'Вещание',
         subtitle: 'Публикация рекламных кампаний на кассы',
-        icon: Layers,
+        icon: HiOutlineRadio,
       };
     }
     if (path.startsWith('/users')) {
@@ -99,7 +113,7 @@ export const AppLayout: React.FC = () => {
         title: 'Пользователи и доступ',
         category: 'Безопасность',
         subtitle: 'Управление учетными записями и правами (RBAC)',
-        icon: UsersIcon,
+        icon: HiOutlineUsers,
       };
     }
     if (path.startsWith('/audit')) {
@@ -107,7 +121,7 @@ export const AppLayout: React.FC = () => {
         title: 'Журнал аудита',
         category: 'Система',
         subtitle: 'История действий операторов и инцидентов',
-        icon: FileText,
+        icon: HiOutlineDocumentText,
       };
     }
     if (path.startsWith('/settings')) {
@@ -115,14 +129,14 @@ export const AppLayout: React.FC = () => {
         title: 'Параметры системы',
         category: 'Конфигурация',
         subtitle: 'Глобальные настройки сервера GuestScreen',
-        icon: SettingsIcon,
+        icon: HiOutlineCog6Tooth,
       };
     }
     return {
       title: 'Панель управления',
       category: 'GuestScreen',
       subtitle: `Управление экранами касс ${brand.name}`,
-      icon: Monitor,
+      icon: HiOutlineComputerDesktop,
     };
   };
 
@@ -137,6 +151,17 @@ export const AppLayout: React.FC = () => {
   const [unreadCount, setUnreadCount] = useState<number | null>(() => {
     return localStorage.getItem('gs_notifications_cleared') === 'true' ? 0 : null;
   });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('gs_sidebar_collapsed') === 'true';
+  });
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem('gs_sidebar_collapsed', String(next));
+      return next;
+    });
+  };
   
   const notifRef = useRef<HTMLDivElement>(null);
   const userMenuRef = useRef<HTMLDivElement>(null);
@@ -226,66 +251,80 @@ export const AppLayout: React.FC = () => {
     {
       title: 'УПРАВЛЕНИЕ КАССАМИ',
       items: [
-        { to: '/devices', label: 'Устройства', icon: Monitor, badge: cashiers.length },
-        { to: '/restaurants', label: 'Рестораны', icon: Building2, badge: branches.length },
+        { to: '/devices', label: 'Устройства', icon: HiOutlineComputerDesktop, badge: cashiers.length },
+        { to: '/restaurants', label: 'Рестораны', icon: HiOutlineBuildingStorefront, badge: branches.length },
       ]
     },
     {
       title: 'РЕКЛАМА И КОНТЕНТ',
       items: [
-        { to: '/media', label: 'Медиатека', icon: ImageIcon },
-        { to: '/playlists', label: 'Рекламные шаблоны', icon: Film },
-        { to: '/content', label: 'Распределение', icon: Layers },
+        { to: '/media', label: 'Медиатека', icon: HiOutlinePhoto },
+        { to: '/playlists', label: 'Рекламные шаблоны', icon: HiOutlineFilm },
+        { to: '/content', label: 'Распределение', icon: HiOutlineRadio },
       ]
     },
     {
       title: 'БЕЗОПАСНОСТЬ И СИСТЕМА',
       items: [
-        ...(isAdminOrSupervisor ? [{ to: '/users', label: 'Пользователи и доступ', icon: UsersIcon, badge: users.length }] : []),
-        { to: '/audit', label: 'Журнал аудита', icon: FileText },
-        ...(isAdminOrSupervisor ? [{ to: '/settings', label: 'Настройки', icon: SettingsIcon }] : []),
+        ...(isAdminOrSupervisor ? [{ to: '/users', label: 'Пользователи и доступ', icon: HiOutlineUsers, badge: users.length }] : []),
+        { to: '/audit', label: 'Журнал аудита', icon: HiOutlineDocumentText },
+        ...(isAdminOrSupervisor ? [{ to: '/settings', label: 'Настройки', icon: HiOutlineCog6Tooth }] : []),
       ]
     }
   ];
 
   return (
-    <div className="flex h-screen bg-transparent text-slate-100 font-sans antialiased overflow-hidden selection:bg-[#A9DFD8] selection:text-[#070b12]">
+    <div className="flex h-screen bg-transparent text-slate-100 font-sans antialiased overflow-hidden selection:bg-blue-600/30 selection:text-blue-200">
       
-      {/* 1. Sidebar - Spatial Liquid Glass Navigation */}
-      <aside className="w-64 glass-surface-l3 border-r border-glass-elevated flex flex-col justify-between flex-shrink-0 z-20 glass-specular-edge">
-        
+      {/* 1. Sidebar - Seamless Collapsible Navigation */}
+      <motion.aside 
+        initial={false}
+        animate={{ width: sidebarCollapsed ? 72 : 256 }}
+        transition={{ type: 'spring', stiffness: 350, damping: 32 }}
+        className="bg-[#0b0d14] border-r border-[#1f2536] flex flex-col justify-between flex-shrink-0 z-30 select-none relative overflow-hidden"
+      >
         <div className="flex flex-col h-full">
           {/* Brand Header with Dynamic Emblem - Click returns to Main / Devices */}
-          <NavLink 
-            to="/" 
-            className="px-5 py-4 flex items-center space-x-3 border-b border-glass-subtle hover:bg-white/[0.04] transition-colors cursor-pointer group select-none"
-            title="Перейти к кассам (Главная)"
-          >
-            <img 
-              src={brand.emblem} 
-              alt={brand.name} 
-              className="w-10 h-10 rounded-xl shadow-lg flex-shrink-0 object-contain ring-1 ring-white/10 group-hover:scale-105 transition-transform" 
-            />
-            <div className="min-w-0">
-              <div className="flex items-center space-x-1.5">
-                <h1 className="font-extrabold text-sm tracking-tight text-white uppercase truncate group-hover:text-[#A9DFD8] transition-colors">
-                  {brand.name}
-                </h1>
-                <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-glass-cyan text-[#A9DFD8] font-mono border border-[#A9DFD8]/30">
-                  v3.1
-                </span>
-              </div>
-              <span className="text-[11px] text-slate-400 font-medium block truncate">GuestScreen • Кассы</span>
-            </div>
-          </NavLink>
+          <div className="h-16 border-b border-[#1f2536] flex items-center px-4 justify-between flex-shrink-0">
+            <NavLink 
+              to="/" 
+              className={`flex items-center space-x-3 hover:opacity-90 transition-opacity cursor-pointer overflow-hidden group ${
+                sidebarCollapsed ? 'justify-center w-full' : ''
+              }`}
+              title={brand.name}
+            >
+              <img 
+                src={brand.emblem} 
+                alt={brand.name} 
+                className="w-9 h-9 rounded-xl shadow-lg flex-shrink-0 object-contain ring-1 ring-white/10 group-hover:scale-105 transition-transform" 
+              />
+              {!sidebarCollapsed && (
+                <div className="min-w-0">
+                  <div className="flex items-center space-x-1.5">
+                    <h1 className="font-extrabold text-sm tracking-tight text-white uppercase truncate group-hover:text-blue-400 transition-colors">
+                      {brand.name}
+                    </h1>
+                    <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-blue-500/15 text-blue-400 font-mono border border-blue-500/30">
+                      v3.1
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-slate-400 font-medium block truncate">GuestScreen • Кассы</span>
+                </div>
+              )}
+            </NavLink>
+          </div>
 
           {/* Navigation Links */}
-          <nav className="p-3.5 space-y-5 overflow-y-auto flex-1">
+          <nav className="p-2.5 space-y-4 overflow-y-auto flex-1 overflow-x-hidden">
             {navSections.map((section, idx) => (
               <div key={idx} className="space-y-1">
-                <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
-                  {section.title}
-                </h3>
+                {!sidebarCollapsed ? (
+                  <h3 className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 font-mono">
+                    {section.title}
+                  </h3>
+                ) : (
+                  idx > 0 && <div className="my-2 border-t border-white/[0.08] mx-2" />
+                )}
                 {section.items.map((item) => {
                   const Icon = item.icon;
                   const isActive = location.pathname === item.to || (item.to === '/devices' && location.pathname === '/');
@@ -293,19 +332,31 @@ export const AppLayout: React.FC = () => {
                     <NavLink
                       key={item.to}
                       to={item.to}
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all group ${
+                      title={sidebarCollapsed ? item.label : undefined}
+                      className={`relative flex items-center ${
+                        sidebarCollapsed ? 'justify-center px-0 py-2.5' : 'justify-between px-3.5 py-2.5'
+                      } rounded-xl text-xs font-semibold transition-colors group ${
                         isActive
-                          ? 'glass-active-capsule'
-                          : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent hover:border-glass-subtle'
+                          ? 'text-white font-bold'
+                          : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
                       }`}
                     >
-                      <div className="flex items-center space-x-3">
-                        <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${isActive ? 'text-[#A9DFD8]' : 'text-slate-400 group-hover:text-white'}`} />
-                        <span>{item.label}</span>
+                      {isActive && (
+                        <motion.div
+                          layoutId="sidebarActivePill"
+                          className="absolute inset-0 bg-[#2563EB] rounded-xl shadow-[0_0_15px_rgba(37,99,235,0.3)]"
+                          transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                        />
+                      )}
+                      <div className={`flex items-center space-x-3 relative z-10 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+                        <Icon className={`w-5 h-5 transition-transform group-hover:scale-110 flex-shrink-0 ${
+                          isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'
+                        }`} />
+                        {!sidebarCollapsed && <span className="truncate">{item.label}</span>}
                       </div>
-                      {item.badge !== undefined && (
-                        <span className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${
-                          isActive ? 'bg-white/20 text-white' : 'glass-surface-l1 text-slate-300'
+                      {!sidebarCollapsed && item.badge !== undefined && (
+                        <span className={`relative z-10 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-[#182030] text-slate-400 border border-[#232b40]'
                         }`}>
                           {item.badge}
                         </span>
@@ -316,26 +367,58 @@ export const AppLayout: React.FC = () => {
               </div>
             ))}
           </nav>
+
+          {/* Sidebar Footer with Collapse / Expand button */}
+          <div className="p-2 border-t border-[#1f2536] bg-[#08090d]/80 flex-shrink-0">
+            <button
+              onClick={toggleSidebar}
+              className={`w-full flex items-center ${
+                sidebarCollapsed ? 'justify-center px-0' : 'justify-start px-3'
+              } py-2 rounded-xl text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors text-xs font-medium space-x-2.5`}
+              title={sidebarCollapsed ? "Развернуть меню" : "Свернуть меню"}
+            >
+              {sidebarCollapsed ? (
+                <RiMenuUnfoldLine className="w-5 h-5 text-slate-300" />
+              ) : (
+                <>
+                  <RiMenuFoldLine className="w-4 h-4 text-slate-400" />
+                  <span className="text-xs">Свернуть меню</span>
+                </>
+              )}
+            </button>
+          </div>
         </div>
 
-      </aside>
+      </motion.aside>
 
       {/* 2. Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden bg-transparent">
         
-        {/* Top Header Bar - Floating Spatial Island */}
-        <header className="h-16 glass-surface-l3 border-b border-glass-elevated px-6 flex items-center justify-between flex-shrink-0 z-40 glass-specular-edge">
+        {/* Top Header Bar - Seamless Flush Integration */}
+        <header className="h-16 bg-[#0b0d14] border-b border-[#1f2536] px-6 flex items-center justify-between flex-shrink-0 z-20">
           
-          {/* Left: Dynamic Page Breadcrumb Context */}
-          <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-[#A9DFD8]/20 to-[#A9DFD8]/5 border border-[#A9DFD8]/30 flex items-center justify-center text-[#A9DFD8] shadow-sm flex-shrink-0">
+          {/* Left: Sidebar Collapse Toggle + Dynamic Page Breadcrumb Context */}
+          <div className="flex items-center space-x-3.5">
+            <button
+              onClick={toggleSidebar}
+              className="p-2 rounded-xl border border-white/10 text-slate-400 hover:text-white hover:bg-white/10 transition-colors hidden sm:flex items-center justify-center"
+              title={sidebarCollapsed ? "Развернуть боковое меню" : "Свернуть боковое меню"}
+            >
+              {sidebarCollapsed ? (
+                <RiMenuUnfoldLine className="w-4 h-4 text-blue-400" />
+              ) : (
+                <RiMenuFoldLine className="w-4 h-4" />
+              )}
+            </button>
+
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500/20 to-indigo-500/10 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-sm flex-shrink-0">
               <PageContextIcon className="w-4 h-4" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center space-x-2">
                 <h2 className="text-xs font-extrabold text-white tracking-tight uppercase truncate">{pageCtx.title}</h2>
                 <span className="text-slate-600 text-[10px] hidden sm:inline">•</span>
-                <span className="text-[10px] font-mono text-[#A9DFD8] font-bold px-1.5 py-0.5 bg-[#A9DFD8]/10 rounded border border-[#A9DFD8]/20 hidden sm:inline">
+                <span className="text-[10px] font-mono text-blue-300 font-bold px-1.5 py-0.5 bg-blue-500/15 rounded border border-blue-500/30 hidden sm:inline">
                   {pageCtx.category}
                 </span>
               </div>
@@ -350,40 +433,42 @@ export const AppLayout: React.FC = () => {
             <div className="hidden sm:flex items-center space-x-2">
               <div 
                 onClick={() => navigate('/devices?status=ONLINE')}
-                className="flex items-center space-x-1.5 px-3 py-1 rounded-full glass-surface-l1 border border-[#05C168]/40 text-[#05C168] font-mono text-[11px] font-bold cursor-pointer hover:border-[#05C168] hover:bg-[#05C168]/15 transition shadow-sm liquid-interactive"
+                className="flex items-center space-x-2 min-h-[38px] px-3.5 py-1.5 rounded-lg glass-surface-l1 border border-[#05C168]/40 text-[#05C168] font-mono text-xs font-bold cursor-pointer hover:border-[#05C168] hover:bg-[#05C168]/15 transition shadow-sm liquid-interactive select-none"
                 title="Фильтр: только кассы в сети"
               >
-                <span className="w-2 h-2 rounded-full bg-[#05C168] animate-pulse shadow-[0_0_8px_#05C168]" />
-                <span>В сети: {onlineCount}</span>
+                <span className="w-2 h-2 rounded-full bg-[#05C168] animate-pulse shadow-[0_0_8px_#05C168] flex-shrink-0" />
+                <span className="leading-none">В сети: {onlineCount}</span>
               </div>
 
               <div 
                 onClick={() => navigate('/devices?status=OFFLINE')}
-                className={`flex items-center space-x-1.5 px-3 py-1 rounded-full glass-surface-l1 border font-mono text-[11px] font-bold cursor-pointer transition shadow-sm liquid-interactive ${
+                className={`flex items-center space-x-2 min-h-[38px] px-3.5 py-1.5 rounded-lg glass-surface-l1 border font-mono text-xs font-bold cursor-pointer transition shadow-sm liquid-interactive select-none ${
                   offlineCount > 0 
                     ? 'border-[#FF5B5B]/50 text-[#FF5B5B] hover:bg-[#FF5B5B]/15 hover:border-[#FF5B5B]' 
                     : 'border-glass-subtle text-slate-400'
                 }`}
                 title="Фильтр: только кассы оффлайн"
               >
-                <span className={`w-2 h-2 rounded-full ${offlineCount > 0 ? 'bg-[#FF5B5B] shadow-[0_0_8px_#FF5B5B]' : 'bg-slate-500'}`} />
-                <span>Оффлайн: {offlineCount}</span>
+                <span className={`w-2 h-2 rounded-full flex-shrink-0 ${offlineCount > 0 ? 'bg-[#FF5B5B] shadow-[0_0_8px_#FF5B5B]' : 'bg-slate-500'}`} />
+                <span className="leading-none">Оффлайн: {offlineCount}</span>
               </div>
             </div>
 
             <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
 
             {isConnected ? (
-              <span className="flex items-center space-x-1.5 text-[11px] font-mono text-[#05C168] glass-surface-l1 px-3 py-1 rounded-full border border-[#05C168]/40 font-semibold shadow-sm">
-                <Radio className="w-3 h-3 text-[#05C168] animate-pulse" />
-                <span>Real-time Sync</span>
+              <span className="flex items-center space-x-2 text-xs font-mono text-[#05C168] glass-surface-l1 min-h-[38px] px-3.5 py-1.5 rounded-lg border border-[#05C168]/40 font-semibold shadow-sm select-none">
+                <Radio className="w-3.5 h-3.5 text-[#05C168] animate-pulse flex-shrink-0" />
+                <span className="leading-none">Real-time Sync</span>
               </span>
             ) : (
-              <span className="flex items-center space-x-1.5 text-[11px] font-mono text-slate-400 glass-surface-l1 px-3 py-1 rounded-full border border-glass-subtle">
-                <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                <span>Авто-опрос 10с</span>
+              <span className="flex items-center space-x-2 text-xs font-mono text-slate-400 glass-surface-l1 min-h-[38px] px-3.5 py-1.5 rounded-lg border border-glass-subtle select-none">
+                <span className="w-1.5 h-1.5 rounded-full bg-slate-500 flex-shrink-0" />
+                <span className="leading-none">Авто-опрос 10с</span>
               </span>
             )}
+
+            <div className="h-4 w-[1px] bg-white/10 hidden sm:block" />
 
             {/* Notification Bell with interactive dropdown */}
             <div className="relative" ref={notifRef}>
@@ -392,25 +477,30 @@ export const AppLayout: React.FC = () => {
                   setNotificationsOpen(!notificationsOpen);
                   if (userMenuOpen) setUserMenuOpen(false);
                 }}
-                className={`p-2 rounded-xl border text-slate-300 hover:text-white transition-all relative liquid-interactive ${
+                className={`h-[38px] w-[38px] rounded-lg border text-slate-300 hover:text-white transition-all relative flex items-center justify-center liquid-interactive cursor-pointer ${
                   notificationsOpen 
-                    ? 'glass-active-capsule text-[#A9DFD8]' 
+                    ? 'glass-active-capsule text-blue-400 border-blue-500/50' 
                     : 'glass-surface-l1 hover:bg-white/15 border-glass-subtle'
                 }`}
                 title="Уведомления системы"
               >
-                <Bell className={`w-4 h-4 ${notificationsOpen ? 'text-[#A9DFD8]' : ''}`} />
+                <Bell className={`w-4 h-4 ${notificationsOpen ? 'text-blue-400' : ''}`} />
                 {!notificationsCleared && unreadCount !== null && unreadCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#FF5B5B] ring-2 ring-[#070b12] animate-pulse shadow-[0_0_6px_#FF5B5B]" />
                 )}
               </button>
 
               {/* Notification Center Popover */}
-              {notificationsOpen && (
-                <div 
-                  style={{ position: 'absolute' }}
-                  className="right-0 top-full mt-3 w-80 sm:w-96 glass-surface-l3 border border-glass-elevated rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col glass-specular-edge liquid-chromatic-edge"
-                >
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    style={{ position: 'absolute' }}
+                    className="right-0 top-full mt-2 w-80 sm:w-96 bg-[#111928] border border-[#233148] rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-xl"
+                  >
                   
                   {/* Dropdown Header */}
                   <div className="p-4 border-b border-glass-subtle flex items-center justify-between bg-white/[0.03] flex-shrink-0">
@@ -431,7 +521,7 @@ export const AppLayout: React.FC = () => {
                       {!notificationsCleared && unreadCount !== null && unreadCount > 0 ? (
                         <button
                           onClick={handleClearAllNotifications}
-                          className="text-[10px] font-bold text-[#A9DFD8] hover:underline transition"
+                          className="text-[10px] font-bold text-[#A9DFD8] hover:underline transition cursor-pointer"
                           title="Пометить все как прочитанные"
                         >
                           Прочитать все
@@ -439,7 +529,7 @@ export const AppLayout: React.FC = () => {
                       ) : (
                         <button
                           onClick={handleRestoreNotifications}
-                          className="text-[10px] text-slate-400 hover:text-[#A9DFD8] flex items-center gap-1 transition"
+                          className="text-[10px] text-slate-400 hover:text-[#A9DFD8] flex items-center gap-1 transition cursor-pointer"
                           title="Показать скрытые уведомления"
                         >
                           <RotateCcw className="w-3 h-3" />
@@ -448,7 +538,7 @@ export const AppLayout: React.FC = () => {
                       )}
                       <button 
                         onClick={() => setNotificationsOpen(false)}
-                        className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition"
+                        className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition cursor-pointer"
                       >
                         <X className="w-3.5 h-3.5" />
                       </button>
@@ -469,7 +559,7 @@ export const AppLayout: React.FC = () => {
                         </p>
                         <button
                           onClick={handleRestoreNotifications}
-                          className="mt-1 px-3 py-1 rounded-lg text-[11px] font-semibold text-[#A9DFD8] bg-[#A9DFD8]/10 hover:bg-[#A9DFD8]/20 border border-[#A9DFD8]/20 transition flex items-center gap-1.5"
+                          className="mt-1 px-3 py-1 rounded-lg text-[11px] font-semibold text-[#A9DFD8] bg-[#A9DFD8]/10 hover:bg-[#A9DFD8]/20 border border-[#A9DFD8]/20 transition flex items-center gap-1.5 cursor-pointer"
                         >
                           <RotateCcw className="w-3 h-3" />
                           <span>Показать список касс ({offlineCount})</span>
@@ -493,10 +583,10 @@ export const AppLayout: React.FC = () => {
                                     setNotificationsOpen(false);
                                     navigate(`/devices?search=${encodeURIComponent(c.ip_address)}`);
                                   }}
-                                  className="p-3 rounded-xl bg-[#FF5B5B]/10 border border-[#FF5B5B]/25 flex items-start space-x-3 hover:bg-[#FF5B5B]/20 transition cursor-pointer group"
+                                  className="p-3 rounded-xl bg-[#FF5B5B]/10 border border-[#FF5B5B]/25 flex items-center space-x-3 hover:bg-[#FF5B5B]/20 transition cursor-pointer group"
                                   title="Нажмите, чтобы найти кассу в списке устройств"
                                 >
-                                  <div className="w-7 h-7 rounded-lg bg-[#FF5B5B]/20 flex items-center justify-center flex-shrink-0 text-[#FF5B5B] mt-0.5 group-hover:scale-105 transition-transform">
+                                  <div className="w-8 h-8 rounded-lg bg-[#FF5B5B]/20 flex items-center justify-center flex-shrink-0 text-[#FF5B5B] group-hover:scale-105 transition-transform">
                                     <AlertTriangle className="w-4 h-4" />
                                   </div>
                                   <div className="flex-1 min-w-0">
@@ -521,7 +611,7 @@ export const AppLayout: React.FC = () => {
                                   setNotificationsOpen(false);
                                   navigate('/devices?status=OFFLINE');
                                 }}
-                                className="w-full py-1.5 px-3 rounded-lg text-[11px] font-bold text-[#FF5B5B] bg-[#FF5B5B]/10 hover:bg-[#FF5B5B]/20 border border-[#FF5B5B]/25 transition text-center block"
+                                className="w-full py-1.5 px-3 rounded-lg text-[11px] font-bold text-[#FF5B5B] bg-[#FF5B5B]/10 hover:bg-[#FF5B5B]/20 border border-[#FF5B5B]/25 transition text-center block cursor-pointer"
                               >
                                 Показать все {offlineCount} офлайн-касс →
                               </button>
@@ -540,8 +630,8 @@ export const AppLayout: React.FC = () => {
                         )}
 
                         {/* Fleet Sync Status Card */}
-                        <div className="p-3 rounded-xl glass-surface-l1 border border-glass-subtle flex items-start space-x-3">
-                          <div className="w-7 h-7 rounded-lg bg-[#A9DFD8]/10 flex items-center justify-center flex-shrink-0 text-[#A9DFD8] mt-0.5">
+                        <div className="p-3 rounded-xl glass-surface-l1 border border-glass-subtle flex items-center space-x-3">
+                          <div className="w-8 h-8 rounded-lg bg-[#A9DFD8]/10 flex items-center justify-center flex-shrink-0 text-[#A9DFD8]">
                             <Radio className="w-4 h-4" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -563,9 +653,9 @@ export const AppLayout: React.FC = () => {
                               setNotificationsOpen(false);
                               navigate('/audit');
                             }}
-                            className="p-3 rounded-xl glass-surface-l1 border border-glass-subtle flex items-start space-x-3 hover:bg-white/5 transition cursor-pointer"
+                            className="p-3 rounded-xl glass-surface-l1 border border-glass-subtle flex items-center space-x-3 hover:bg-white/5 transition cursor-pointer"
                           >
-                            <div className="w-7 h-7 rounded-lg bg-[#FFB648]/10 flex items-center justify-center flex-shrink-0 text-[#FFB648] mt-0.5">
+                            <div className="w-8 h-8 rounded-lg bg-[#FFB648]/10 flex items-center justify-center flex-shrink-0 text-[#FFB648]">
                               <CheckCircle2 className="w-4 h-4" />
                             </div>
                             <div className="flex-1 min-w-0">
@@ -608,8 +698,9 @@ export const AppLayout: React.FC = () => {
                     </button>
                   </div>
 
-                </div>
+                </motion.div>
               )}
+            </AnimatePresence>
             </div>
 
             {/* Interactive User Profile & Logout Dropdown with Oqtepa Brand badge */}
@@ -619,14 +710,14 @@ export const AppLayout: React.FC = () => {
                   setUserMenuOpen(!userMenuOpen);
                   if (notificationsOpen) setNotificationsOpen(false);
                 }}
-                className={`flex items-center space-x-2.5 p-1.5 pl-2.5 pr-2 rounded-xl border transition-all ${
+                className={`flex items-center space-x-2.5 h-[38px] px-3 rounded-lg border transition-all cursor-pointer ${
                   userMenuOpen 
-                    ? 'glass-surface-l2 border-[#A9DFD8]/40 shadow-lg' 
-                    : 'glass-surface-l1 hover:bg-white/10 border-glass-subtle'
+                    ? 'bg-[#182238] border-blue-500/50 shadow-lg ring-1 ring-blue-500/30' 
+                    : 'bg-[#111928] hover:bg-[#162033] border-[#1e293b]'
                 }`}
                 title="Профиль пользователя и выход"
               >
-                <div className="w-7 h-7 rounded-lg bg-gradient-to-tr from-[#A9DFD8] to-emerald-400 text-[#070b12] font-black text-xs flex items-center justify-center shadow-md">
+                <div className="w-6 h-6 rounded-md bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-sm flex-shrink-0">
                   {user.username.substring(0, 2).toUpperCase()}
                 </div>
                 <div className="hidden md:flex flex-col text-left">
@@ -635,118 +726,132 @@ export const AppLayout: React.FC = () => {
                     {getRoleLabel(user.role)}
                   </span>
                 </div>
-                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180 text-[#A9DFD8]' : ''}`} />
+                <ChevronDown className={`w-3.5 h-3.5 text-slate-400 transition-transform duration-200 ${userMenuOpen ? 'rotate-180 text-blue-400' : ''}`} />
               </button>
 
               {/* User Dropdown Popover */}
-              {userMenuOpen && (
-                <div 
-                  style={{ position: 'absolute' }}
-                  className="right-0 top-full mt-3 w-72 glass-surface-l3 border border-glass-elevated rounded-2xl shadow-2xl z-50 overflow-hidden flex flex-col glass-specular-edge"
-                >
-                  
-                  {/* User Profile Card Header */}
-                  <div className="p-4 bg-white/[0.03] border-b border-glass-subtle">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-[#A9DFD8] to-emerald-400 text-[#070b12] font-black text-sm flex items-center justify-center shadow-lg shadow-[#A9DFD8]/15">
-                        {user.username.substring(0, 2).toUpperCase()}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-xs font-bold text-white truncate">
-                          {user.full_name || user.username}
-                        </h4>
-                        <span className="text-[11px] font-mono text-slate-400 block truncate">
-                          @{user.username}
-                        </span>
-                        <div className="flex items-center gap-1.5 mt-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#05C168] animate-pulse" />
-                          <span className="text-[10px] font-semibold text-[#05C168]">Авторизован</span>
-                          <span className="text-slate-500 text-[10px]">•</span>
-                          <span className="text-[10px] font-mono text-[#FFB648] font-bold">
-                            {getRoleLabel(user.role)}
-                          </span>
+              <AnimatePresence>
+                {userMenuOpen && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -6, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -6, scale: 0.98 }}
+                    transition={{ duration: 0.15, ease: 'easeOut' }}
+                    style={{ position: 'absolute' }}
+                    className="right-0 top-full mt-2 w-72 bg-[#111928] border border-[#233148] rounded-xl shadow-2xl z-50 overflow-hidden flex flex-col backdrop-blur-xl"
+                  >
+                    
+                    {/* User Profile Card Header */}
+                    <div className="p-4 bg-white/[0.02] border-b border-[#1e293b]">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-11 h-11 rounded-xl bg-gradient-to-tr from-cyan-400 to-emerald-400 text-[#070b12] font-black text-sm flex items-center justify-center shadow-lg shadow-cyan-500/15">
+                          {user.username.substring(0, 2).toUpperCase()}
                         </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-xs font-bold text-white truncate">
+                            {user.full_name || user.username}
+                          </h4>
+                          <span className="text-[11px] font-mono text-slate-400 block truncate">
+                            @{user.username}
+                          </span>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[10px] font-semibold text-emerald-400">Авторизован</span>
+                            <span className="text-slate-500 text-[10px]">•</span>
+                            <span className="text-[10px] font-mono text-amber-400 font-bold">
+                              {getRoleLabel(user.role)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-3 pt-2.5 border-t border-[#1e293b] flex items-center justify-between text-[10px] font-mono text-slate-400">
+                        <button
+                          onClick={() => {
+                            setUserMenuOpen(false);
+                            navigate('/');
+                          }}
+                          className="flex items-center gap-1.5 text-white/90 hover:text-cyan-400 transition cursor-pointer"
+                          title="Перейти к кассам"
+                        >
+                          <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
+                          <span>{brand.name}</span>
+                        </button>
+                        <span>ID: {user.id ? `${user.id.substring(0, 6)}...` : 'admin'}</span>
                       </div>
                     </div>
 
-                    <div className="mt-3 pt-2.5 border-t border-glass-subtle flex items-center justify-between text-[10px] font-mono text-slate-400">
+                    {/* Navigation Links inside profile */}
+                    <div className="p-2 space-y-1 text-xs">
+                      {isAdminOrSupervisor && (
+                        <>
+                          <button
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              navigate('/users');
+                            }}
+                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition text-left"
+                          >
+                            <UsersIcon className="w-4 h-4 text-cyan-400" />
+                            <span>Пользователи и доступ</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              setUserMenuOpen(false);
+                              navigate('/settings');
+                            }}
+                            className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition text-left"
+                          >
+                            <SettingsIcon className="w-4 h-4 text-cyan-400" />
+                            <span>Параметры и настройки</span>
+                          </button>
+                        </>
+                      )}
                       <button
                         onClick={() => {
                           setUserMenuOpen(false);
-                          navigate('/');
+                          navigate('/audit');
                         }}
-                        className="flex items-center gap-1.5 text-white/90 hover:text-[#A9DFD8] transition cursor-pointer"
-                        title="Перейти к кассам"
+                        className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition text-left"
                       >
-                        <img src={brand.emblem} className="w-3.5 h-3.5 rounded object-contain" alt="" />
-                        <span>{brand.name}</span>
+                        <FileText className="w-4 h-4 text-cyan-400" />
+                        <span>Журнал действий</span>
                       </button>
-                      <span>ID: {user.id ? `${user.id.substring(0, 6)}...` : 'admin'}</span>
                     </div>
-                  </div>
 
-                  {/* Navigation Links inside profile */}
-                  <div className="p-2 space-y-1 text-xs">
-                    {isAdminOrSupervisor && (
-                      <>
-                        <button
-                          onClick={() => {
-                            setUserMenuOpen(false);
-                            navigate('/users');
-                          }}
-                          className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition text-left"
-                        >
-                          <UsersIcon className="w-4 h-4 text-[#A9DFD8]" />
-                          <span>Пользователи и доступ</span>
-                        </button>
-                        <button
-                          onClick={() => {
-                            setUserMenuOpen(false);
-                            navigate('/settings');
-                          }}
-                          className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition text-left"
-                        >
-                          <SettingsIcon className="w-4 h-4 text-[#A9DFD8]" />
-                          <span>Параметры и настройки</span>
-                        </button>
-                      </>
-                    )}
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        navigate('/audit');
-                      }}
-                      className="w-full flex items-center space-x-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition text-left"
-                    >
-                      <FileText className="w-4 h-4 text-[#A9DFD8]" />
-                      <span>Журнал действий</span>
-                    </button>
-                  </div>
+                    {/* Logout Button */}
+                    <div className="p-2 border-t border-[#1e293b] bg-white/[0.01]">
+                      <button
+                        onClick={() => {
+                          setUserMenuOpen(false);
+                          handleLogout();
+                        }}
+                        className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-400 hover:bg-rose-500/15 border border-transparent hover:border-rose-500/30 transition"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        <span>Выйти из системы (Logout)</span>
+                      </button>
+                    </div>
 
-                  {/* Logout Button */}
-                  <div className="p-2 border-t border-glass-subtle bg-white/[0.02]">
-                    <button
-                      onClick={() => {
-                        setUserMenuOpen(false);
-                        handleLogout();
-                      }}
-                      className="w-full flex items-center justify-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-[#FF5B5B] hover:bg-[#FF5B5B]/15 border border-transparent hover:border-[#FF5B5B]/30 transition"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      <span>Выйти из системы (Logout)</span>
-                    </button>
-                  </div>
-
-                </div>
-              )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
           </div>
         </header>
 
-        {/* Dynamic Page Outlet */}
+        {/* Dynamic Page Outlet with Seamless Smooth Transition */}
         <main className="flex-1 overflow-y-auto p-6 md:p-8 bg-transparent">
-          <Outlet />
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.16, ease: 'easeOut' }}
+            className="h-full"
+          >
+            <Outlet />
+          </motion.div>
         </main>
 
       </div>

@@ -34,7 +34,7 @@ export const LiquidCard: React.FC<LiquidCardProps> = ({
     <div
       {...props}
       className={`
-        relative rounded-2xl transition-all duration-200 overflow-hidden
+        relative rounded-xl transition-all duration-200 overflow-hidden
         ${getLevelClass()}
         ${interactive ? 'hover:-translate-y-1 hover:shadow-2xl hover:border-white/25 cursor-pointer' : ''}
         ${chromatic ? 'liquid-chromatic-edge' : ''}

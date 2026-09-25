@@ -77,6 +77,18 @@ export default {
         'glass-surface': 'var(--glass-border-surface)',
         'glass-elevated': 'var(--glass-border-elevated)',
         'glass-specular': 'var(--glass-border-specular)',
+      },
+      borderRadius: {
+        'none': '0px',
+        'xs': '0.125rem',
+        'sm': '0.1875rem',
+        DEFAULT: '0.25rem',
+        'md': '0.375rem',
+        'lg': '0.5rem',
+        'xl': '0.625rem',
+        '2xl': '0.75rem',
+        '3xl': '1rem',
+        'full': '9999px',
       }
     },
   },

@@ -2,17 +2,17 @@ import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { 
-  X, 
-  Monitor, 
-  Layers, 
-  CheckCircle2, 
-  AlertTriangle, 
-  Cpu, 
-  ShieldCheck, 
-  Send, 
-  Activity, 
-  Pencil 
-} from 'lucide-react';
+  RiCloseLine as X, 
+  RiComputerLine as Monitor, 
+  RiStackLine as Layers, 
+  RiCheckboxCircleLine as CheckCircle2, 
+  RiAlertLine as AlertTriangle, 
+  RiCpuLine as Cpu, 
+  RiShieldCheckLine as ShieldCheck, 
+  RiSendPlane2Line as Send, 
+  RiPulseLine as Activity, 
+  RiEditLine as Pencil 
+} from 'react-icons/ri';
 import { 
   Cashier, 
   Branch, 
@@ -22,6 +22,7 @@ import {
   publicationsApi, 
   ConnectionTestResult 
 } from '../../api/client';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface DeviceDetailModalProps {
   cashier: Cashier;
@@ -105,8 +106,21 @@ export const DeviceDetailModal: React.FC<DeviceDetailModalProps> = ({
   const promoIsSync = (currentPromoBlock?.id === desiredPromoBlock?.id) || (!desiredPromoBlock && !currentPromoBlock);
 
   return createPortal(
-    <div className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div className="glass-surface-l4 glass-specular-edge rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] animate-scale-up">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={onClose}
+      className="fixed inset-0 !m-0 top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center p-4 bg-black/75 cursor-pointer"
+    >
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.96, y: 12 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.96, y: 12 }}
+        transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-[#0f172a] border border-[#1e293b] rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh] cursor-default"
+      >
         
         {/* Header */}
         <div className="p-6 border-b border-white/10 flex items-start justify-between">
@@ -216,37 +230,32 @@ export const DeviceDetailModal: React.FC<DeviceDetailModalProps> = ({
         )}
 
         {/* Tab Navigation */}
-        <div className="flex border-b border-white/[0.08] px-6 bg-black/20">
-          <button
-            onClick={() => setActiveTab('info')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
-              activeTab === 'info'
-                ? 'border-teal-400 text-teal-300 font-bold'
-                : 'border-transparent text-slate-400 hover:text-white'
-            }`}
-          >
-            Общая информация
-          </button>
-          <button
-            onClick={() => setActiveTab('content')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
-              activeTab === 'content'
-                ? 'border-teal-400 text-teal-300 font-bold'
-                : 'border-transparent text-slate-400 hover:text-white'
-            }`}
-          >
-            Контент и реклама
-          </button>
-          <button
-            onClick={() => setActiveTab('deployments')}
-            className={`py-3 px-4 text-xs font-semibold border-b-2 transition-all ${
-              activeTab === 'deployments'
-                ? 'border-teal-400 text-teal-300 font-bold'
-                : 'border-transparent text-slate-400 hover:text-white'
-            }`}
-          >
-            История публикаций
-          </button>
+        <div className="flex border-b border-white/[0.08] px-6 bg-black/20 gap-2">
+          {[
+            { id: 'info', label: 'Общая информация' },
+            { id: 'content', label: 'Контент и реклама' },
+            { id: 'deployments', label: 'История публикаций' },
+          ].map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`relative py-3 px-4 text-xs font-semibold transition-colors ${
+                  isActive ? 'text-blue-400 font-bold' : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                <span className="relative z-10">{tab.label}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="deviceModalTabIndicator"
+                    className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 shadow-sm shadow-blue-500/50"
+                    transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                  />
+                )}
+              </button>
+            );
+          })}
         </div>
 
         {/* Body Content */}
@@ -486,8 +495,8 @@ export const DeviceDetailModal: React.FC<DeviceDetailModalProps> = ({
           </div>
         </div>
 
-      </div>
-    </div>,
+      </motion.div>
+    </motion.div>,
     document.body
   );
 };

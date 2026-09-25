@@ -1,7 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Save, CheckCircle2, Server, Cpu, HardDrive, Sliders } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  RiSave3Line, 
+  RiCheckboxCircleLine, 
+  RiServerLine, 
+  RiCpuLine, 
+  RiHardDrive2Line, 
+  RiEqualizerLine 
+} from 'react-icons/ri';
 import { settingsApi, getCurrentUserFromStorage } from '../api/client';
 
 export const SettingsPage: React.FC = () => {
@@ -79,7 +87,7 @@ export const SettingsPage: React.FC = () => {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
-          <Sliders className="w-6 h-6 text-teal-300" />
+          <RiEqualizerLine className="w-6 h-6 text-cyan-400" />
           Параметры и настройки
         </h1>
         <p className="text-xs text-slate-400 mt-1">
@@ -88,19 +96,23 @@ export const SettingsPage: React.FC = () => {
       </div>
 
       {savedToast && (
-        <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 flex items-center space-x-2 shadow-lg"
+        >
+          <RiCheckboxCircleLine className="w-5 h-5 text-emerald-400 flex-shrink-0" />
           <span>Системные настройки успешно сохранены в базе данных и применены к рабочему пулу.</span>
-        </div>
+        </motion.div>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
         
         {/* Concurrency and Worker Pool */}
-        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
-            <div className="w-8 h-8 rounded-lg bg-teal-500/10 text-teal-300 flex items-center justify-center">
-              <Cpu className="w-4 h-4" />
+        <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#1e293b] pb-3">
+            <div className="w-8 h-8 rounded-lg bg-cyan-500/10 text-cyan-400 flex items-center justify-center">
+              <RiCpuLine className="w-5 h-5" />
             </div>
             <span>Оркестратор параллельной доставки (Worker Pool)</span>
           </div>
@@ -114,7 +126,7 @@ export const SettingsPage: React.FC = () => {
                 max={30}
                 value={workerConcurrency}
                 onChange={(e) => setWorkerConcurrency(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
               <span className="text-[11px] text-slate-400 mt-1 block">Одновременных касс при публикации (рекомендуется 2-4)</span>
             </div>
@@ -127,7 +139,7 @@ export const SettingsPage: React.FC = () => {
                 max={4}
                 value={maxConcurrentPerBranch}
                 onChange={(e) => setMaxConcurrentPerBranch(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
               <span className="text-[11px] text-slate-500 mt-1 block">Защита от перегрузки локальной сети филиала (1-4)</span>
             </div>
@@ -135,10 +147,10 @@ export const SettingsPage: React.FC = () => {
         </div>
 
         {/* SSH and Network Timeouts */}
-        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
+        <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#1e293b] pb-3">
             <div className="w-8 h-8 rounded-lg bg-emerald-500/15 text-emerald-400 flex items-center justify-center">
-              <Server className="w-4 h-4" />
+              <RiServerLine className="w-5 h-5" />
             </div>
             <span>Сетевые протоколы и таймауты SSH / SFTP</span>
           </div>
@@ -152,7 +164,7 @@ export const SettingsPage: React.FC = () => {
                 max={60}
                 value={sshConnectTimeout}
                 onChange={(e) => setSshConnectTimeout(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
             </div>
 
@@ -164,7 +176,7 @@ export const SettingsPage: React.FC = () => {
                 max={180}
                 value={sshCommandTimeout}
                 onChange={(e) => setSshCommandTimeout(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
             </div>
 
@@ -176,17 +188,17 @@ export const SettingsPage: React.FC = () => {
                 max={300}
                 value={sftpTimeout}
                 onChange={(e) => setSftpTimeout(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
             </div>
           </div>
         </div>
 
         {/* Storage Retention & Backup */}
-        <div className="glass-surface-l2 glass-specular-edge rounded-2xl p-6 space-y-4 shadow-xl">
-          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-white/[0.08] pb-3">
+        <div className="bg-[#111928] border border-[#1e293b] rounded-2xl p-6 space-y-4 shadow-xl">
+          <div className="flex items-center space-x-2.5 text-white font-bold text-sm border-b border-[#1e293b] pb-3">
             <div className="w-8 h-8 rounded-lg bg-amber-500/15 text-amber-400 flex items-center justify-center">
-              <HardDrive className="w-4 h-4" />
+              <RiHardDrive2Line className="w-5 h-5" />
             </div>
             <span>Хранилище MinIO и политики резервного копирования</span>
           </div>
@@ -200,7 +212,7 @@ export const SettingsPage: React.FC = () => {
                 max={365}
                 value={minioRetention}
                 onChange={(e) => setMinioRetention(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
               <span className="text-[11px] text-slate-500 mt-1 block">Автоматический Garbage Collector удаляет неиспользуемые объекты</span>
             </div>
@@ -213,7 +225,7 @@ export const SettingsPage: React.FC = () => {
                 max={90}
                 value={backupRetention}
                 onChange={(e) => setBackupRetention(Number(e.target.value))}
-                className="glass-input w-full p-2.5 text-white font-mono focus:outline-none"
+                className="glass-input w-full font-mono"
               />
               <span className="text-[11px] text-slate-500 mt-1 block">Ротация контрольных снимков gs.db</span>
             </div>
@@ -222,14 +234,16 @@ export const SettingsPage: React.FC = () => {
 
         {/* Submit button */}
         <div className="flex justify-end">
-          <button
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={updateMutation.isPending}
-            className="glass-btn-primary px-6 py-2.5 rounded-xl text-xs font-bold flex items-center space-x-2 disabled:opacity-50"
+            className="px-6 py-2.5 rounded-xl text-xs font-bold bg-[#2563EB] hover:bg-[#1d4ed8] text-white flex items-center space-x-2 disabled:opacity-50 shadow-lg shadow-blue-600/25 transition-all cursor-pointer"
           >
-            <Save className="w-4 h-4" />
+            <RiSave3Line className="w-4 h-4 text-white" />
             <span>{updateMutation.isPending ? 'Сохранение...' : 'Сохранить настройки'}</span>
-          </button>
+          </motion.button>
         </div>
 
       </form>
