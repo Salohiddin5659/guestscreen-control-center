@@ -10,6 +10,7 @@ export interface BrandConfig {
   restaurantsSubtitle: string;
   devicesSubtitle: string;
   brandTag: string;
+  port: string;
 }
 
 export const getBrand = (): BrandConfig => {
@@ -31,6 +32,7 @@ export const getBrand = (): BrandConfig => {
       restaurantsSubtitle: 'Управление сетью заведений Milly',
       devicesSubtitle: 'Централизованный мониторинг кассового флота Milly',
       brandTag: 'MILLY',
+      port: '8102',
     };
   }
 
@@ -46,5 +48,6 @@ export const getBrand = (): BrandConfig => {
     restaurantsSubtitle: 'Управление сетью заведений Oqtepa Lavash',
     devicesSubtitle: 'Централизованный мониторинг кассового флота',
     brandTag: 'OQTEPA',
+    port: '8101',
   };
 };
