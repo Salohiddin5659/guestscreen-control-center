@@ -10,7 +10,11 @@ import {
   RiTv2Line, 
   RiLayoutColumnLine, 
   RiStackLine,
-  RiEditLine
+  RiEditLine,
+  RiStarFill,
+  RiCalendarLine,
+  RiRefreshLine,
+  RiTimeLine
 } from 'react-icons/ri';
 import { 
   advertisingApi, 
@@ -23,7 +27,7 @@ import { DeploymentProgressModal } from '../components/deployment/DeploymentProg
 
 export const PlaylistsView: React.FC = () => {
   const queryClient = useQueryClient();
-  const [areaFilter, setAreaFilter] = useState<'ALL' | 'FULL_SCREEN' | 'MODE32_PROMO'>('ALL');
+  const [areaFilter, setAreaFilter] = useState<'ALL' | 'FULL_SCREEN' | 'MODE32_PROMO' | 'DEFAULTS' | 'SCHEDULED'>('ALL');
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null);
 
   // Modals state
@@ -89,8 +93,37 @@ export const PlaylistsView: React.FC = () => {
     }
   });
 
+  // Set Default mutation
+  const setDefaultMutation = useMutation({
+    mutationFn: (id: string) => advertisingApi.setDefault(id),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['advertising-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['advertising-block', selectedBlockId] });
+      alert(res.message);
+    },
+    onError: (err: any) => {
+      alert(`Ошибка: ${err.message}`);
+    }
+  });
+
+  // Recheck schedules mutation
+  const recheckMutation = useMutation({
+    mutationFn: () => advertisingApi.recheckSchedules(),
+    onSuccess: (res) => {
+      queryClient.invalidateQueries({ queryKey: ['advertising-blocks'] });
+      queryClient.invalidateQueries({ queryKey: ['cashiers'] });
+      alert(res.message);
+    },
+    onError: (err: any) => {
+      alert(`Ошибка проверки расписаний: ${err.message}`);
+    }
+  });
+
   const filteredBlocks = blocks.filter((b) => {
-    if (areaFilter !== 'ALL' && b.area !== areaFilter) return false;
+    if (areaFilter === 'FULL_SCREEN') return b.area === 'FULL_SCREEN';
+    if (areaFilter === 'MODE32_PROMO') return b.area === 'MODE32_PROMO';
+    if (areaFilter === 'DEFAULTS') return Boolean(b.is_default);
+    if (areaFilter === 'SCHEDULED') return Boolean(b.valid_to || b.schedule_type === 'DAYS' || b.schedule_type === 'DATE_RANGE');
     return true;
   });
 
@@ -103,34 +136,51 @@ export const PlaylistsView: React.FC = () => {
           <div className="flex items-center space-x-3">
             <h1 className="text-2xl font-bold text-white tracking-tight flex items-center gap-2.5">
               <RiMovie2Line className="w-6 h-6 text-cyan-400" />
-              Рекламные шаблоны и плейлисты
+              Рекламные шаблоны и расписания
             </h1>
             <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-[#162033] text-cyan-400 border border-[#1e293b] shadow-sm">
               {blocks.length} блоков
             </span>
           </div>
           <p className="text-xs text-slate-400 mt-1">
-            Управление шаблонами рекламных блоков, таймингами слайдов и быстрая публикация на кассы
+            Управление шаблонами, таймингами, временными расписаниями и дефолтным возвратом контента на кассах
           </p>
         </div>
 
-        <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => setAdConfigOpen(true)}
-          className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#2563EB] hover:bg-[#1d4ed8] text-white flex items-center space-x-2 self-start sm:self-auto shadow-lg shadow-blue-600/25 transition-all cursor-pointer"
-        >
-          <RiAddLine className="w-4 h-4 text-white font-bold" />
-          <span>Создать рекламный блок</span>
-        </motion.button>
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <button
+            onClick={() => recheckMutation.mutate()}
+            disabled={recheckMutation.isPending}
+            className="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-[#162033] hover:bg-cyan-500/15 border border-[#1e293b] hover:border-cyan-500/30 text-slate-300 hover:text-cyan-400 flex items-center space-x-2 transition-all cursor-pointer shadow-sm"
+            title="Проверить все кассы и вернуть экраны на дефолтные шаблоны, если срок акции истёк"
+          >
+            <RiRefreshLine className={`w-4 h-4 ${recheckMutation.isPending ? 'animate-spin text-cyan-400' : ''}`} />
+            <span>Проверить расписания</span>
+          </button>
+
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => {
+              setEditingBlock(null);
+              setAdConfigOpen(true);
+            }}
+            className="px-4 py-2.5 rounded-xl text-xs font-bold bg-[#2563EB] hover:bg-[#1d4ed8] text-white flex items-center space-x-2 shadow-lg shadow-blue-600/25 transition-all cursor-pointer"
+          >
+            <RiAddLine className="w-4 h-4 text-white font-bold" />
+            <span>Создать рекламный блок</span>
+          </motion.button>
+        </div>
       </div>
 
-      {/* Area Filter Tabs with sliding active pill */}
-      <div className="flex items-center space-x-1.5 bg-[#111928] border border-[#1e293b] p-1.5 rounded-2xl w-fit text-xs shadow-lg">
+      {/* Area & Schedule Filter Tabs with sliding active pill */}
+      <div className="flex items-center space-x-1.5 bg-[#111928] border border-[#1e293b] p-1.5 rounded-2xl w-fit text-xs shadow-lg flex-wrap gap-y-1">
         {[
           { id: 'ALL', label: 'Все форматы' },
           { id: 'FULL_SCREEN', label: 'FULL SCREEN (4:3)', icon: RiTv2Line },
-          { id: 'MODE32_PROMO', label: '50/50 PROMO (2:3)', icon: RiLayoutColumnLine }
+          { id: 'MODE32_PROMO', label: '50/50 PROMO (2:3)', icon: RiLayoutColumnLine },
+          { id: 'DEFAULTS', label: '★ Дефолтные', icon: RiStarFill },
+          { id: 'SCHEDULED', label: 'По расписанию', icon: RiCalendarLine }
         ].map((tab) => {
           const isActive = areaFilter === tab.id;
           const Icon = tab.icon;
@@ -224,7 +274,40 @@ export const PlaylistsView: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2.5 border-t border-[#1e293b] mt-2">
+                  {/* Schedule & Default Badges */}
+                  <div className="flex items-center gap-1.5 flex-wrap my-2">
+                    {b.is_default && (
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                        <RiStarFill className="w-2.5 h-2.5 text-amber-400" />
+                        <span>Дефолтный</span>
+                      </span>
+                    )}
+                    {b.schedule_status === 'ACTIVE' && (
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                        <RiCalendarLine className="w-2.5 h-2.5 text-emerald-400" />
+                        <span>В эфире{b.remaining_days !== null && b.remaining_days !== undefined ? ` (${b.remaining_days} дн.)` : ''}</span>
+                      </span>
+                    )}
+                    {b.schedule_status === 'EXPIRED' && (
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-rose-500/15 text-rose-300 border border-rose-500/30 flex items-center gap-1">
+                        <RiTimeLine className="w-2.5 h-2.5 text-rose-400" />
+                        <span>Истёк</span>
+                      </span>
+                    )}
+                    {b.schedule_status === 'SCHEDULED' && (
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-bold bg-blue-500/15 text-blue-300 border border-blue-500/30 flex items-center gap-1">
+                        <RiCalendarLine className="w-2.5 h-2.5 text-blue-400" />
+                        <span>Запланирован</span>
+                      </span>
+                    )}
+                    {!b.is_default && (!b.schedule_status || b.schedule_status === 'PERMANENT') && (
+                      <span className="px-2 py-0.5 rounded-md text-[9px] font-mono text-slate-400 bg-white/5 border border-white/10">
+                        Бессрочно
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] text-slate-400 pt-2 border-t border-[#1e293b]">
                     <span>Слайдов: <strong className="text-white font-semibold font-mono">{b.items_count}</strong></span>
                     <span className="text-[10px] text-slate-400 font-mono">
                       {new Date(b.created_at).toLocaleDateString('ru-RU')}
@@ -245,6 +328,12 @@ export const PlaylistsView: React.FC = () => {
                   <div>
                     <div className="flex items-center space-x-3">
                       <h2 className="text-lg font-bold text-white">{blockDetail.name}</h2>
+                      {blockDetail.is_default && (
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1">
+                          <RiStarFill className="w-3 h-3 text-amber-400" />
+                          <span>Дефолтный</span>
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">
                       Зона: <strong className="text-white">{blockDetail.area}</strong> • Режим: <strong className="text-white">{blockDetail.display_mode}</strong>
@@ -258,7 +347,7 @@ export const PlaylistsView: React.FC = () => {
                         setAdConfigOpen(true);
                       }}
                       className="p-2 bg-[#162033] hover:bg-cyan-500/15 border border-[#1e293b] hover:border-cyan-500/30 rounded-xl text-slate-300 hover:text-cyan-400 transition-colors cursor-pointer"
-                      title="Редактировать шаблон"
+                      title="Редактировать шаблон и расписание"
                     >
                       <RiEditLine className="w-4 h-4" />
                     </button>
@@ -296,6 +385,77 @@ export const PlaylistsView: React.FC = () => {
                       <span>Развернуть на кассы</span>
                     </motion.button>
                   </div>
+                </div>
+
+                {/* Schedule & Fallback Banner */}
+                <div className="p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0e1726] border-[#1e293b]">
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                      blockDetail.is_default
+                        ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30'
+                        : blockDetail.schedule_status === 'ACTIVE'
+                        ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                        : blockDetail.schedule_status === 'EXPIRED'
+                        ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                        : 'bg-blue-500/15 text-blue-400 border border-blue-500/30'
+                    }`}>
+                      {blockDetail.is_default ? <RiStarFill className="w-5 h-5 text-amber-400" /> : <RiCalendarLine className="w-5 h-5" />}
+                    </div>
+                    <div>
+                      <div className="flex items-center space-x-2 flex-wrap">
+                        <span className="text-white font-bold text-xs">
+                          {blockDetail.is_default
+                            ? 'Дефолтный шаблон (Fallback по умолчанию)'
+                            : blockDetail.schedule_type === 'DAYS'
+                            ? `Временная акция на ${blockDetail.schedule_days || ''} дней`
+                            : blockDetail.schedule_type === 'DATE_RANGE'
+                            ? 'Календарное расписание показа'
+                            : 'Постоянный показ (Бессрочно)'}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded-md text-[9px] font-bold font-mono ${
+                          blockDetail.is_default
+                            ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                            : blockDetail.schedule_status === 'ACTIVE'
+                            ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                            : blockDetail.schedule_status === 'EXPIRED'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            : 'bg-blue-500/20 text-blue-300 border border-blue-500/40'
+                        }`}>
+                          {blockDetail.is_default ? 'DEFAULT' : blockDetail.schedule_status || 'PERMANENT'}
+                        </span>
+                      </div>
+
+                      <div className="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        {blockDetail.is_default ? (
+                          'На этот шаблон кассы автоматически переключаются после истечения любых временных акций.'
+                        ) : blockDetail.valid_from && blockDetail.valid_to ? (
+                          <>
+                            Период показа: <strong className="text-white font-mono">{new Date(blockDetail.valid_from).toLocaleDateString('ru-RU')}</strong> — <strong className="text-white font-mono">{new Date(blockDetail.valid_to).toLocaleDateString('ru-RU')}</strong>
+                            {blockDetail.remaining_days !== null && blockDetail.remaining_days !== undefined && (
+                              <span className="ml-2 text-cyan-400 font-semibold font-mono">(Осталось: {blockDetail.remaining_days} дн.)</span>
+                            )}
+                            <span className="block text-slate-400 mt-0.5">
+                              После окончания срока кассы автоматически переключатся на дефолтный шаблон зоны {blockDetail.area}.
+                            </span>
+                          </>
+                        ) : (
+                          'Бессрочный шаблон без ограничений по датам.'
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {!blockDetail.is_default && (
+                    <button
+                      onClick={() => setDefaultMutation.mutate(blockDetail.id)}
+                      disabled={setDefaultMutation.isPending}
+                      className="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/30 text-amber-300 flex items-center space-x-1.5 transition-all self-start sm:self-auto cursor-pointer flex-shrink-0"
+                      title="Сделать этот шаблон постоянным по умолчанию (Fallback)"
+                    >
+                      <RiStarFill className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Сделать дефолтным</span>
+                    </button>
+                  )}
                 </div>
 
                 {/* Slides Gallery of Block */}

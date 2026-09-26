@@ -43,12 +43,32 @@ async def resolve_active_block_id(
         raise ValueError(f"Unknown target area: {target_area}")
 
 
+from datetime import datetime, timezone
+
 async def resolve_active_block(
     session: AsyncSession,
     cashier_id: UUID,
     target_area: str
 ) -> Optional[AdvertisingBlock]:
+    now = datetime.now(timezone.utc)
     block_id = await resolve_active_block_id(session, cashier_id, target_area)
-    if not block_id:
-        return None
-    return await session.get(AdvertisingBlock, block_id)
+    if block_id:
+        block = await session.get(AdvertisingBlock, block_id)
+        if block and block.is_active:
+            # Check schedule validity
+            is_valid_time = True
+            if block.valid_from and block.valid_from > now:
+                is_valid_time = False
+            if block.valid_to and block.valid_to < now:
+                is_valid_time = False
+
+            if is_valid_time:
+                return block
+
+    # Fallback to designated default template for this area
+    default_query = select(AdvertisingBlock).where(
+        AdvertisingBlock.area == target_area,
+        AdvertisingBlock.is_default == True,
+        AdvertisingBlock.is_active == True
+    )
+    return (await session.exec(default_query)).first()

@@ -1,7 +1,7 @@
 import json
 from typing import List, Optional, Any
 from uuid import UUID
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlmodel import select, update
@@ -31,6 +31,9 @@ class AdvertisingBlockCreate(BaseModel):
     area: str          # FULL_SCREEN, MODE32_PROMO
     display_mode: str  # STATIC, SLIDESHOW, VIDEO
     is_active: bool = True
+    is_default: bool = False
+    schedule_type: str = "PERMANENT"  # PERMANENT, DAYS, DATE_RANGE
+    schedule_days: Optional[int] = None
     valid_from: Optional[datetime] = None
     valid_to: Optional[datetime] = None
     items: List[PlaylistItemInput]
@@ -42,6 +45,9 @@ class AdvertisingBlockUpdate(BaseModel):
     area: Optional[str] = None
     display_mode: Optional[str] = None
     is_active: Optional[bool] = None
+    is_default: Optional[bool] = None
+    schedule_type: Optional[str] = None
+    schedule_days: Optional[int] = None
     valid_from: Optional[datetime] = None
     valid_to: Optional[datetime] = None
     version: Optional[int] = None
@@ -55,6 +61,33 @@ class PlaylistUpdatePayload(BaseModel):
 
 class DuplicateBlockPayload(BaseModel):
     name: Optional[str] = None
+
+
+def _compute_schedule_meta(b: AdvertisingBlock) -> dict[str, Any]:
+    now = datetime.now(timezone.utc)
+    schedule_status = "PERMANENT"
+    remaining_days = None
+
+    if b.is_default:
+        schedule_status = "DEFAULT"
+    elif b.valid_to and b.valid_to < now:
+        schedule_status = "EXPIRED"
+    elif b.valid_from and b.valid_from > now:
+        schedule_status = "SCHEDULED"
+    elif b.valid_to and b.valid_to >= now:
+        schedule_status = "ACTIVE"
+        remaining_days = max(0, (b.valid_to.date() - now.date()).days)
+    elif b.schedule_type == "DAYS" and b.schedule_days:
+        schedule_status = "ACTIVE"
+        remaining_days = b.schedule_days
+
+    return {
+        "is_default": bool(getattr(b, "is_default", False)),
+        "schedule_type": getattr(b, "schedule_type", "PERMANENT") or "PERMANENT",
+        "schedule_days": getattr(b, "schedule_days", None),
+        "schedule_status": schedule_status,
+        "remaining_days": remaining_days,
+    }
 
 
 @router.get("", response_model=List[dict])
@@ -74,6 +107,7 @@ async def list_advertising_blocks(
         items_count = len((await session.exec(
             select(PlaylistItem).where(PlaylistItem.advertising_block_id == b.id)
         )).all())
+        meta = _compute_schedule_meta(b)
         result.append({
             "id": str(b.id),
             "name": b.name,
@@ -81,6 +115,11 @@ async def list_advertising_blocks(
             "area": b.area,
             "display_mode": b.display_mode,
             "is_active": b.is_active,
+            "is_default": meta["is_default"],
+            "schedule_type": meta["schedule_type"],
+            "schedule_days": meta["schedule_days"],
+            "schedule_status": meta["schedule_status"],
+            "remaining_days": meta["remaining_days"],
             "version": b.version,
             "items_count": items_count,
             "valid_from": b.valid_from,
@@ -124,6 +163,7 @@ async def get_advertising_block(
             } if asset else None
         })
 
+    meta = _compute_schedule_meta(block)
     return {
         "id": str(block.id),
         "name": block.name,
@@ -131,6 +171,11 @@ async def get_advertising_block(
         "area": block.area,
         "display_mode": block.display_mode,
         "is_active": block.is_active,
+        "is_default": meta["is_default"],
+        "schedule_type": meta["schedule_type"],
+        "schedule_days": meta["schedule_days"],
+        "schedule_status": meta["schedule_status"],
+        "remaining_days": meta["remaining_days"],
         "version": block.version,
         "valid_from": block.valid_from,
         "valid_to": block.valid_to,
@@ -176,15 +221,37 @@ async def create_advertising_block(
     except ValidationError as e:
         raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(e))
 
+    valid_from = req.valid_from
+    valid_to = req.valid_to
+    now_dt = datetime.now(timezone.utc)
+    if req.schedule_type == "DAYS" and req.schedule_days:
+        valid_from = valid_from or now_dt
+        valid_to = valid_to or (now_dt + timedelta(days=req.schedule_days))
+
+    # If this is marked as default, unset other defaults in the same area
+    if req.is_default:
+        other_defaults = (await session.exec(
+            select(AdvertisingBlock).where(
+                AdvertisingBlock.area == req.area,
+                AdvertisingBlock.is_default == True
+            )
+        )).all()
+        for ob in other_defaults:
+            ob.is_default = False
+            session.add(ob)
+
     block = AdvertisingBlock(
         name=req.name,
         description=req.description,
         area=req.area,
         display_mode=req.display_mode,
         is_active=req.is_active,
+        is_default=req.is_default,
+        schedule_type=req.schedule_type,
+        schedule_days=req.schedule_days,
         version=1,
-        valid_from=req.valid_from,
-        valid_to=req.valid_to,
+        valid_from=valid_from,
+        valid_to=valid_to,
         created_by_user_id=current_user.id,
         created_at=datetime.now(timezone.utc),
         updated_at=datetime.now(timezone.utc)
@@ -235,6 +302,30 @@ async def _handle_update_block(
         block.display_mode = req.display_mode
     if req.is_active is not None:
         block.is_active = req.is_active
+
+    if req.is_default is not None:
+        block.is_default = req.is_default
+        if req.is_default:
+            other_defaults = (await session.exec(
+                select(AdvertisingBlock).where(
+                    AdvertisingBlock.area == (req.area or block.area),
+                    AdvertisingBlock.is_default == True,
+                    AdvertisingBlock.id != block.id
+                )
+            )).all()
+            for ob in other_defaults:
+                ob.is_default = False
+                session.add(ob)
+
+    if req.schedule_type is not None:
+        block.schedule_type = req.schedule_type
+    if req.schedule_days is not None:
+        block.schedule_days = req.schedule_days
+        if req.schedule_type == "DAYS" or block.schedule_type == "DAYS":
+            now_dt = datetime.now(timezone.utc)
+            block.valid_from = block.valid_from or now_dt
+            block.valid_to = now_dt + timedelta(days=req.schedule_days)
+
     if req.valid_from is not None:
         block.valid_from = req.valid_from
     if req.valid_to is not None:
@@ -563,3 +654,61 @@ async def preview_advertising_block(
         "slides": slides,
         "media_filenames": built.media_filenames
     }
+
+
+@router.post("/{block_id}/set-default")
+async def set_default_advertising_block(
+    block_id: UUID,
+    session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+):
+    """Marks this template as the permanent fallback default for its display area."""
+    block = await session.get(AdvertisingBlock, block_id)
+    if not block:
+        raise HTTPException(status_code=404, detail="Шаблон не найден")
+
+    # Unset other defaults for this area
+    other_defaults = (await session.exec(
+        select(AdvertisingBlock).where(
+            AdvertisingBlock.area == block.area,
+            AdvertisingBlock.is_default == True,
+            AdvertisingBlock.id != block.id
+        )
+    )).all()
+    for ob in other_defaults:
+        ob.is_default = False
+        session.add(ob)
+
+    block.is_default = True
+    block.is_active = True
+    session.add(block)
+    await session.commit()
+    await session.refresh(block)
+
+    await record_audit_event(
+        session, "AD_BLOCK_SET_DEFAULT", "AdvertisingBlock", str(block.id), current_user.id,
+        {"area": block.area, "name": block.name}
+    )
+    return {
+        "id": str(block.id),
+        "name": block.name,
+        "is_default": True,
+        "area": block.area,
+        "schedule_status": "DEFAULT",
+        "message": f"Шаблон '{block.name}' назначен дефолтным для зоны {block.area}"
+    }
+
+
+@router.post("/recheck-schedules")
+async def trigger_schedule_recheck(
+    session: AsyncSession = Depends(get_db),
+    current_user: User = Depends(require_roles("ADMINISTRATOR", "OPERATOR"))
+):
+    """Manually triggers evaluation of all cashier schedules and immediate fallback to default for expired templates."""
+    from app.services.schedule_watchdog import check_and_revert_expired_schedules
+    reverted_count = await check_and_revert_expired_schedules()
+    return {
+        "message": f"Проверка расписаний выполнена. Касс возвращено на дефолтный шаблон: {reverted_count}",
+        "reverted_count": reverted_count
+    }
+

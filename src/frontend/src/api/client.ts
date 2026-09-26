@@ -245,6 +245,11 @@ export interface AdvertisingBlockListItem {
   area: 'FULL_SCREEN' | 'MODE32_PROMO';
   display_mode: 'STATIC' | 'SLIDESHOW' | 'VIDEO';
   is_active: boolean;
+  is_default?: boolean;
+  schedule_type?: 'PERMANENT' | 'DAYS' | 'DATE_RANGE';
+  schedule_days?: number | null;
+  schedule_status?: 'DEFAULT' | 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'PERMANENT';
+  remaining_days?: number | null;
   version: number;
   items_count: number;
   valid_from?: string | null;
@@ -260,6 +265,11 @@ export interface AdvertisingBlockDetail {
   area: 'FULL_SCREEN' | 'MODE32_PROMO';
   display_mode: 'STATIC' | 'SLIDESHOW' | 'VIDEO';
   is_active: boolean;
+  is_default?: boolean;
+  schedule_type?: 'PERMANENT' | 'DAYS' | 'DATE_RANGE';
+  schedule_days?: number | null;
+  schedule_status?: 'DEFAULT' | 'ACTIVE' | 'SCHEDULED' | 'EXPIRED' | 'PERMANENT';
+  remaining_days?: number | null;
   version: number;
   valid_from?: string | null;
   valid_to?: string | null;
@@ -274,6 +284,9 @@ export interface AdvertisingBlockCreateInput {
   area: 'FULL_SCREEN' | 'MODE32_PROMO';
   display_mode: 'STATIC' | 'SLIDESHOW' | 'VIDEO';
   is_active?: boolean;
+  is_default?: boolean;
+  schedule_type?: 'PERMANENT' | 'DAYS' | 'DATE_RANGE';
+  schedule_days?: number | null;
   valid_from?: string | null;
   valid_to?: string | null;
   items: PlaylistItemInput[];
@@ -546,6 +559,18 @@ export const advertisingApi = {
     apiRequest<{ message: string }>(`/advertising-blocks/${encodeURIComponent(id)}`, {
       method: 'DELETE',
     }),
+
+  setDefault: (id: string) =>
+    apiRequest<{ id: string; name: string; is_default: boolean; area: string; message: string }>(
+      `/advertising-blocks/${encodeURIComponent(id)}/set-default`,
+      { method: 'POST' }
+    ),
+
+  recheckSchedules: () =>
+    apiRequest<{ message: string; reverted_count: number }>(
+      '/advertising-blocks/recheck-schedules',
+      { method: 'POST' }
+    ),
 
   preview: (id: string) =>
     apiRequest<AdvertisingBlockPreview>(`/advertising-blocks/${encodeURIComponent(id)}/preview`),

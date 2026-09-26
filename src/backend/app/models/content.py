@@ -39,6 +39,9 @@ class AdvertisingBlock(SQLModel, table=True):
     area: str = Field(index=True, max_length=30)          # FULL_SCREEN, MODE32_PROMO
     display_mode: str = Field(index=True, max_length=30)  # STATIC, SLIDESHOW, VIDEO
     is_active: bool = Field(default=True)
+    is_default: bool = Field(default=False)
+    schedule_type: str = Field(default="PERMANENT", max_length=30)  # PERMANENT, DAYS, DATE_RANGE
+    schedule_days: Optional[int] = Field(default=None)
     version: int = Field(default=1, nullable=False)
     valid_from: Optional[datetime] = Field(
         default=None,

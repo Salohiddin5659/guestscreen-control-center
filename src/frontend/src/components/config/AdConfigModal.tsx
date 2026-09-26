@@ -23,7 +23,10 @@ import {
   RiPlayLine as Play,
   RiPauseLine as Pause,
   RiAddLine as Plus,
-  RiSave3Line as Save
+  RiSave3Line as Save,
+  RiCalendarLine as CalendarIcon,
+  RiStarFill as StarFilled,
+  RiTimerLine as TimerIcon
 } from 'react-icons/ri';
 import { 
   mediaApi, 
@@ -65,6 +68,17 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
   const [area, setArea] = useState<'FULL_SCREEN' | 'MODE32_PROMO'>('FULL_SCREEN');
   const [displayMode, setDisplayMode] = useState<'STATIC' | 'SLIDESHOW' | 'VIDEO'>('STATIC');
 
+  // Scheduling & Default Template metadata
+  const [isDefault, setIsDefault] = useState(false);
+  const [scheduleType, setScheduleType] = useState<'PERMANENT' | 'DAYS' | 'DATE_RANGE'>('PERMANENT');
+  const [scheduleDays, setScheduleDays] = useState<number>(10);
+  const [validFrom, setValidFrom] = useState<string>(() => new Date().toISOString().split('T')[0]);
+  const [validTo, setValidTo] = useState<string>(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 10);
+    return d.toISOString().split('T')[0];
+  });
+
   // Playlist items: array of { mediaAsset: MediaAsset, duration: number }
   const [playlistItems, setPlaylistItems] = useState<Array<{ asset: MediaAsset; duration: number }>>([]);
   const [selectedSingleAssetId, setSelectedSingleAssetId] = useState<string>('');
@@ -102,6 +116,22 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
     setTemplateName(block.name);
     setArea(block.area);
     setDisplayMode(block.display_mode);
+    setIsDefault(Boolean(block.is_default));
+    setScheduleType(block.schedule_type || (block.valid_to ? 'DATE_RANGE' : 'PERMANENT'));
+    setScheduleDays(block.schedule_days || 10);
+    if (block.valid_from) {
+      setValidFrom(block.valid_from.split('T')[0]);
+    } else {
+      setValidFrom(new Date().toISOString().split('T')[0]);
+    }
+    if (block.valid_to) {
+      setValidTo(block.valid_to.split('T')[0]);
+    } else {
+      const d = new Date();
+      d.setDate(d.getDate() + 10);
+      setValidTo(d.toISOString().split('T')[0]);
+    }
+
     if (block.items && block.items.length > 0) {
       setPlaylistItems(
         block.items.map((it) => ({
@@ -149,6 +179,14 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
       setTemplateName('Промо-кампания ' + new Date().toLocaleDateString('ru-RU'));
       setArea('FULL_SCREEN');
       setDisplayMode('STATIC');
+      setIsDefault(false);
+      setScheduleType('PERMANENT');
+      setScheduleDays(10);
+      const today = new Date().toISOString().split('T')[0];
+      setValidFrom(today);
+      const d = new Date();
+      d.setDate(d.getDate() + 10);
+      setValidTo(d.toISOString().split('T')[0]);
       setPlaylistItems([]);
       setSelectedSingleAssetId('');
       return;
@@ -189,10 +227,28 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
         }));
       }
 
+      let calculatedValidFrom: string | null = null;
+      let calculatedValidTo: string | null = null;
+
+      if (scheduleType === 'DAYS') {
+        const now = new Date();
+        calculatedValidFrom = now.toISOString();
+        const end = new Date(now.getTime() + scheduleDays * 24 * 60 * 60 * 1000);
+        calculatedValidTo = end.toISOString();
+      } else if (scheduleType === 'DATE_RANGE') {
+        calculatedValidFrom = validFrom ? new Date(validFrom + 'T00:00:00Z').toISOString() : null;
+        calculatedValidTo = validTo ? new Date(validTo + 'T23:59:59Z').toISOString() : null;
+      }
+
       await advertisingApi.update(currentBlock.id, {
         name: templateName.trim() || 'Рекламный блок',
         area,
         display_mode: displayMode,
+        is_default: isDefault,
+        schedule_type: scheduleType,
+        schedule_days: scheduleType === 'DAYS' ? scheduleDays : null,
+        valid_from: calculatedValidFrom,
+        valid_to: calculatedValidTo,
         items: itemsPayload,
       });
 
@@ -322,22 +378,45 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
       }
 
       // 2. Create or Update Advertising Block via real FastAPI
+      let calculatedValidFrom: string | null = null;
+      let calculatedValidTo: string | null = null;
+
+      if (scheduleType === 'DAYS') {
+        const now = new Date();
+        calculatedValidFrom = now.toISOString();
+        const end = new Date(now.getTime() + scheduleDays * 24 * 60 * 60 * 1000);
+        calculatedValidTo = end.toISOString();
+      } else if (scheduleType === 'DATE_RANGE') {
+        calculatedValidFrom = validFrom ? new Date(validFrom + 'T00:00:00Z').toISOString() : null;
+        calculatedValidTo = validTo ? new Date(validTo + 'T23:59:59Z').toISOString() : null;
+      }
+
       let blockId: string;
       if (currentBlock) {
         await advertisingApi.update(currentBlock.id, {
           name: templateName.trim() || 'Рекламный блок',
           area,
           display_mode: displayMode,
+          is_default: isDefault,
+          schedule_type: scheduleType,
+          schedule_days: scheduleType === 'DAYS' ? scheduleDays : null,
+          valid_from: calculatedValidFrom,
+          valid_to: calculatedValidTo,
           items: itemsPayload,
         });
         blockId = currentBlock.id;
       } else {
         const blockRes = await advertisingApi.create({
           name: templateName.trim() || 'Рекламный блок',
-          description: `Автоматически создан для деплоя ${new Date().toLocaleString('ru-RU')}`,
+          description: `Создан для деплоя ${new Date().toLocaleString('ru-RU')}`,
           area,
           display_mode: displayMode,
           is_active: true,
+          is_default: isDefault,
+          schedule_type: scheduleType,
+          schedule_days: scheduleType === 'DAYS' ? scheduleDays : null,
+          valid_from: calculatedValidFrom,
+          valid_to: calculatedValidTo,
           items: itemsPayload,
         });
         blockId = blockRes.id;
@@ -583,6 +662,199 @@ export const AdConfigModal: React.FC<AdConfigModalProps> = ({
                     <span>Динамическое слайдшоу (Плейлист)</span>
                   </button>
                 </div>
+              </div>
+
+              {/* 📅 РАСПИСАНИЕ И ПЕРИОД ПОКАЗА (Scheduling & Default Fallback) */}
+              <div className="glass-surface-l2 border border-white/10 rounded-2xl p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/[0.08] pb-3">
+                  <div className="flex items-center space-x-2.5">
+                    <div className="w-8 h-8 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30 flex items-center justify-center flex-shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-white text-xs">Расписание и период показа</h4>
+                      <span className="text-[11px] text-slate-400">
+                        Период действия кампании и автоматический возврат на дефолтный шаблон
+                      </span>
+                    </div>
+                  </div>
+
+                  {isDefault && (
+                    <span className="px-2.5 py-1 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30 flex items-center gap-1 self-start sm:self-auto shadow-sm">
+                      <StarFilled className="w-3 h-3 text-amber-400" />
+                      <span>Дефолтный шаблон</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Schedule Type Selector */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setScheduleType('PERMANENT')}
+                    className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                      scheduleType === 'PERMANENT'
+                        ? 'bg-blue-600/20 border-blue-500 text-white font-bold shadow-md shadow-blue-600/20 ring-1 ring-blue-500/40'
+                        : 'glass-surface-l1 border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-xs">Постоянный показ</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">Бессрочно / Всегда</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setScheduleType('DAYS');
+                      if (!scheduleDays) setScheduleDays(10);
+                    }}
+                    className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                      scheduleType === 'DAYS'
+                        ? 'bg-blue-600/20 border-blue-500 text-white font-bold shadow-md shadow-blue-600/20 ring-1 ring-blue-500/40'
+                        : 'glass-surface-l1 border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-xs">На период (Дни)</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">10, 20 дней и др.</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setScheduleType('DATE_RANGE')}
+                    className={`p-3 rounded-xl border flex flex-col items-center justify-center text-center transition-all cursor-pointer ${
+                      scheduleType === 'DATE_RANGE'
+                        ? 'bg-blue-600/20 border-blue-500 text-white font-bold shadow-md shadow-blue-600/20 ring-1 ring-blue-500/40'
+                        : 'glass-surface-l1 border-white/10 text-slate-400 hover:text-white'
+                    }`}
+                  >
+                    <span className="text-xs">Календарь дат</span>
+                    <span className="text-[10px] opacity-75 mt-0.5">До точного числа</span>
+                  </button>
+                </div>
+
+                {/* Sub-panel: PERMANENT */}
+                {scheduleType === 'PERMANENT' && (
+                  <div className="p-3 rounded-xl bg-white/[0.03] border border-white/[0.06] flex items-center justify-between gap-4">
+                    <div>
+                      <span className="text-white font-semibold block text-xs">Сделать шаблоном по умолчанию (Fallback)</span>
+                      <span className="text-slate-400 text-[11px]">
+                        Когда временные акции заканчиваются, экраны касс автоматически возвращаются на этот дефолтный шаблон.
+                      </span>
+                    </div>
+                    <label className="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                      <input
+                        type="checkbox"
+                        checked={isDefault}
+                        onChange={(e) => setIsDefault(e.target.checked)}
+                        className="sr-only peer"
+                      />
+                      <div className="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-500"></div>
+                    </label>
+                  </div>
+                )}
+
+                {/* Sub-panel: DAYS */}
+                {scheduleType === 'DAYS' && (
+                  <div className="p-3.5 rounded-xl bg-blue-500/[0.05] border border-blue-500/20 space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                      <span className="text-slate-300 font-semibold text-xs">Выберите или введите количество дней:</span>
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        {[7, 10, 14, 20, 30].map((d) => (
+                          <button
+                            key={d}
+                            type="button"
+                            onClick={() => setScheduleDays(d)}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold transition-all cursor-pointer ${
+                              scheduleDays === d
+                                ? 'bg-blue-600 text-white shadow-sm shadow-blue-500/30'
+                                : 'bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10'
+                            }`}
+                          >
+                            {d} дн.
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                      <div className="w-full sm:w-28">
+                        <input
+                          type="number"
+                          min={1}
+                          max={365}
+                          value={scheduleDays}
+                          onChange={(e) => setScheduleDays(Math.max(1, parseInt(e.target.value) || 1))}
+                          className="glass-input w-full p-2 text-white font-mono text-xs text-center focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex-1 text-[11px] text-slate-300 bg-black/20 p-2.5 rounded-xl border border-white/5">
+                        <span>Срок показа: </span>
+                        <strong className="text-cyan-400 font-mono">
+                          {new Date().toLocaleDateString('ru-RU')} — {new Date(Date.now() + scheduleDays * 86400000).toLocaleDateString('ru-RU')}
+                        </strong>
+                        <span className="text-slate-400 block mt-0.5">
+                          По окончании {scheduleDays} дней система автоматически вернёт кассы на дефолтный шаблон.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Sub-panel: DATE_RANGE */}
+                {scheduleType === 'DATE_RANGE' && (
+                  <div className="p-3.5 rounded-xl bg-indigo-500/[0.05] border border-indigo-500/20 space-y-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-slate-400 block text-[11px] mb-1 font-semibold">Дата начала показа</label>
+                        <input
+                          type="date"
+                          value={validFrom}
+                          onChange={(e) => setValidFrom(e.target.value)}
+                          className="glass-input w-full p-2 text-white font-mono text-xs focus:outline-none"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-slate-400 block text-[11px] mb-1 font-semibold">Дата окончания (До какого числа)</label>
+                        <input
+                          type="date"
+                          value={validTo}
+                          onChange={(e) => setValidTo(e.target.value)}
+                          className="glass-input w-full p-2 text-white font-mono text-xs focus:outline-none"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] text-slate-400 flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
+                      <span>По истечении даты окончания кассы автоматически переключатся на дефолтный шаблон.</span>
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const d = new Date();
+                            setValidFrom(d.toISOString().split('T')[0]);
+                            d.setDate(d.getDate() + 10);
+                            setValidTo(d.toISOString().split('T')[0]);
+                          }}
+                          className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
+                        >
+                          +10 дней
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const d = new Date();
+                            setValidFrom(d.toISOString().split('T')[0]);
+                            d.setDate(d.getDate() + 20);
+                            setValidTo(d.toISOString().split('T')[0]);
+                          }}
+                          className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
+                        >
+                          +20 дней
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Mode Specific Configuration */}

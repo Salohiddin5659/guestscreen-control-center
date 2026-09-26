@@ -1145,12 +1145,20 @@ export const DevicesView: React.FC = () => {
                         <td className="py-3.5 px-4">
                           <div className="space-y-1 max-w-[200px]">
                             <div className="flex items-center space-x-1 text-[11px] truncate" title={fullBlock?.name || 'По умолчанию'}>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">FULL</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 flex-shrink-0">FULL</span>
                               <span className="text-slate-300 truncate">{fullBlock ? fullBlock.name : 'По умолчанию'}</span>
+                              {fullBlock?.is_default && <span className="text-amber-400 text-[9px] font-bold flex-shrink-0" title="Дефолтный шаблон">★</span>}
+                              {fullBlock?.schedule_status === 'ACTIVE' && fullBlock.remaining_days !== null && (
+                                <span className="text-emerald-400 text-[9px] font-mono flex-shrink-0" title={`Осталось ${fullBlock.remaining_days} дней`}>({fullBlock.remaining_days}д)</span>
+                              )}
                             </div>
                             <div className="flex items-center space-x-1 text-[11px] truncate" title={promoBlock?.name || 'По умолчанию'}>
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10">50/50</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-white/5 text-slate-400 border border-white/10 flex-shrink-0">50/50</span>
                               <span className="text-slate-300 truncate">{promoBlock ? promoBlock.name : 'По умолчанию'}</span>
+                              {promoBlock?.is_default && <span className="text-amber-400 text-[9px] font-bold flex-shrink-0" title="Дефолтный шаблон">★</span>}
+                              {promoBlock?.schedule_status === 'ACTIVE' && promoBlock.remaining_days !== null && (
+                                <span className="text-emerald-400 text-[9px] font-mono flex-shrink-0" title={`Осталось ${promoBlock.remaining_days} дней`}>({promoBlock.remaining_days}д)</span>
+                              )}
                             </div>
                           </div>
                         </td>

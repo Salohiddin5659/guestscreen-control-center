@@ -21,6 +21,7 @@ from app.api.v1.users import router as users_router
 
 import asyncio
 from app.services.heartbeat import start_heartbeat_loop
+from app.services.schedule_watchdog import start_schedule_watchdog_loop
 
 # Attach license mask filter to root logger
 root_logger = logging.getLogger()
@@ -38,15 +39,18 @@ async def lifespan(app: FastAPI):
 
     # Launch background cashier fleet heartbeat monitor (checks every 30s)
     heartbeat_task = asyncio.create_task(start_heartbeat_loop(interval_seconds=30))
+    # Launch background advertising schedule watchdog (checks every 60s for expired schedules)
+    schedule_task = asyncio.create_task(start_schedule_watchdog_loop(interval_seconds=60))
     try:
         yield
     finally:
         # Shutdown actions
         logging.info("Shutting down GS Control Center backend...")
         heartbeat_task.cancel()
+        schedule_task.cancel()
         try:
-            await heartbeat_task
-        except asyncio.CancelledError:
+            await asyncio.gather(heartbeat_task, schedule_task, return_exceptions=True)
+        except Exception:
             pass
 
 
